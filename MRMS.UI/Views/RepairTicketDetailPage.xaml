@@ -1,0 +1,212 @@
+<Page x:Class="MRMS.UI.Views.RepairTicketDetailPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="تفاصيل تذكرة الإصلاح" FlowDirection="RightToLeft"
+      xmlns:enums="clr-namespace:MRMS.Core.Enums;assembly=MRMS.Core"
+      Style="{StaticResource PageBackground}">
+    <ScrollViewer FlowDirection="LeftToRight">
+        <StackPanel Margin="28" FlowDirection="RightToLeft">
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="تفاصيل تذكرة الإصلاح" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="{Binding SelectedTicket.TicketNumber, StringFormat='تذكرة رقم: {0}'}"
+                           Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <!-- Ticket Info Card -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,20">
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="العميل" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,8"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding SelectedTicket.CustomerName}" FontSize="14"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="الجهاز" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,8"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding SelectedTicket.DeviceInfo}" FontSize="14"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="المشكلة" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,8"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding SelectedTicket.ProblemDescription}" FontSize="14"
+                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="الحالة" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,8"/>
+                        <Border Grid.Row="3" Grid.Column="1" CornerRadius="10" Padding="10,3"
+                                HorizontalAlignment="Right" Margin="0,0,0,8">
+                            <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
+                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                            <Setter Property="Background" Value="{StaticResource DangerLightBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}"
+                                       FontSize="12" FontWeight="Medium">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
+                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="تاريخ الاستقبال" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,0"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1"
+                                   Text="{Binding SelectedTicket.ReceiveDate, StringFormat={}{0:yyyy-MM-dd}}" FontSize="14"
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Status Update -->
+            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="تحديث الحالة" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox SelectedIndex="{Binding SelectedStatusIndex}"
+                                  Width="200" Height="30" FontSize="14">
+                            <ComboBoxItem Content="مستلم"/>
+                            <ComboBoxItem Content="تحت الفحص" Tag="1"/>
+                            <ComboBoxItem Content="في انتظار قطع الغيار" Tag="2"/>
+                            <ComboBoxItem Content="قيد الإصلاح" Tag="3"/>
+                            <ComboBoxItem Content="تم الإصلاح" Tag="4"/>
+                            <ComboBoxItem Content="تم التسليم" Tag="5"/>
+                            <ComboBoxItem Content="ملغي" Tag="6"/>
+                        </ComboBox>
+                        <Button Content="تحديث" Command="{Binding UpdateStatusCommand}"
+                                Margin="10,0,0,0" Padding="15,5"
+                                Background="#0078D7" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Repair Info -->
+            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="بيانات الإصلاح" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="وصف الإصلاح" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding RepairDescription}" Height="60" Width="400"
+                             HorizontalAlignment="Right" FontSize="14"
+                             AcceptsReturn="True" TextWrapping="Wrap"/>
+                    <TextBlock Text="التكلفة" Margin="0,10,0,5"/>
+                    <TextBox Text="{Binding Cost}" Height="30" Width="150"
+                             HorizontalAlignment="Right" FontSize="14"/>
+                    <Button Content="حفظ" Command="{Binding UpdateRepairInfoCommand}"
+                            Margin="0,10,0,0" Padding="15,5"
+                            Background="#27AE60" Foreground="White"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Photos -->
+            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="الصور" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="إضافة صورة قبل" Click="AddPhotoBefore"
+                                Padding="10,5" Margin="0,0,10,0"/>
+                        <Button Content="إضافة صورة بعد" Click="AddPhotoAfter"
+                                Padding="10,5"/>
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Photos}" Margin="0,10,0,0" Height="200"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="5"
+                                        Margin="5" Padding="3" Cursor="Hand">
+                                    <StackPanel>
+                                        <Image Source="{Binding FilePath}" Width="150" Height="150"
+                                               Stretch="UniformToFill"
+                                               MouseLeftButtonUp="Image_MouseLeftButtonUp"/>
+                                        <TextBlock Text="{Binding PhotoType}"
+                                                   HorizontalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <!-- Warranty -->
+            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="الضمان" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="مدة الضمان (أيام)" Margin="0,0,0,5"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="{Binding WarrantyDuration}" Height="30" Width="150"
+                                 HorizontalAlignment="Right" FontSize="14"/>
+                        <Button Content="تعيين الضمان" Click="AssignWarranty"
+                                Margin="10,0,0,0" Padding="10,5"
+                                Background="#E67E22" Foreground="White"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding WarrantyInfo}" Margin="0,5,0,0" Foreground="Gray"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Error -->
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red"
+                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+            <!-- Print Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="طباعة الفاتورة" Click="PrintInvoice"
+                        Padding="15,8" Background="#2C3E50" Foreground="White"
+                        Cursor="Hand" Margin="0,0,8,0"/>
+                <Button Content="وصل استلام" Click="PrintReceptionReceipt"
+                        Padding="15,8" Background="#0078D7" Foreground="White"
+                        Cursor="Hand"/>
+            </StackPanel>
+
+            <ProgressBar IsIndeterminate="True"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                         Height="5" Margin="0,15,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

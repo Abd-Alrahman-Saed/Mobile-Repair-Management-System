@@ -1,0 +1,57 @@
+<Page x:Class="MRMS.UI.Views.DeviceTransferPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="نقل ملكية جهاز" FlowDirection="RightToLeft">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="نقل ملكية جهاز" FontSize="24"
+                   FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="رقم IMEI" Margin="0,0,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{Binding Imei, UpdateSourceTrigger=PropertyChanged}"
+                         Height="30" Width="250" FontSize="14"/>
+                <Button Content="بحث" Command="{Binding FindDeviceCommand}"
+                        Margin="10,0,0,0" Padding="15,5"
+                        Background="#0078D7" Foreground="White"/>
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="2" BorderBrush="#27AE60" BorderThickness="1"
+                CornerRadius="5" Padding="10" Margin="0,0,0,15"
+                Visibility="{Binding DeviceFound, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock FontWeight="Bold" FontSize="14"
+                           Text="{Binding Device.Brand}"/>
+                <TextBlock Text="{Binding Device.Model, StringFormat='موديل: {0}'}"/>
+                <TextBlock Text="{Binding Device.IMEI, StringFormat='IMEI: {0}'}"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="3" Margin="0,0,0,20">
+            <TextBlock Text="المالك الجديد" Margin="0,0,0,5"/>
+            <ComboBox ItemsSource="{Binding Customers}"
+                      SelectedValue="{Binding SelectedCustomerId}"
+                      DisplayMemberPath="FullName"
+                      SelectedValuePath="Id"
+                      Width="300" HorizontalAlignment="Right" Height="30"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}"
+                   Foreground="Red" HorizontalAlignment="Center"/>
+
+        <Button Grid.Row="5" Content="نقل الملكية"
+                Command="{Binding TransferCommand}"
+                Padding="20,8" Background="#E67E22" Foreground="White"
+                Width="200" HorizontalAlignment="Center"/>
+    </Grid>
+</Page>

@@ -1,0 +1,176 @@
+<Page x:Class="MRMS.UI.Views.CustomerProfilePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="ملف العميل" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <ScrollViewer FlowDirection="LeftToRight">
+        <StackPanel Margin="28" FlowDirection="RightToLeft">
+            <!-- ===== Header ===== -->
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="ملف العميل" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="عرض معلومات العميل والأجهزة المرتبطة" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <!-- ===== Profile Header Card ===== -->
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Avatar -->
+                    <Border Grid.Column="0" Style="{StaticResource ProfileAvatar}"
+                            VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding Customer.FullName, Converter={StaticResource FirstLetter}}"
+                                   FontSize="32" FontWeight="Bold"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Customer.FullName}"
+                                   FontSize="22" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Margin="0,0,0,6"/>
+                        <TextBlock FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,0,0,4">
+                            <Run Text="الهاتف:" FontWeight="SemiBold"/>
+                            <Run Text="{Binding Customer.PhoneNumber}"/>
+                        </TextBlock>
+                        <TextBlock FontSize="13" Foreground="{StaticResource TextMutedBrush}">
+                            <Run Text="مسجل منذ:"/>
+                            <Run Text="{Binding Customer.CreatedAt, StringFormat={}{0:yyyy-MM-dd}}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ===== Quick Stats ===== -->
+            <WrapPanel Margin="0,0,0,20">
+                <Border Style="{StaticResource StatCardStyle}" Margin="0,0,12,8">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Devices.Count}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="الأجهزة المسجلة" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource StatCardStyle}" Margin="0,0,12,8">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedDeviceTickets.Count}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource InfoBrush}"/>
+                        <TextBlock Text="تذاكر الإصلاح" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- ===== Devices Section ===== -->
+            <TextBlock Text="الأجهزة" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <DataGrid ItemsSource="{Binding Devices}"
+                              Style="{StaticResource ModernDataGrid}"
+                              SelectedItem="{Binding SelectedDevice}"
+                              Cursor="Hand">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="الماركة" Binding="{Binding Brand}" Width="*"/>
+                            <DataGridTextColumn Header="الموديل" Binding="{Binding Model}" Width="*"/>
+                            <DataGridTextColumn Header="IMEI" Binding="{Binding IMEI}" Width="160"/>
+                            <DataGridTextColumn Header="اللون" Binding="{Binding Color}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- ===== Repair History Section ===== -->
+            <TextBlock Text="تاريخ الإصلاح" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <DataGrid x:Name="TicketsGrid" ItemsSource="{Binding SelectedDeviceTickets}"
+                              Style="{StaticResource ModernDataGrid}"
+                              Cursor="Hand"
+                              MouseDoubleClick="TicketsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="رقم التذكرة" Binding="{Binding TicketNumber}" Width="110"/>
+                            <DataGridTextColumn Header="المشكلة" Binding="{Binding ProblemDescription}" Width="*"/>
+                            <DataGridTemplateColumn Header="الحالة" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="10" Padding="8,2"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
+                                                    <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="مكتمل">
+                                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
+                                                            <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                            <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                                            <Setter Property="Background" Value="{StaticResource DangerLightBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatus}}"
+                                                       FontSize="12" FontWeight="Medium">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="مكتمل">
+                                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
+                                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="تاريخ الاستقبال" Binding="{Binding ReceiveDate, StringFormat={}{0:yyyy-MM-dd}}" Width="120"/>
+                            <DataGridTemplateColumn Header="الإجراءات" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="فتح" Style="{StaticResource ActionButton}"
+                                                Command="{Binding DataContext.ViewTicketDetailCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+
+            <!-- ===== Loading ===== -->
+            <ProgressBar IsIndeterminate="True"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                         Style="{StaticResource ModernProgressBar}"
+                         Margin="0,4,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

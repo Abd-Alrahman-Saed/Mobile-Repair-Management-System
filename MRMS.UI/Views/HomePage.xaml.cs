@@ -1,0 +1,61 @@
+using System.Windows.Controls;
+using Microsoft.Extensions.DependencyInjection;
+using MRMS.UI.Controls;
+using MRMS.UI.Services;
+
+namespace MRMS.UI.Views;
+
+public partial class HomePage : Page
+{
+    private readonly AppNavigationService _navigationService;
+
+    public HomePage(AppNavigationService navigationService)
+    {
+        InitializeComponent();
+        _navigationService = navigationService;
+        _navigationService.Initialize(ContentFrame);
+
+        var notificationService = App.ServiceProvider!.GetRequiredService<NotificationService>();
+        var notification = new NotificationControl(notificationService);
+        NotificationLayer.Children.Add(notification);
+
+        Loaded += (_, _) => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DashboardPage>());
+    }
+
+    private void Back_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        _navigationService.GoBack();
+    }
+
+    private void ContentFrame_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+    {
+    }
+
+    private void Dashboard_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DashboardPage>());
+
+    private void Customers_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<CustomerListPage>());
+
+    private void RegisterDevice_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DeviceRegistrationPage>());
+
+    private void RepairTickets_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<RepairTicketListPage>());
+
+    private void CreateRepairTicket_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<RepairTicketCreatePage>());
+
+    private void TransferDevice_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DeviceTransferPage>());
+
+    private void Search_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SearchPage>());
+
+    private void Logout_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var login = App.ServiceProvider!.GetRequiredService<LoginWindow>();
+        login.Show();
+        System.Windows.Window.GetWindow(this)?.Close();
+    }
+}

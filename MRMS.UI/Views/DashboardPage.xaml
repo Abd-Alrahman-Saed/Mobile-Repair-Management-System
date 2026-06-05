@@ -1,0 +1,189 @@
+<Page x:Class="MRMS.UI.Views.DashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="لوحة التحكم" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <ScrollViewer FlowDirection="LeftToRight">
+        <StackPanel Margin="28" FlowDirection="RightToLeft">
+            <!-- ===== Header ===== -->
+            <StackPanel Margin="0,0,0,28">
+                <TextBlock Text="لوحة التحكم" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="نظرة عامة على أداء مركز الإصلاح" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <!-- ===== Stats Cards ===== -->
+            <WrapPanel Margin="0,0,0,28">
+                <!-- Today Received -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TodayReceived}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="مستلم اليوم" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Today Delivered -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TodayDelivered}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="مسلم اليوم" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Currently In Repair -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.CurrentlyInRepair}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource WarningBrush}"/>
+                        <TextBlock Text="قيد الإصلاح" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Waiting For Parts -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.WaitingForParts}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource WarningBrush}"/>
+                        <TextBlock Text="بانتظار القطع" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Total Repaired -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TotalRepaired}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource SuccessBrush}"/>
+                        <TextBlock Text="تم الإصلاح" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Total Delivered -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TotalDelivered}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource InfoBrush}"/>
+                        <TextBlock Text="تم التسليم" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Total Customers -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TotalCustomers}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource SecondaryBrush}"/>
+                        <TextBlock Text="إجمالي العملاء" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Total Devices -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TotalDevices}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource InfoBrush}"/>
+                        <TextBlock Text="إجمالي الأجهزة" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+                <!-- Total Tickets -->
+                <Border Style="{StaticResource StatCardStyle}" Width="185" Height="120" Margin="0,0,14,14"
+                        Effect="{StaticResource CardShadow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stats.TotalTickets}" Style="{StaticResource StatValue}"
+                                   Foreground="{StaticResource DangerBrush}"/>
+                        <TextBlock Text="إجمالي التذاكر" Style="{StaticResource StatLabel}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- ===== Recent Tickets ===== -->
+            <TextBlock Text="آخر التذاكر" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <DataGrid x:Name="RecentTicketsGrid" ItemsSource="{Binding RecentTickets}"
+                              Style="{StaticResource ModernDataGrid}"
+                              Cursor="Hand"
+                              MouseDoubleClick="RecentTicketsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="رقم التذكرة" Binding="{Binding TicketNumber}" Width="100"/>
+                            <DataGridTextColumn Header="العميل" Binding="{Binding CustomerName}" Width="120"/>
+                            <DataGridTextColumn Header="الجهاز" Binding="{Binding DeviceInfo}" Width="130"/>
+                            <DataGridTextColumn Header="المشكلة" Binding="{Binding ProblemDescription}" Width="*"/>
+                            <DataGridTemplateColumn Header="الحالة" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="10" Padding="8,2"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
+                                                    <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
+                                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                            <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الفحص">
+                                                            <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="بانتظار القطع">
+                                                            <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                                            <Setter Property="Background" Value="{StaticResource DangerLightBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatus}}"
+                                                       FontSize="12" FontWeight="Medium">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
+                                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الفحص">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="بانتظار القطع">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
+                                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="تاريخ الاستقبال" Binding="{Binding ReceiveDate, StringFormat={}{0:yyyy-MM-dd}}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- ===== Loading ===== -->
+            <ProgressBar IsIndeterminate="True"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                         Style="{StaticResource ModernProgressBar}"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

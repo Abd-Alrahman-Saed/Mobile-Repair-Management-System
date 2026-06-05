@@ -1,0 +1,65 @@
+<Page x:Class="MRMS.UI.Views.SearchPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="بحث" FlowDirection="RightToLeft">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="بحث" FontSize="24"
+                   FontWeight="Bold" Margin="0,0,0,15"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                     Height="30" Width="300" FontSize="14"/>
+            <Button Content="بحث" Command="{Binding SearchCommand}"
+                    Margin="10,0,0,0" Padding="15,5"
+                    Background="#0078D7" Foreground="White"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" Text="لا توجد نتائج بحث"
+                   FontSize="16" Foreground="Gray" HorizontalAlignment="Center"
+                   Visibility="{Binding HasSearched, Converter={StaticResource BoolToVis}}"
+                   Margin="0,30,0,0">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasResults}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <ListBox Grid.Row="2" ItemsSource="{Binding Results}"
+                 Visibility="{Binding HasResults, Converter={StaticResource BoolToVis}}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Button Command="{Binding DataContext.OpenResultCommand,
+                              RelativeSource={RelativeSource AncestorType=Page}}"
+                            CommandParameter="{Binding}"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" Padding="0">
+                        <Border Padding="10" Margin="0,0,0,5"
+                                BorderBrush="#E0E0E0" BorderThickness="1"
+                                CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="{Binding DisplayText}" FontSize="14" FontWeight="Bold"
+                                           TextDecorations="Underline" Foreground="#0078D7"/>
+                                <TextBlock Text="{Binding AdditionalInfo}" FontSize="12" Foreground="Gray"/>
+                            </StackPanel>
+                        </Border>
+                    </Button>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ProgressBar Grid.Row="2" IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                     Height="5" VerticalAlignment="Top"/>
+    </Grid>
+</Page>

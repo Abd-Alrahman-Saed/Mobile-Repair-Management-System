@@ -1,0 +1,87 @@
+2026-05-26 16:16:12.492 +03:00 [INF] Application starting...
+2026-05-26 16:18:43.079 +03:00 [INF] Application starting...
+2026-05-26 16:18:45.589 +03:00 [WRN] Database seeding failed (non-fatal) - app works without DB
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure. Consider enabling transient error resiliency by adding 'EnableRetryOnFailure' to the 'UseSqlServer' call.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot open database "MRMS" requested by the login. The login failed.
+Login failed for user 'ABDO-DESKTOP\Abdo'.
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, SqlCommand command, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.TdsParser.Run(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.CompleteLogin(Boolean enlistOK)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.AttemptOneLogin(ServerInfo serverInfo, String newPassword, SecureString newSecurePassword, TimeoutTimer timeout, Boolean withFailover)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.LoginNoFailover(ServerInfo serverInfo, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance, SqlConnectionString connectionOptions, SqlCredential credential, TimeoutTimer timeout)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds.OpenLoginEnlist(TimeoutTimer timeout, SqlConnectionString connectionOptions, SqlCredential credential, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance)
+   at Microsoft.Data.SqlClient.SqlInternalConnectionTds..ctor(DbConnectionPoolIdentity identity, SqlConnectionString connectionOptions, SqlCredential credential, Object providerInfo, String newPassword, SecureString newSecurePassword, Boolean redirectedUserInstance, SqlConnectionString userConnectionOptions, SessionData reconnectSessionData, Boolean applyTransientFaultHandling, String accessToken, IDbConnectionPool pool, Func`3 accessTokenCallback)
+   at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, DbConnectionPoolGroupProviderInfo poolGroupProviderInfo, IDbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
+   at Microsoft.Data.ProviderBase.DbConnectionFactory.CreatePooledConnection(IDbConnectionPool pool, DbConnection owningObject, DbConnectionOptions options, DbConnectionPoolKey poolKey, DbConnectionOptions userOptions)
+   at Microsoft.Data.SqlClient.ConnectionPool.WaitHandleDbConnectionPool.CreateObject(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
+   at Microsoft.Data.SqlClient.ConnectionPool.WaitHandleDbConnectionPool.UserCreateRequest(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection)
+   at Microsoft.Data.SqlClient.ConnectionPool.WaitHandleDbConnectionPool.TryGetConnection(DbConnection owningObject, UInt32 waitForMultipleObjectsTimeout, Boolean allowCreate, Boolean onlyOneCheckConnection, DbConnectionOptions userOptions, DbConnectionInternal& connection)
+   at Microsoft.Data.SqlClient.ConnectionPool.WaitHandleDbConnectionPool.WaitForPendingOpen()
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+ClientConnectionId:5b2c7920-43f7-40ea-8aa3-f61294fe5339
+Error Number:4060,State:1,Class:11
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at MRMS.Infrastructure.Services.SeedService.SeedAsync() in D:\OpenCode\Mobile Repair Managment System\MRMS.Infrastructure\Services\SeedService.cs:line 20
+   at MRMS.UI.App.<>c.<<OnStartup>b__4_1>d.MoveNext() in D:\OpenCode\Mobile Repair Managment System\MRMS.UI\App.xaml.cs:line 69
+2026-05-26 16:24:03.131 +03:00 [INF] Application starting...
+2026-05-26 16:24:06.893 +03:00 [INF] Database seeded successfully
+2026-05-26 16:25:14.862 +03:00 [INF] Application starting...
+2026-05-26 16:25:17.844 +03:00 [INF] Database seeded successfully
+2026-05-26 16:30:44.443 +03:00 [INF] Application starting...
+2026-05-26 16:30:47.199 +03:00 [INF] Database seeded successfully
+2026-05-26 16:30:53.778 +03:00 [ERR] Login failed
+System.InvalidOperationException: No service for type 'MRMS.UI.Views.MainWindow' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at MRMS.UI.Views.LoginWindow.OnLoginSucceeded() in D:\OpenCode\Mobile Repair Managment System\MRMS.UI\Views\LoginWindow.xaml.cs:line 39
+   at MRMS.UI.ViewModels.LoginViewModel.LoginAsync() in D:\OpenCode\Mobile Repair Managment System\MRMS.UI\ViewModels\LoginViewModel.cs:line 44
+2026-05-26 16:31:16.205 +03:00 [ERR] Login failed
+System.InvalidOperationException: No service for type 'MRMS.UI.Views.MainWindow' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at MRMS.UI.Views.LoginWindow.OnLoginSucceeded() in D:\OpenCode\Mobile Repair Managment System\MRMS.UI\Views\LoginWindow.xaml.cs:line 39
+   at MRMS.UI.ViewModels.LoginViewModel.LoginAsync() in D:\OpenCode\Mobile Repair Managment System\MRMS.UI\ViewModels\LoginViewModel.cs:line 44
+2026-05-26 16:36:07.639 +03:00 [INF] Application starting...
+2026-05-26 16:36:10.160 +03:00 [INF] Database seeded successfully
+2026-05-26 17:14:25.187 +03:00 [INF] Application starting...
+2026-05-26 17:14:27.153 +03:00 [INF] Database seeded successfully
+2026-05-26 17:16:37.122 +03:00 [INF] Application starting...
+2026-05-26 17:16:38.844 +03:00 [INF] Database seeded successfully
+2026-05-26 17:25:32.212 +03:00 [INF] Application starting...
+2026-05-26 17:25:33.605 +03:00 [INF] Database seeded successfully
+2026-05-26 17:28:17.409 +03:00 [INF] Application starting...
+2026-05-26 17:28:18.869 +03:00 [INF] Database seeded successfully
+2026-05-26 17:34:01.291 +03:00 [INF] Application starting...
+2026-05-26 17:34:02.723 +03:00 [INF] Database seeded successfully
+2026-05-26 17:53:13.871 +03:00 [INF] Application starting...
+2026-05-26 17:53:15.435 +03:00 [INF] Database seeded successfully
+2026-05-26 17:55:45.495 +03:00 [INF] Application starting...
+2026-05-26 17:55:47.035 +03:00 [INF] Database seeded successfully
+2026-05-26 18:02:31.320 +03:00 [INF] Application starting...
+2026-05-26 18:02:32.803 +03:00 [INF] Database seeded successfully
+2026-05-26 18:06:43.137 +03:00 [INF] Application starting...
+2026-05-26 18:06:44.495 +03:00 [INF] Database seeded successfully
+2026-05-26 18:10:22.877 +03:00 [INF] Application starting...
+2026-05-26 18:10:24.277 +03:00 [INF] Database seeded successfully
+2026-05-26 18:13:53.483 +03:00 [INF] Application starting...
+2026-05-26 18:13:54.926 +03:00 [INF] Database seeded successfully
+2026-05-26 20:46:44.566 +03:00 [INF] Application starting...
+2026-05-26 20:46:47.670 +03:00 [INF] Database seeded successfully
+2026-05-26 20:55:32.924 +03:00 [INF] Application starting...
+2026-05-26 20:55:34.608 +03:00 [INF] Database seeded successfully
+2026-05-26 23:38:29.647 +03:00 [INF] Application starting...
+2026-05-26 23:38:32.762 +03:00 [INF] Database seeded successfully
+2026-05-26 23:59:06.218 +03:00 [INF] Application starting...
+2026-05-26 23:59:08.300 +03:00 [INF] Database seeded successfully

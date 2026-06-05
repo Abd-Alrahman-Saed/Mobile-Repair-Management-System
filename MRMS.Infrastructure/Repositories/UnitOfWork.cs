@@ -1,0 +1,32 @@
+using MRMS.Core.Entities;
+using MRMS.Core.Interfaces;
+using MRMS.Infrastructure.Data;
+
+namespace MRMS.Infrastructure.Repositories;
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AppDbContext _context;
+    private Repository<User>? _users;
+    private Repository<Customer>? _customers;
+    private Repository<Device>? _devices;
+    private Repository<RepairTicket>? _repairTickets;
+    private Repository<DevicePhoto>? _devicePhotos;
+    private Repository<Warranty>? _warranties;
+
+    public UnitOfWork(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public IRepository<User> Users => _users ??= new Repository<User>(_context);
+    public IRepository<Customer> Customers => _customers ??= new Repository<Customer>(_context);
+    public IRepository<Device> Devices => _devices ??= new Repository<Device>(_context);
+    public IRepository<RepairTicket> RepairTickets => _repairTickets ??= new Repository<RepairTicket>(_context);
+    public IRepository<DevicePhoto> DevicePhotos => _devicePhotos ??= new Repository<DevicePhoto>(_context);
+    public IRepository<Warranty> Warranties => _warranties ??= new Repository<Warranty>(_context);
+
+    public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
+
+    public void Dispose() => _context.Dispose();
+}

@@ -1,0 +1,94 @@
+﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using MRMS.Application;
+using MRMS.Infrastructure;
+using MRMS.Infrastructure.Services;
+using MRMS.UI.Services;
+using MRMS.UI.ViewModels;
+using MRMS.UI.Views;
+using Serilog;
+
+namespace MRMS.UI;
+
+public partial class App : System.Windows.Application
+{
+    public static ServiceProvider? ServiceProvider { get; private set; }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        DispatcherUnhandledException += (_, args) =>
+        {
+            Log.Error(args.Exception, "Unhandled exception");
+            args.Handled = true;
+        };
+
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.File("logs/mrms-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        Log.Information("Application starting...");
+
+        var services = new ServiceCollection();
+
+        services.AddInfrastructure(
+            "Server=ABDO-DESKTOP\\SQLEXPRESS;Database=MRMS;Trusted_Connection=True;TrustServerCertificate=True;Connection Timeout=5;");
+
+        services.AddApplication();
+
+        services.AddTransient<LoginViewModel>();
+        services.AddTransient<DashboardViewModel>();
+        services.AddTransient<CustomerListViewModel>();
+        services.AddTransient<CustomerFormViewModel>();
+        services.AddTransient<DeviceRegistrationViewModel>();
+        services.AddTransient<DeviceTransferViewModel>();
+        services.AddTransient<RepairTicketViewModel>();
+        services.AddTransient<RepairTicketCreateViewModel>();
+        services.AddTransient<RepairTicketListViewModel>();
+        services.AddTransient<CustomerProfileViewModel>();
+        services.AddTransient<SearchViewModel>();
+
+        services.AddTransient<LoginWindow>();
+        services.AddTransient<MainWindow>();
+        services.AddTransient<HomePage>();
+        services.AddTransient<DashboardPage>();
+        services.AddTransient<CustomerListPage>();
+        services.AddTransient<CustomerFormPage>();
+        services.AddTransient<DeviceRegistrationPage>();
+        services.AddTransient<DeviceTransferPage>();
+        services.AddTransient<RepairTicketCreatePage>();
+        services.AddTransient<RepairTicketDetailPage>();
+        services.AddTransient<RepairTicketListPage>();
+        services.AddTransient<CustomerProfilePage>();
+        services.AddTransient<SearchPage>();
+
+        services.AddSingleton<AppNavigationService>();
+        services.AddSingleton<NotificationService>();
+
+        ServiceProvider = services.BuildServiceProvider();
+
+        // Seed database in background
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var scope = ServiceProvider.CreateScope();
+                var seedService = scope.ServiceProvider.GetRequiredService<SeedService>();
+                await seedService.SeedAsync();
+                Log.Information("Database seeded successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Database seeding failed (non-fatal)");
+            }
+        });
+
+        var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        Log.CloseAndFlush();
+        base.OnExit(e);
+    }
+}

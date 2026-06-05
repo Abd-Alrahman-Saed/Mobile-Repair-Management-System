@@ -1,0 +1,8 @@
+<Solution>
+  <Property Name="StartupProject" Value="MRMS.UI/MRMS.UI.csproj" />
+  <Project Path="MRMS.UI/MRMS.UI.csproj" />
+  <Project Path="MRMS.Core/MRMS.Core.csproj" />
+  <Project Path="MRMS.Application/MRMS.Application.csproj" />
+  <Project Path="MRMS.Infrastructure/MRMS.Infrastructure.csproj" />
+  <Project Path="MRMS.Tests/MRMS.Tests.csproj" />
+</Solution>

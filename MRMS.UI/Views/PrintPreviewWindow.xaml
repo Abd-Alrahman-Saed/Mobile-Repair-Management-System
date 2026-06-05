@@ -1,0 +1,10 @@
+<Window x:Class="MRMS.UI.Views.PrintPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="معاينة الطباعة" Height="700" Width="900"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="RightToLeft">
+    <Grid>
+        <DocumentViewer x:Name="DocViewer"/>
+    </Grid>
+</Window>

@@ -1,0 +1,82 @@
+<Page x:Class="MRMS.UI.Views.CustomerListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="العملاء" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== Header ===== -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="إدارة العملاء" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="عرض وإدارة جميع عملاء المركز" Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <!-- ===== Toolbar ===== -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                           FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                    <Run Text="إجمالي العملاء:"/>
+                    <Run Text="{Binding Customers.Count, Mode=OneWay, FallbackValue=0}" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}"/>
+                </TextBlock>
+
+                <Button Grid.Column="1" Content="+ إضافة عميل جديد"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding AddCustomerCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- ===== Search ===== -->
+        <TextBox Grid.Row="2" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                 Style="{StaticResource SearchTextBox}"
+                 Margin="0,0,0,16"/>
+
+        <!-- ===== DataGrid Card ===== -->
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+            <Grid>
+                <DataGrid x:Name="CustomersGrid" ItemsSource="{Binding Customers}"
+                          Style="{StaticResource ModernDataGrid}"
+                          Cursor="Hand"
+                          MouseDoubleClick="CustomersGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*"/>
+                        <DataGridTextColumn Header="رقم الهاتف" Binding="{Binding PhoneNumber}" Width="140"/>
+                        <DataGridTextColumn Header="تاريخ التسجيل" Binding="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd}}" Width="130"/>
+                        <DataGridTemplateColumn Header="الإجراءات" Width="170">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="تعديل" Style="{StaticResource ActionButton}" Margin="0,0,6,0"
+                                                Command="{Binding DataContext.EditCustomerCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                        <Button Content="حذف" Style="{StaticResource DangerActionButton}"
+                                                Command="{Binding DataContext.DeleteCustomerCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                             Height="3" VerticalAlignment="Top"
+                             Style="{StaticResource ModernProgressBar}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

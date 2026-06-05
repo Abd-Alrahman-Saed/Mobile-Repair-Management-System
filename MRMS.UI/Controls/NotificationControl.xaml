@@ -1,0 +1,64 @@
+<UserControl x:Class="MRMS.UI.Controls.NotificationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    <Grid>
+        <Border x:Name="ToastBorder" CornerRadius="10"
+                Padding="16,12" Effect="{StaticResource ElevatedShadow}"
+                HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="0,8,0,0"
+                MaxWidth="500"
+                MouseDown="ToastBorder_MouseDown">
+
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Setter Property="Opacity" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Tag}" Value="Visible">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Setter Property="Opacity" Value="1"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0" To="1" Duration="0:0:0.25"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Width="24" Height="24"
+                        CornerRadius="12" Background="#FFFFFF40"
+                        VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBlock x:Name="IconText" FontSize="13" FontWeight="Bold"
+                               Foreground="White" HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <TextBlock x:Name="MessageText" Grid.Column="1"
+                           FontSize="14" FontWeight="Medium"
+                           Foreground="White" VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <TextBlock Grid.Column="2" Text="✕" FontSize="14"
+                           Foreground="#FFFFFFC0" VerticalAlignment="Center"
+                           Margin="10,0,0,0" Cursor="Hand"
+                           MouseDown="Close_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

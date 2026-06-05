@@ -1,0 +1,56 @@
+<Page x:Class="MRMS.UI.Views.CustomerFormPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="بيانات العميل" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <ScrollViewer FlowDirection="LeftToRight">
+        <StackPanel Margin="28" FlowDirection="RightToLeft">
+            <!-- ===== Header ===== -->
+            <StackPanel Margin="0,0,0,28">
+                <TextBlock Text="بيانات العميل" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="أدخل المعلومات الأساسية للعميل" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <!-- ===== Form Card ===== -->
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,24" Width="460" HorizontalAlignment="Center">
+                <StackPanel>
+                    <!-- Full Name -->
+                    <StackPanel Margin="0,0,0,20">
+                        <TextBlock Text="الاسم الكامل" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+
+                    <!-- Phone -->
+                    <StackPanel Margin="0,0,0,24">
+                        <TextBlock Text="رقم الهاتف" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+
+                    <!-- Error Message -->
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10"
+                            Margin="0,0,0,4">
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="{StaticResource DangerBrush}" FontSize="13"
+                                   FontWeight="Medium"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Actions ===== -->
+            <Border Style="{StaticResource CardBorderNoShadow}"
+                    Background="{StaticResource DividerBrush}"
+                    BorderThickness="0" Padding="16" Width="460" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="حفظ البيانات" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveCommand}" Margin="0,0,12,0"/>
+                    <Button Content="إلغاء" Style="{StaticResource SecondaryButton}"
+                            Click="Cancel_Click"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
