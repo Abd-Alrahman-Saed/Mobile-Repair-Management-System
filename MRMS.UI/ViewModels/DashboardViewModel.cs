@@ -10,6 +10,13 @@ namespace MRMS.UI.ViewModels;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IRepairTicketService _repairTicketService;
+    private readonly IDashboardService _dashboardService;
+
+    public DashboardViewModel(IRepairTicketService repairTicketService, IDashboardService dashboardService)
+    {
+        _repairTicketService = repairTicketService;
+        _dashboardService = dashboardService;
+    }
 
     [ObservableProperty]
     private DashboardStatsDto _stats = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -32,19 +39,23 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
-    public DashboardViewModel(IRepairTicketService repairTicketService)
-    {
-        _repairTicketService = repairTicketService;
-    }
+    [ObservableProperty]
+    private string _periodLabel = "هذا الشهر";
+
+    private DateTime _periodFrom;
+    private DateTime _periodTo;
 
     [RelayCommand]
     private async Task LoadAsync()
     {
         IsLoading = true;
 
-        Stats = await _repairTicketService.GetDashboardStatsAsync();
+        _periodFrom = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        _periodTo = DateTime.Today;
+        Stats = await _dashboardService.GetDashboardStatsAsync(_periodFrom, _periodTo);
 
         var allTickets = (await _repairTicketService.GetAllAsync()).ToList();
+
         RecentTickets = new ObservableCollection<RepairTicketDto>(
             allTickets.OrderByDescending(t => t.ReceiveDate).ThenByDescending(t => t.ReceiveTime).Take(5));
 
@@ -53,6 +64,36 @@ public partial class DashboardViewModel : ObservableObject
         RepairedCount = allTickets.Count(t => t.Status == TicketStatus.Repaired);
         CancelledCount = allTickets.Count(t => t.Status == TicketStatus.Cancelled);
 
+        PeriodLabel = "هذا الشهر";
         IsLoading = false;
     }
+
+    [RelayCommand]
+    private async Task LastMonthAsync()
+    {
+        IsLoading = true;
+        var firstOfLastMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
+        _periodFrom = firstOfLastMonth;
+        _periodTo = firstOfLastMonth.AddMonths(1).AddDays(-1);
+        Stats = await _dashboardService.GetDashboardStatsAsync(_periodFrom, _periodTo);
+        PeriodLabel = "الشهر الماضي";
+        IsLoading = false;
+    }
+
+    [RelayCommand]
+    private async Task ThisMonthAsync()
+    {
+        await LoadAsync();
+    }
+
+    private static string FormatChange(double percent) => percent switch
+    {
+        > 0 => $"▲ {percent:F1}%",
+        < 0 => $"▼ {Math.Abs(percent):F1}%",
+        _ => "—"
+    };
+
+    public string RevenueChangeText => FormatChange(Stats.RevenueChangePercent);
+    public string ExpensesChangeText => FormatChange(Stats.ExpensesChangePercent);
+    public string NetProfitChangeText => FormatChange(Stats.NetProfitChangePercent);
 }

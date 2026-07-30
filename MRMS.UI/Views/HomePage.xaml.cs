@@ -73,6 +73,9 @@ public partial class HomePage : Page
     private void Payables_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<PayablesPage>());
 
+    private void IncomeStatement_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<IncomeStatementPage>());
+
     private void Items_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ItemsPage>());
 
