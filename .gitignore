@@ -1,0 +1,25 @@
+bin/
+obj/
+.vs/
+.idea/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+*.log
+*.pdb
+
+publish/
+TestResults/
+
+.env
+secrets.json
+appsettings.Development.json
+
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+next sessions layout problem/
