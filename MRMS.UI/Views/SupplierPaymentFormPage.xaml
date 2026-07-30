@@ -1,0 +1,63 @@
+<Page x:Class="MRMS.UI.Views.SupplierPaymentFormPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="دفعة مورد" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <ScrollViewer>
+        <StackPanel Margin="28">
+            <StackPanel Margin="0,0,0,28">
+                <TextBlock Text="تسجيل دفعة مورد" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="إدخال دفعة جديدة للمورد" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <Border Style="{StaticResource CardBorder}" Padding="20" Width="500" HorizontalAlignment="Center" Margin="0,0,0,24">
+                <StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="التاريخ" Style="{StaticResource FormLabel}"/>
+                        <DatePicker SelectedDate="{Binding Date, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="المورد" Style="{StaticResource FormLabel}"/>
+                        <ComboBox ItemsSource="{Binding Suppliers}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Id"
+                                  SelectedValue="{Binding SelectedSupplierId, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="المبلغ" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="رقم المرجع" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding Reference, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,4">
+                        <TextBlock Text="ملاحظات" Style="{StaticResource FormLabel}"/>
+                        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}" Height="60" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10" Margin="0,16,0,4"
+                            Visibility="{Binding ErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}" FontSize="13" FontWeight="Medium"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorderNoShadow}" Background="{StaticResource DividerBrush}"
+                    BorderThickness="0" Padding="16" Width="500" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="حفظ" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveCommand}" Margin="0,0,12,0"/>
+                    <Button Content="إلغاء" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding CancelCommand}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

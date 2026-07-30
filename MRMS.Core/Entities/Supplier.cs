@@ -11,4 +11,5 @@ public class Supplier
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Purchase> Purchases { get; set; } = [];
+    public ICollection<SupplierPayment> SupplierPayments { get; set; } = [];
 }

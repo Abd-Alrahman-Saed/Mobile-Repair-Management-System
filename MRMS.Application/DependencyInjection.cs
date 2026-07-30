@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddTransient<IPurchaseService, PurchaseService>();
         services.AddTransient<ISaleService, SaleService>();
         services.AddTransient<IExpenseService, ExpenseService>();
+        services.AddTransient<ISupplierPaymentService, SupplierPaymentService>();
+        services.AddTransient<IStockMovementService, StockMovementService>();
 
         return services;
     }

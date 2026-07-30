@@ -419,6 +419,49 @@ namespace MRMS.Infrastructure.Migrations
                     b.ToTable("Sales");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.StockMovement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("StockMovements");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -459,6 +502,43 @@ namespace MRMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Suppliers");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.SupplierPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierPayments");
                 });
 
             modelBuilder.Entity("MRMS.Core.Entities.SystemSetting", b =>
@@ -634,6 +714,28 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.StockMovement", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.Item", "Item")
+                        .WithMany("StockMovements")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.SupplierPayment", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.Supplier", "Supplier")
+                        .WithMany("SupplierPayments")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Warranty", b =>
                 {
                     b.HasOne("MRMS.Core.Entities.RepairTicket", "RepairTicket")
@@ -662,6 +764,8 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTicketItems");
 
                     b.Navigation("Sales");
+
+                    b.Navigation("StockMovements");
                 });
 
             modelBuilder.Entity("MRMS.Core.Entities.Purchase", b =>
@@ -681,6 +785,8 @@ namespace MRMS.Infrastructure.Migrations
             modelBuilder.Entity("MRMS.Core.Entities.Supplier", b =>
                 {
                     b.Navigation("Purchases");
+
+                    b.Navigation("SupplierPayments");
                 });
 #pragma warning restore 612, 618
         }

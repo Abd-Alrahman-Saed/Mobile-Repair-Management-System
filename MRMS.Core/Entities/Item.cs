@@ -18,4 +18,5 @@ public class Item
     public ICollection<PurchaseItem> PurchaseItems { get; set; } = [];
     public ICollection<Sale> Sales { get; set; } = [];
     public ICollection<RepairTicketItem> RepairTicketItems { get; set; } = [];
+    public ICollection<StockMovement> StockMovements { get; set; } = [];
 }

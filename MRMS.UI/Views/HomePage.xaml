@@ -63,6 +63,20 @@
                         FontSize="15"
                         Click="Sales_Click"/>
 
+                <Button Content="دفعات الموردين" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="SupplierPayments_Click"/>
+
+                <Button Content="الحركات المخزنية" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="StockMovements_Click"/>
+
                 <Button Content="المصروفات" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"

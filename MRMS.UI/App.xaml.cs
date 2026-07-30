@@ -57,6 +57,10 @@ public partial class App : System.Windows.Application
         services.AddTransient<SaleFormViewModel>();
         services.AddTransient<ExpensesViewModel>();
         services.AddTransient<ExpenseFormViewModel>();
+        services.AddTransient<SupplierPaymentsViewModel>();
+        services.AddTransient<SupplierPaymentFormViewModel>();
+        services.AddTransient<StockMovementsViewModel>();
+        services.AddTransient<StockMovementFormViewModel>();
 
         services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
@@ -82,6 +86,10 @@ public partial class App : System.Windows.Application
         services.AddTransient<SaleFormPage>();
         services.AddTransient<ExpensesPage>();
         services.AddTransient<ExpenseFormPage>();
+        services.AddTransient<SupplierPaymentsPage>();
+        services.AddTransient<SupplierPaymentFormPage>();
+        services.AddTransient<StockMovementsPage>();
+        services.AddTransient<StockMovementFormPage>();
 
         services.AddSingleton<AppNavigationService>();
         services.AddSingleton<NotificationService>();

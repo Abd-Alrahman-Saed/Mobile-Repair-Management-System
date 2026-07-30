@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<RepairTicketItem> RepairTicketItems => Set<RepairTicketItem>();
+    public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
     public DbSet<Sale> Sales => Set<Sale>();
@@ -169,6 +171,28 @@ public class AppDbContext : DbContext
             e.Property(ex => ex.Amount).HasColumnType("decimal(18,2)");
             e.Property(ex => ex.Notes).HasMaxLength(500);
             e.Property(ex => ex.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<SupplierPayment>(e =>
+        {
+            e.Property(sp => sp.Amount).HasColumnType("decimal(18,2)");
+            e.Property(sp => sp.Reference).HasMaxLength(100);
+            e.Property(sp => sp.Notes).HasMaxLength(500);
+            e.HasOne(sp => sp.Supplier)
+                .WithMany(s => s.SupplierPayments)
+                .HasForeignKey(sp => sp.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<StockMovement>(e =>
+        {
+            e.Property(sm => sm.Type).HasConversion<string>().HasMaxLength(20);
+            e.Property(sm => sm.Value).HasColumnType("decimal(18,2)");
+            e.Property(sm => sm.Notes).HasMaxLength(500);
+            e.HasOne(sm => sm.Item)
+                .WithMany(i => i.StockMovements)
+                .HasForeignKey(sm => sm.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

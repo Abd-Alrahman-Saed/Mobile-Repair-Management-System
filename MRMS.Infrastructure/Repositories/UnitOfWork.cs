@@ -17,6 +17,8 @@ public class UnitOfWork : IUnitOfWork
     private Repository<Supplier>? _suppliers;
     private Repository<SystemSetting>? _systemSettings;
     private Repository<RepairTicketItem>? _repairTicketItems;
+    private Repository<SupplierPayment>? _supplierPayments;
+    private Repository<StockMovement>? _stockMovements;
     private Repository<Purchase>? _purchases;
     private Repository<PurchaseItem>? _purchaseItems;
     private Repository<Sale>? _sales;
@@ -37,6 +39,8 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Supplier> Suppliers => _suppliers ??= new Repository<Supplier>(_context);
     public IRepository<SystemSetting> SystemSettings => _systemSettings ??= new Repository<SystemSetting>(_context);
     public IRepository<RepairTicketItem> RepairTicketItems => _repairTicketItems ??= new Repository<RepairTicketItem>(_context);
+    public IRepository<SupplierPayment> SupplierPayments => _supplierPayments ??= new Repository<SupplierPayment>(_context);
+    public IRepository<StockMovement> StockMovements => _stockMovements ??= new Repository<StockMovement>(_context);
     public IRepository<Purchase> Purchases => _purchases ??= new Repository<Purchase>(_context);
     public IRepository<PurchaseItem> PurchaseItems => _purchaseItems ??= new Repository<PurchaseItem>(_context);
     public IRepository<Sale> Sales => _sales ??= new Repository<Sale>(_context);
