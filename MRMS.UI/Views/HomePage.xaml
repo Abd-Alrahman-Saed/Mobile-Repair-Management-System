@@ -112,6 +112,13 @@
                         FontSize="15"
                         Click="IncomeStatement_Click"/>
 
+                <Button Content="التقرير الشهري" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="MonthlyReport_Click"/>
+
                 <Button Content="الأصناف" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"

@@ -65,6 +65,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<CashbookViewModel>();
         services.AddTransient<PayablesViewModel>();
         services.AddTransient<IncomeStatementViewModel>();
+        services.AddTransient<MonthlyReportViewModel>();
 
         services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
@@ -98,6 +99,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<CashbookPage>();
         services.AddTransient<PayablesPage>();
         services.AddTransient<IncomeStatementPage>();
+        services.AddTransient<MonthlyReportPage>();
 
         services.AddSingleton<AppNavigationService>();
         services.AddSingleton<NotificationService>();

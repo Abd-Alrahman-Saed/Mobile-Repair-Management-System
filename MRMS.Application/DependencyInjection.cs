@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IIncomeStatementService, IncomeStatementService>();
         services.AddTransient<IDashboardService, DashboardService>();
+        services.AddTransient<IMonthlyReportService, MonthlyReportService>();
 
         return services;
     }
