@@ -42,7 +42,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="220" Height="120" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Report.CurrentMonthRevenue, StringFormat={}{0:N2}}"
+                        <TextBlock Text="{Binding Report.CurrentMonthRevenue, StringFormat={}{0:N0}}"
                                    Style="{StaticResource StatValue}" Foreground="{StaticResource SuccessBrush}"/>
                         <TextBlock Text="الإيرادات" Style="{StaticResource StatLabel}"/>
                         <TextBlock Text="{Binding Report.RevenueChangePercent, StringFormat={}{0}%}"
@@ -52,7 +52,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="220" Height="120" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Report.CurrentMonthExpenses, StringFormat={}{0:N2}}"
+                        <TextBlock Text="{Binding Report.CurrentMonthExpenses, StringFormat={}{0:N0}}"
                                    Style="{StaticResource StatValue}" Foreground="{StaticResource DangerBrush}"/>
                         <TextBlock Text="المصروفات" Style="{StaticResource StatLabel}"/>
                         <TextBlock Text="{Binding Report.ExpensesChangePercent, StringFormat={}{0}%}"
@@ -62,7 +62,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="220" Height="120" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Report.CurrentMonthNetProfit, StringFormat={}{0:N2}}">
+                        <TextBlock Text="{Binding Report.CurrentMonthNetProfit, StringFormat={}{0:N0}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource StatValue}">
                                     <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
@@ -82,7 +82,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="220" Height="120" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Report.CurrentMonthCashBalance, StringFormat={}{0:N2}}"
+                        <TextBlock Text="{Binding Report.CurrentMonthCashBalance, StringFormat={}{0:N0}}"
                                    Style="{StaticResource StatValue}" Foreground="{StaticResource InfoBrush}"/>
                         <TextBlock Text="الرصيد النقدي" Style="{StaticResource StatLabel}"/>
                         <TextBlock Text="{Binding Report.CashBalanceChangePercent, StringFormat={}{0}%}"
@@ -99,16 +99,16 @@
                           AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="400">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="الشهر" Binding="{Binding MonthName}" Width="70"/>
-                        <DataGridTextColumn Header="مبيعات" Binding="{Binding SalesRevenue, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="إصلاح" Binding="{Binding RepairRevenue, StringFormat={}{0:N2}}" Width="90"/>
-                        <DataGridTextColumn Header="إيرادات" Binding="{Binding TotalRevenue, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="تكلفة م.مباعة" Binding="{Binding CostOfGoodsSold, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="تكلفة قطع" Binding="{Binding PartsCost, StringFormat={}{0:N2}}" Width="90"/>
-                        <DataGridTextColumn Header="إجمالي الربح" Binding="{Binding GrossProfit, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="مصروفات" Binding="{Binding Expenses, StringFormat={}{0:N2}}" Width="90"/>
-                        <DataGridTextColumn Header="صافي الربح" Binding="{Binding NetProfit, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="تدفق نقدي" Binding="{Binding NetCashFlow, StringFormat={}{0:N2}}" Width="100"/>
-                        <DataGridTextColumn Header="رصيد نقدي تراكمي" Binding="{Binding CumulativeCashBalance, StringFormat={}{0:N2}}" Width="120"/>
+                        <DataGridTextColumn Header="مبيعات" Binding="{Binding SalesRevenue, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="إصلاح" Binding="{Binding RepairRevenue, StringFormat={}{0:N0}}" Width="90"/>
+                        <DataGridTextColumn Header="إيرادات" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="تكلفة م.مباعة" Binding="{Binding CostOfGoodsSold, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="تكلفة قطع" Binding="{Binding PartsCost, StringFormat={}{0:N0}}" Width="90"/>
+                        <DataGridTextColumn Header="إجمالي الربح" Binding="{Binding GrossProfit, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="مصروفات" Binding="{Binding Expenses, StringFormat={}{0:N0}}" Width="90"/>
+                        <DataGridTextColumn Header="صافي الربح" Binding="{Binding NetProfit, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="تدفق نقدي" Binding="{Binding NetCashFlow, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="رصيد نقدي تراكمي" Binding="{Binding CumulativeCashBalance, StringFormat={}{0:N0}}" Width="120"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>

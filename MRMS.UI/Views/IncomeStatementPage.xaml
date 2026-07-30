@@ -49,7 +49,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="إيرادات المبيعات" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.SalesRevenue, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.SalesRevenue, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -60,7 +60,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="إيرادات الإصلاح" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.RepairRevenue, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.RepairRevenue, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -72,7 +72,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="إجمالي الإيرادات" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.TotalRevenue, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.TotalRevenue, StringFormat={}{0:N0}}"
                                    FontSize="16" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"
                                    HorizontalAlignment="Right"/>
                     </Grid>
@@ -89,7 +89,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="تكلفة البضاعة المباعة" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.CostOfGoodsSold, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.CostOfGoodsSold, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -100,7 +100,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="تكلفة قطع الإصلاح" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.RepairPartsCost, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.RepairPartsCost, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -112,7 +112,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="إجمالي التكاليف" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Path=Statement.CostOfGoodsSold, StringFormat={}{0:N2}, Converter={StaticResource InverseSign}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Path=Statement.CostOfGoodsSold, StringFormat={}{0:N0}, Converter={StaticResource InverseSign}}"
                                    FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource DangerBrush}"
                                    HorizontalAlignment="Right"/>
                     </Grid>
@@ -126,7 +126,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="إجمالي الربح" FontSize="18" FontWeight="Bold"
                                        Foreground="{StaticResource SuccessBrush}"/>
-                            <TextBlock Grid.Column="1" Text="{Binding Statement.GrossProfit, StringFormat={}{0:N2}}"
+                            <TextBlock Grid.Column="1" Text="{Binding Statement.GrossProfit, StringFormat={}{0:N0}}"
                                        FontSize="18" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"
                                        HorizontalAlignment="Right"/>
                         </Grid>
@@ -144,7 +144,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="المصروفات التشغيلية" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.OperatingExpenses, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.OperatingExpenses, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -155,7 +155,7 @@
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="خسائر التوالف" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Statement.DamageLosses, StringFormat={}{0:N2}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Statement.DamageLosses, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
                     <Rectangle Style="{StaticResource Divider}" Margin="0,4"/>
@@ -167,7 +167,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="إجمالي المصروفات" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Path=Statement.OperatingExpenses, StringFormat={}{0:N2}, Converter={StaticResource InverseSign}}"
+                        <TextBlock Grid.Column="1" Text="{Binding Path=Statement.OperatingExpenses, StringFormat={}{0:N0}, Converter={StaticResource InverseSign}}"
                                    FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource DangerBrush}"
                                    HorizontalAlignment="Right"/>
                     </Grid>
@@ -185,7 +185,7 @@
                                 <TextBlock Text="الفترة من {Binding Statement.From, StringFormat={}{0:yyyy-MM-dd}} إلى {Binding Statement.To, StringFormat={}{0:yyyy-MM-dd}}"
                                            FontSize="13" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
-                            <TextBlock Grid.Column="1" Text="{Binding Statement.NetProfit, StringFormat={}{0:N2}}"
+                            <TextBlock Grid.Column="1" Text="{Binding Statement.NetProfit, StringFormat={}{0:N0}}"
                                        FontSize="22" FontWeight="Bold"
                                        HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock.Style>

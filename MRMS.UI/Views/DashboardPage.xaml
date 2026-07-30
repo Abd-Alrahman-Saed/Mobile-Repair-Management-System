@@ -121,7 +121,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.CurrentPeriodNetProfit, StringFormat={}{0:N2}}">
+                        <TextBlock Text="{Binding Stats.CurrentPeriodNetProfit, StringFormat={}{0:N0}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource StatValue}">
                                     <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
@@ -142,7 +142,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.CurrentPeriodRevenue, StringFormat={}{0:N2}}" Style="{StaticResource StatValue}"
+                        <TextBlock Text="{Binding Stats.CurrentPeriodRevenue, StringFormat={}{0:N0}}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource PrimaryBrush}"/>
                         <TextBlock Text="الإيرادات" Style="{StaticResource StatLabel}"/>
                         <TextBlock Text="{Binding RevenueChangeText}" FontSize="12" HorizontalAlignment="Center"
@@ -153,7 +153,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.CurrentPeriodExpenses, StringFormat={}{0:N2}}" Style="{StaticResource StatValue}"
+                        <TextBlock Text="{Binding Stats.CurrentPeriodExpenses, StringFormat={}{0:N0}}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource DangerBrush}"/>
                         <TextBlock Text="المصروفات" Style="{StaticResource StatLabel}"/>
                         <TextBlock Text="{Binding ExpensesChangeText}" FontSize="12" HorizontalAlignment="Center"
@@ -164,7 +164,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.CashBalance, StringFormat={}{0:N2}}" Style="{StaticResource StatValue}"
+                        <TextBlock Text="{Binding Stats.CashBalance, StringFormat={}{0:N0}}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource InfoBrush}"/>
                         <TextBlock Text="الرصيد النقدي" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
@@ -173,7 +173,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.StockValue, StringFormat={}{0:N2}}" Style="{StaticResource StatValue}"
+                        <TextBlock Text="{Binding Stats.StockValue, StringFormat={}{0:N0}}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource SecondaryBrush}"/>
                         <TextBlock Text="قيمة المخزون" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
@@ -182,7 +182,7 @@
                 <Border Style="{StaticResource StatCardStyle}" Width="240" Height="130" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stats.PayablesTotal, StringFormat={}{0:N2}}" Style="{StaticResource StatValue}"
+                        <TextBlock Text="{Binding Stats.PayablesTotal, StringFormat={}{0:N0}}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource WarningBrush}"/>
                         <TextBlock Text="المستحقات للموردين" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
