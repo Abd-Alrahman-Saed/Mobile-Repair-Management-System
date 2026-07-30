@@ -119,6 +119,20 @@
                         FontSize="15"
                         Click="MonthlyReport_Click"/>
 
+                <Button Content="قيود اليومية" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="JournalEntries_Click"/>
+
+                <Button Content="ميزان المراجعة" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="TrialBalance_Click"/>
+
                 <Button Content="الأصناف" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"

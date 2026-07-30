@@ -9,10 +9,12 @@ namespace MRMS.Application.Services;
 public class ExpenseService : IExpenseService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IJournalService _journalService;
 
-    public ExpenseService(IUnitOfWork unitOfWork)
+    public ExpenseService(IUnitOfWork unitOfWork, IJournalService journalService)
     {
         _unitOfWork = unitOfWork;
+        _journalService = journalService;
     }
 
     public async Task<IEnumerable<ExpenseDto>> GetAllAsync()
@@ -44,6 +46,9 @@ public class ExpenseService : IExpenseService
         };
 
         await _unitOfWork.Expenses.AddAsync(expense);
+        await _unitOfWork.CompleteAsync();
+
+        await _journalService.PostExpenseAsync(expense.Date, expense.Category, expense.Description, expense.Amount, expense.Id);
         await _unitOfWork.CompleteAsync();
 
         return MapToDto(expense);

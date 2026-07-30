@@ -9,10 +9,12 @@ namespace MRMS.Application.Services;
 public class PurchaseService : IPurchaseService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IJournalService _journalService;
 
-    public PurchaseService(IUnitOfWork unitOfWork)
+    public PurchaseService(IUnitOfWork unitOfWork, IJournalService journalService)
     {
         _unitOfWork = unitOfWork;
+        _journalService = journalService;
     }
 
     public async Task<IEnumerable<PurchaseDto>> GetAllAsync()
@@ -65,6 +67,10 @@ public class PurchaseService : IPurchaseService
         }
 
         await _unitOfWork.Purchases.AddAsync(purchase);
+        await _unitOfWork.CompleteAsync();
+
+        var supplierName = (await _unitOfWork.Suppliers.GetByIdAsync(dto.SupplierId))?.Name ?? $"Supplier#{dto.SupplierId}";
+        await _journalService.PostPurchaseAsync(purchase.Date, $"مشتريات: {supplierName} - {purchase.PaidAmount:N2}", purchase.PaidAmount, purchase.Id);
         await _unitOfWork.CompleteAsync();
 
         return (await GetByIdAsync(purchase.Id))!;

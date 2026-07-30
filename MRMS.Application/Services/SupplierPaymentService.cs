@@ -9,10 +9,12 @@ namespace MRMS.Application.Services;
 public class SupplierPaymentService : ISupplierPaymentService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IJournalService _journalService;
 
-    public SupplierPaymentService(IUnitOfWork unitOfWork)
+    public SupplierPaymentService(IUnitOfWork unitOfWork, IJournalService journalService)
     {
         _unitOfWork = unitOfWork;
+        _journalService = journalService;
     }
 
     public async Task<IEnumerable<SupplierPaymentDto>> GetAllAsync()
@@ -56,6 +58,9 @@ public class SupplierPaymentService : ISupplierPaymentService
             .Query()
             .Include(p => p.Supplier)
             .FirstAsync(p => p.Id == payment.Id);
+
+        await _journalService.PostSupplierPaymentAsync(saved.Date, saved.Supplier.Name, saved.Amount, saved.Id);
+        await _unitOfWork.CompleteAsync();
 
         return MapToDto(saved);
     }

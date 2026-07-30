@@ -9,10 +9,12 @@ namespace MRMS.Application.Services;
 public class SaleService : ISaleService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IJournalService _journalService;
 
-    public SaleService(IUnitOfWork unitOfWork)
+    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService)
     {
         _unitOfWork = unitOfWork;
+        _journalService = journalService;
     }
 
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
@@ -54,6 +56,10 @@ public class SaleService : ISaleService
             item.CurrentStock -= dto.Quantity;
 
         await _unitOfWork.Sales.AddAsync(sale);
+        await _unitOfWork.CompleteAsync();
+
+        var itemName = (await _unitOfWork.Items.GetByIdAsync(dto.ItemId))?.Name ?? $"Item#{dto.ItemId}";
+        await _journalService.PostSaleAsync(sale.Date, $"بيع: {itemName} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
         await _unitOfWork.CompleteAsync();
 
         return (await GetByIdAsync(sale.Id))!;

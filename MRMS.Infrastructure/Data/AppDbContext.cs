@@ -23,6 +23,8 @@ public class AppDbContext : DbContext
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
+    public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -193,6 +195,23 @@ public class AppDbContext : DbContext
                 .WithMany(i => i.StockMovements)
                 .HasForeignKey(sm => sm.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<JournalEntry>(e =>
+        {
+            e.Property(je => je.Description).HasMaxLength(500);
+            e.Property(je => je.ReferenceType).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<JournalEntryLine>(e =>
+        {
+            e.Property(jl => jl.AccountName).HasMaxLength(100);
+            e.Property(jl => jl.DebitAmount).HasColumnType("decimal(18,2)");
+            e.Property(jl => jl.CreditAmount).HasColumnType("decimal(18,2)");
+            e.HasOne(jl => jl.JournalEntry)
+                .WithMany(je => je.Lines)
+                .HasForeignKey(jl => jl.JournalEntryId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -10,10 +10,12 @@ namespace MRMS.Application.Services;
 public class RepairTicketService : IRepairTicketService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IJournalService _journalService;
 
-    public RepairTicketService(IUnitOfWork uow)
+    public RepairTicketService(IUnitOfWork uow, IJournalService journalService)
     {
         _uow = uow;
+        _journalService = journalService;
     }
 
     public async Task<RepairTicketDto> CreateAsync(CreateRepairTicketDto dto)
@@ -78,6 +80,13 @@ public class RepairTicketService : IRepairTicketService
 
         _uow.RepairTickets.Update(ticket);
         await _uow.CompleteAsync();
+
+        if (dto.NewStatus == TicketStatus.Delivered)
+        {
+            await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, ticket.Id);
+            await _uow.CompleteAsync();
+        }
+
         return true;
     }
 

@@ -10,10 +10,12 @@ namespace MRMS.Application.Services;
 public class StockMovementService : IStockMovementService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IJournalService _journalService;
 
-    public StockMovementService(IUnitOfWork unitOfWork)
+    public StockMovementService(IUnitOfWork unitOfWork, IJournalService journalService)
     {
         _unitOfWork = unitOfWork;
+        _journalService = journalService;
     }
 
     public async Task<IEnumerable<StockMovementDto>> GetAllAsync()
@@ -68,6 +70,12 @@ public class StockMovementService : IStockMovementService
             .Query()
             .Include(m => m.Item)
             .FirstAsync(m => m.Id == movement.Id);
+
+        if (dto.Type == MovementType.Damaged)
+        {
+            await _journalService.PostDamagedAsync(saved.Date, saved.Item.Name, saved.Quantity, saved.Value, saved.Id);
+            await _unitOfWork.CompleteAsync();
+        }
 
         return MapToDto(saved);
     }
