@@ -43,6 +43,15 @@ public class StockMovementService : IStockMovementService
 
     public async Task<StockMovementDto> CreateAsync(CreateStockMovementDto dto)
     {
+        if (dto.Quantity <= 0)
+            throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
+
+        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
+            ?? throw new InvalidOperationException("الصنف غير موجود");
+
+        if (dto.Type != MovementType.CustomerReturn && item.CurrentStock < dto.Quantity)
+            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
+
         var movement = new StockMovement
         {
             Date = dto.Date,
@@ -54,14 +63,10 @@ public class StockMovementService : IStockMovementService
             Notes = dto.Notes
         };
 
-        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
-        if (item is not null)
-        {
-            if (dto.Type == MovementType.CustomerReturn)
-                item.CurrentStock += dto.Quantity;
-            else
-                item.CurrentStock -= dto.Quantity;
-        }
+        if (dto.Type == MovementType.CustomerReturn)
+            item.CurrentStock += dto.Quantity;
+        else
+            item.CurrentStock -= dto.Quantity;
 
         await _unitOfWork.StockMovements.AddAsync(movement);
         await _unitOfWork.CompleteAsync();

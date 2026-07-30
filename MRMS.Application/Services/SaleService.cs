@@ -40,6 +40,12 @@ public class SaleService : ISaleService
 
     public async Task<SaleDto> CreateAsync(CreateSaleDto dto)
     {
+        if (dto.Quantity <= 0)
+            throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
+
+        if (dto.UnitPrice <= 0)
+            throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
+
         var sale = new Sale
         {
             Date = dto.Date,
@@ -51,9 +57,13 @@ public class SaleService : ISaleService
             Notes = dto.Notes
         };
 
-        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
-        if (item is not null)
-            item.CurrentStock -= dto.Quantity;
+        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
+            ?? throw new InvalidOperationException("الصنف غير موجود");
+
+        if (item.CurrentStock < dto.Quantity)
+            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
+
+        item.CurrentStock -= dto.Quantity;
 
         await _unitOfWork.Sales.AddAsync(sale);
         await _unitOfWork.CompleteAsync();
@@ -73,6 +83,12 @@ public class SaleService : ISaleService
         var oldQty = existing.Quantity;
         var diff = dto.Quantity - oldQty;
 
+        if (dto.Quantity <= 0)
+            throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
+
+        if (dto.UnitPrice <= 0)
+            throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
+
         existing.Date = dto.Date;
         existing.ItemId = dto.ItemId;
         existing.Quantity = dto.Quantity;
@@ -81,6 +97,9 @@ public class SaleService : ISaleService
         existing.Notes = dto.Notes;
 
         var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
+        if (item is not null && diff > 0 && item.CurrentStock < diff)
+            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}");
+
         if (item is not null)
             item.CurrentStock -= diff;
 

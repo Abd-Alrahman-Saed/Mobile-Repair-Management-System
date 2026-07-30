@@ -3,6 +3,28 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FlowDirection="RightToLeft">
     <Grid>
+        <Border x:Name="Overlay" Background="#80000000" Visibility="Collapsed"
+                Panel.ZIndex="999">
+            <Border CornerRadius="14" Background="White" Padding="28,24"
+                    Width="400" Effect="{StaticResource ElevatedShadow}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock x:Name="ConfirmText" FontSize="16" Foreground="#333"
+                               TextWrapping="Wrap" Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="YesButton" Content="نعم" Padding="24,10"
+                                Background="{StaticResource DangerBrush}" Foreground="White"
+                                BorderThickness="0" FontSize="14"
+                                Cursor="Hand" Margin="0,0,12,0" Click="Yes_Click"/>
+                        <Button x:Name="NoButton" Content="لا" Padding="24,10"
+                                Background="{StaticResource BorderBrush}" Foreground="#333"
+                                BorderThickness="0" FontSize="14"
+                                Cursor="Hand" Click="No_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
         <Border x:Name="ToastBorder" CornerRadius="10"
                 Padding="16,12" Effect="{StaticResource ElevatedShadow}"
                 HorizontalAlignment="Center" VerticalAlignment="Top"

@@ -35,6 +35,12 @@ public class ExpenseService : IExpenseService
 
     public async Task<ExpenseDto> CreateAsync(CreateExpenseDto dto)
     {
+        if (dto.Amount <= 0)
+            throw new InvalidOperationException("المبلغ يجب أن يكون أكبر من صفر");
+
+        if (string.IsNullOrWhiteSpace(dto.Category))
+            throw new InvalidOperationException("التصنيف مطلوب");
+
         var expense = new Expense
         {
             Date = dto.Date,
@@ -56,6 +62,12 @@ public class ExpenseService : IExpenseService
 
     public async Task UpdateAsync(UpdateExpenseDto dto)
     {
+        if (dto.Amount <= 0)
+            throw new InvalidOperationException("المبلغ يجب أن يكون أكبر من صفر");
+
+        if (string.IsNullOrWhiteSpace(dto.Category))
+            throw new InvalidOperationException("التصنيف مطلوب");
+
         var expense = await _unitOfWork.Expenses.GetByIdAsync(dto.Id);
         if (expense is null) return;
 

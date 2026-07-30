@@ -70,6 +70,19 @@
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
                              Height="3" VerticalAlignment="Top"
                              Style="{StaticResource ModernProgressBar}"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,12" VerticalAlignment="Bottom">
+                    <Button Content="السابق" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPrevious}"
+                            Padding="12,6"/>
+                    <TextBlock Text="{Binding PageInfo}" VerticalAlignment="Center" Margin="16,0"
+                               Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"/>
+                    <Button Content="التالي" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNext}"
+                            Padding="12,6"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

@@ -1,91 +1,100 @@
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.Controls;
 
-public partial class NotificationControl : UserControl
+public partial class NotificationControl : System.Windows.Controls.UserControl
 {
-    private readonly NotificationService _notificationService;
+    private readonly NotificationService _service;
+    private TaskCompletionSource<bool>? _currentConfirmTcs;
+    private readonly DispatcherTimer _hideTimer;
 
-    public NotificationControl(NotificationService notificationService)
+    public NotificationControl(NotificationService service)
     {
         InitializeComponent();
-        _notificationService = notificationService;
-        _notificationService.OnNotification += OnNotificationReceived;
+        _service = service;
+        _service.OnNotification += OnNotificationReceived;
+        _service.OnConfirm += OnConfirmRequested;
+
+        _hideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _hideTimer.Tick += (_, _) => { _hideTimer.Stop(); HideToast(); };
     }
 
     private void OnNotificationReceived(object? sender, NotificationEventArgs e)
     {
-        Dispatcher.Invoke(() => Show(e.Message, e.Type));
-    }
-
-    private void Show(string message, NotificationType type)
-    {
-        ToastBorder.Visibility = Visibility.Visible;
-
-        var (icon, bgColor) = type switch
+        Dispatcher.Invoke(() =>
         {
-            NotificationType.Success => ("✓", "#10B981"),
-            NotificationType.Error => ("✕", "#EF4444"),
-            NotificationType.Info => ("ℹ", "#3B82F6"),
-            NotificationType.Warning => ("⚠", "#F59E0B"),
-            _ => ("✓", "#10B981")
-        };
+            MessageText.Text = e.Message;
+            ToastBorder.Tag = "Visible";
 
-        IconText.Text = icon;
-        MessageText.Text = message;
-        ToastBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(bgColor));
+            IconText.Text = e.Type switch
+            {
+                NotificationType.Success => "✓",
+                NotificationType.Error => "✕",
+                NotificationType.Warning => "!",
+                _ => "i"
+            };
 
-        var opacityAnim = new DoubleAnimation
+            ToastBorder.Background = e.Type switch
+            {
+                NotificationType.Success => new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81)),
+                NotificationType.Error => new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44)),
+                NotificationType.Warning => new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B)),
+                _ => new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xEB))
+            };
+
+            _hideTimer.Stop();
+            _hideTimer.Start();
+        });
+    }
+
+    private void OnConfirmRequested(object? sender, ConfirmEventArgs e)
+    {
+        Dispatcher.Invoke(() =>
         {
-            From = 0,
-            To = 1,
-            Duration = TimeSpan.FromSeconds(0.25)
-        };
-        Storyboard.SetTargetProperty(opacityAnim, new PropertyPath("Opacity"));
-        var sb = new Storyboard();
-        sb.Children.Add(opacityAnim);
-        sb.Begin(ToastBorder);
-
-        _ = AutoHideAsync();
+            _currentConfirmTcs = e.Tcs;
+            ConfirmText.Text = e.Message;
+            Overlay.Visibility = Visibility.Visible;
+        });
     }
 
-    public void Hide()
+    private void Yes_Click(object sender, RoutedEventArgs e)
     {
-        var opacityAnim = new DoubleAnimation
-        {
-            From = 1,
-            To = 0,
-            Duration = TimeSpan.FromSeconds(0.2)
-        };
-        opacityAnim.Completed += (_, _) =>
-        {
-            ToastBorder.Visibility = Visibility.Collapsed;
-            ToastBorder.Opacity = 0;
-        };
-        var sb = new Storyboard();
-        Storyboard.SetTargetProperty(opacityAnim, new PropertyPath("Opacity"));
-        sb.Children.Add(opacityAnim);
-        sb.Begin(ToastBorder);
+        _currentConfirmTcs?.TrySetResult(true);
+        _currentConfirmTcs = null;
+        Overlay.Visibility = Visibility.Collapsed;
     }
 
-    private async Task AutoHideAsync()
+    private void No_Click(object sender, RoutedEventArgs e)
     {
-        await Task.Delay(3000);
-        Dispatcher.Invoke(Hide);
+        _currentConfirmTcs?.TrySetResult(false);
+        _currentConfirmTcs = null;
+        Overlay.Visibility = Visibility.Collapsed;
     }
 
-    private void ToastBorder_MouseDown(object sender, MouseButtonEventArgs e)
+    private void HideToast()
     {
-        Hide();
+        var storyboard = new Storyboard();
+        var animation = new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromSeconds(0.3) };
+        Storyboard.SetTarget(animation, ToastBorder);
+        Storyboard.SetTargetProperty(animation, new PropertyPath(OpacityProperty));
+        storyboard.Children.Add(animation);
+        storyboard.Completed += (_, _) => ToastBorder.Tag = null;
+        storyboard.Begin();
     }
 
-    private void Close_Click(object sender, MouseButtonEventArgs e)
+    private void ToastBorder_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        Hide();
+        _hideTimer.Stop();
+        HideToast();
+    }
+
+    private void Close_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        _hideTimer.Stop();
+        HideToast();
     }
 }

@@ -1,7 +1,8 @@
 <Page x:Class="MRMS.UI.Views.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="الرئيسية" FlowDirection="RightToLeft">
+      Title="الرئيسية" FlowDirection="RightToLeft"
+      KeyDown="Page_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="260"/>

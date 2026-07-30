@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using MRMS.UI.Controls;
 using MRMS.UI.Services;
@@ -102,5 +103,45 @@ public partial class HomePage : Page
         var login = App.ServiceProvider!.GetRequiredService<LoginWindow>();
         login.Show();
         System.Windows.Window.GetWindow(this)?.Close();
+    }
+
+    private void Page_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.F5)
+        {
+            var page = ContentFrame.Content as System.Windows.Controls.Page;
+            if (page?.DataContext is CommunityToolkit.Mvvm.Input.IAsyncRelayCommand loadCmd)
+                _ = loadCmd.ExecuteAsync(null);
+            else
+            {
+                var reloadMethod = page?.GetType().GetMethod("LoadAsync");
+                reloadMethod?.Invoke(page?.DataContext, null);
+            }
+            e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.F2)
+        {
+            _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SearchPage>());
+            e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.N && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            var currentType = ContentFrame.Content?.GetType();
+            if (currentType == typeof(PurchasesPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<PurchaseFormPage>());
+            else if (currentType == typeof(SalesPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SaleFormPage>());
+            else if (currentType == typeof(ExpensesPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ExpenseFormPage>());
+            else if (currentType == typeof(ItemsPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ItemFormPage>());
+            else if (currentType == typeof(SuppliersPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SupplierFormPage>());
+            else if (currentType == typeof(SupplierPaymentsPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SupplierPaymentFormPage>());
+            else if (currentType == typeof(StockMovementsPage))
+                _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<StockMovementFormPage>());
+            e.Handled = true;
+        }
     }
 }
