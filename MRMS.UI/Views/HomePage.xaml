@@ -84,6 +84,27 @@
                         FontSize="15"
                         Click="Expenses_Click"/>
 
+                <Button Content="كشف الرصيد المخزني" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="StockBalance_Click"/>
+
+                <Button Content="كشف حساب النقدية" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Cashbook_Click"/>
+
+                <Button Content="المستحقات للموردين" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Payables_Click"/>
+
                 <Button Content="الأصناف" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"

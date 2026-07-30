@@ -1,0 +1,59 @@
+<Page x:Class="MRMS.UI.Views.StockBalancePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="كشف الرصيد المخزني" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="كشف الرصيد المخزني" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="عرض أرصدة الأصناف والقيمة الإجمالية للمخزون" Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                    <Run Text="إجمالي قيمة المخزون:"/>
+                    <Run Text="{Binding TotalStockValue, StringFormat={}{0:N0}}" FontWeight="Bold"
+                         Foreground="{StaticResource PrimaryBrush}"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Items}"
+                          Style="{StaticResource ModernDataGrid}"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="80"/>
+                        <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock}" Width="80"/>
+                        <DataGridTextColumn Header="تكلفة الوحدة" Binding="{Binding CostPrice, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="قيمة الرصيد" Binding="{Binding StockValue, StringFormat={}{0:N0}}" Width="110"/>
+                        <DataGridTextColumn Header="حد الطلب" Binding="{Binding ReorderLevel}" Width="80"/>
+                        <DataGridTemplateColumn Header="حالة المخزون" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding IsLowStock, Converter={StaticResource Not}}"
+                                               Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"
+                                               Visibility="{Binding IsLowStock, Converter={StaticResource InverseBoolToVis}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                             Height="3" VerticalAlignment="Top"
+                             Style="{StaticResource ModernProgressBar}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

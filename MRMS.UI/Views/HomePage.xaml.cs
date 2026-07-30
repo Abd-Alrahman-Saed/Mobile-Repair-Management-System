@@ -64,6 +64,15 @@ public partial class HomePage : Page
     private void Expenses_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ExpensesPage>());
 
+    private void StockBalance_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<StockBalancePage>());
+
+    private void Cashbook_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<CashbookPage>());
+
+    private void Payables_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<PayablesPage>());
+
     private void Items_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ItemsPage>());
 

@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddTransient<IExpenseService, ExpenseService>();
         services.AddTransient<ISupplierPaymentService, SupplierPaymentService>();
         services.AddTransient<IStockMovementService, StockMovementService>();
+        services.AddTransient<IReportService, ReportService>();
 
         return services;
     }
