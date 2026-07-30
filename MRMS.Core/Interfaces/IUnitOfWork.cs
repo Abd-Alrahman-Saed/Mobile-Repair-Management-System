@@ -14,5 +14,9 @@ public interface IUnitOfWork : IDisposable
     IRepository<Supplier> Suppliers { get; }
     IRepository<SystemSetting> SystemSettings { get; }
     IRepository<RepairTicketItem> RepairTicketItems { get; }
+    IRepository<Purchase> Purchases { get; }
+    IRepository<PurchaseItem> PurchaseItems { get; }
+    IRepository<Sale> Sales { get; }
+    IRepository<Expense> Expenses { get; }
     Task<int> CompleteAsync();
 }

@@ -49,6 +49,27 @@
                         FontSize="15"
                         Click="TransferDevice_Click"/>
 
+                <Button Content="المشتريات" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Purchases_Click"/>
+
+                <Button Content="المبيعات" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Sales_Click"/>
+
+                <Button Content="المصروفات" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Expenses_Click"/>
+
                 <Button Content="الأصناف" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"

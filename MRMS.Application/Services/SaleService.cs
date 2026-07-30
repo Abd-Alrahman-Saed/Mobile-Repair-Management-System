@@ -1,0 +1,101 @@
+using Microsoft.EntityFrameworkCore;
+using MRMS.Application.DTOs;
+using MRMS.Application.Interfaces;
+using MRMS.Core.Entities;
+using MRMS.Core.Interfaces;
+
+namespace MRMS.Application.Services;
+
+public class SaleService : ISaleService
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public SaleService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<IEnumerable<SaleDto>> GetAllAsync()
+    {
+        var sales = await _unitOfWork.Sales
+            .Query()
+            .Include(s => s.Item)
+            .OrderByDescending(s => s.Date)
+            .ToListAsync();
+
+        return sales.Select(MapToDto);
+    }
+
+    public async Task<SaleDto?> GetByIdAsync(int id)
+    {
+        var sale = await _unitOfWork.Sales
+            .Query()
+            .Include(s => s.Item)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        return sale is null ? null : MapToDto(sale);
+    }
+
+    public async Task<SaleDto> CreateAsync(CreateSaleDto dto)
+    {
+        var sale = new Sale
+        {
+            Date = dto.Date,
+            ItemId = dto.ItemId,
+            Quantity = dto.Quantity,
+            UnitPrice = dto.UnitPrice,
+            CostPrice = dto.CostPrice,
+            CustomerName = dto.CustomerName,
+            Notes = dto.Notes
+        };
+
+        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
+        if (item is not null)
+            item.CurrentStock -= dto.Quantity;
+
+        await _unitOfWork.Sales.AddAsync(sale);
+        await _unitOfWork.CompleteAsync();
+
+        return (await GetByIdAsync(sale.Id))!;
+    }
+
+    public async Task UpdateAsync(UpdateSaleDto dto)
+    {
+        var existing = await _unitOfWork.Sales.GetByIdAsync(dto.Id);
+        if (existing is null) return;
+
+        var oldQty = existing.Quantity;
+        var diff = dto.Quantity - oldQty;
+
+        existing.Date = dto.Date;
+        existing.ItemId = dto.ItemId;
+        existing.Quantity = dto.Quantity;
+        existing.UnitPrice = dto.UnitPrice;
+        existing.CustomerName = dto.CustomerName;
+        existing.Notes = dto.Notes;
+
+        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
+        if (item is not null)
+            item.CurrentStock -= diff;
+
+        await _unitOfWork.CompleteAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var sale = await _unitOfWork.Sales.GetByIdAsync(id);
+        if (sale is null) return;
+
+        var item = await _unitOfWork.Items.GetByIdAsync(sale.ItemId);
+        if (item is not null)
+            item.CurrentStock += sale.Quantity;
+
+        _unitOfWork.Sales.Delete(sale);
+        await _unitOfWork.CompleteAsync();
+    }
+
+    private static SaleDto MapToDto(Sale s) => new(
+        s.Id, s.Date, s.ItemId, s.Item.Name,
+        s.Quantity, s.UnitPrice, s.TotalPrice, s.CostPrice, s.Profit,
+        s.CustomerName, s.Notes, s.CreatedAt);
+}

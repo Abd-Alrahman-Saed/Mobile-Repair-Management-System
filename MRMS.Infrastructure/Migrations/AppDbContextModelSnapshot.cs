@@ -124,6 +124,48 @@ namespace MRMS.Infrastructure.Migrations
                     b.ToTable("DevicePhotos");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.Expense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Expenses");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Item", b =>
                 {
                     b.Property<int>("Id")
@@ -173,6 +215,72 @@ namespace MRMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.Purchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("Purchases");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.PurchaseItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PurchaseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("PurchaseId");
+
+                    b.ToTable("PurchaseItems");
                 });
 
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicket", b =>
@@ -266,6 +374,49 @@ namespace MRMS.Infrastructure.Migrations
                     b.HasIndex("RepairTicketId");
 
                     b.ToTable("RepairTicketItems");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.Sale", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("MRMS.Core.Entities.Supplier", b =>
@@ -412,6 +563,36 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTicket");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.Purchase", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.Supplier", "Supplier")
+                        .WithMany("Purchases")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.PurchaseItem", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.Item", "Item")
+                        .WithMany("PurchaseItems")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MRMS.Core.Entities.Purchase", "Purchase")
+                        .WithMany("PurchaseItems")
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Purchase");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicket", b =>
                 {
                     b.HasOne("MRMS.Core.Entities.Device", "Device")
@@ -426,7 +607,7 @@ namespace MRMS.Infrastructure.Migrations
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicketItem", b =>
                 {
                     b.HasOne("MRMS.Core.Entities.Item", "Item")
-                        .WithMany()
+                        .WithMany("RepairTicketItems")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -440,6 +621,17 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("RepairTicket");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.Sale", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.Item", "Item")
+                        .WithMany("Sales")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("MRMS.Core.Entities.Warranty", b =>
@@ -463,6 +655,20 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTickets");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.Item", b =>
+                {
+                    b.Navigation("PurchaseItems");
+
+                    b.Navigation("RepairTicketItems");
+
+                    b.Navigation("Sales");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.Purchase", b =>
+                {
+                    b.Navigation("PurchaseItems");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicket", b =>
                 {
                     b.Navigation("Photos");
@@ -470,6 +676,11 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTicketItems");
 
                     b.Navigation("Warranty");
+                });
+
+            modelBuilder.Entity("MRMS.Core.Entities.Supplier", b =>
+                {
+                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

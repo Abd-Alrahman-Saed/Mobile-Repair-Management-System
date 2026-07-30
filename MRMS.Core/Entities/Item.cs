@@ -14,4 +14,8 @@ public class Item
     public int ReorderLevel { get; set; }
     public int CurrentStock { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<PurchaseItem> PurchaseItems { get; set; } = [];
+    public ICollection<Sale> Sales { get; set; } = [];
+    public ICollection<RepairTicketItem> RepairTicketItems { get; set; } = [];
 }

@@ -17,6 +17,10 @@ public class UnitOfWork : IUnitOfWork
     private Repository<Supplier>? _suppliers;
     private Repository<SystemSetting>? _systemSettings;
     private Repository<RepairTicketItem>? _repairTicketItems;
+    private Repository<Purchase>? _purchases;
+    private Repository<PurchaseItem>? _purchaseItems;
+    private Repository<Sale>? _sales;
+    private Repository<Expense>? _expenses;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -33,6 +37,10 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Supplier> Suppliers => _suppliers ??= new Repository<Supplier>(_context);
     public IRepository<SystemSetting> SystemSettings => _systemSettings ??= new Repository<SystemSetting>(_context);
     public IRepository<RepairTicketItem> RepairTicketItems => _repairTicketItems ??= new Repository<RepairTicketItem>(_context);
+    public IRepository<Purchase> Purchases => _purchases ??= new Repository<Purchase>(_context);
+    public IRepository<PurchaseItem> PurchaseItems => _purchaseItems ??= new Repository<PurchaseItem>(_context);
+    public IRepository<Sale> Sales => _sales ??= new Repository<Sale>(_context);
+    public IRepository<Expense> Expenses => _expenses ??= new Repository<Expense>(_context);
 
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
 

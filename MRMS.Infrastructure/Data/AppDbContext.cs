@@ -17,6 +17,10 @@ public class AppDbContext : DbContext
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<RepairTicketItem> RepairTicketItems => Set<RepairTicketItem>();
+    public DbSet<Purchase> Purchases => Set<Purchase>();
+    public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
+    public DbSet<Sale> Sales => Set<Sale>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,9 +121,54 @@ public class AppDbContext : DbContext
                 .HasForeignKey(i => i.RepairTicketId)
                 .OnDelete(DeleteBehavior.Cascade);
             e.HasOne(i => i.Item)
-                .WithMany()
+                .WithMany(i => i.RepairTicketItems)
                 .HasForeignKey(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Purchase>(e =>
+        {
+            e.Property(p => p.Notes).HasMaxLength(500);
+            e.Property(p => p.PaidAmount).HasColumnType("decimal(18,2)");
+            e.Property(p => p.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+            e.HasOne(p => p.Supplier)
+                .WithMany(s => s.Purchases)
+                .HasForeignKey(p => p.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PurchaseItem>(e =>
+        {
+            e.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            e.HasOne(i => i.Purchase)
+                .WithMany(p => p.PurchaseItems)
+                .HasForeignKey(i => i.PurchaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(i => i.Item)
+                .WithMany(i => i.PurchaseItems)
+                .HasForeignKey(i => i.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Sale>(e =>
+        {
+            e.Property(s => s.UnitPrice).HasColumnType("decimal(18,2)");
+            e.Property(s => s.CostPrice).HasColumnType("decimal(18,2)");
+            e.Property(s => s.CustomerName).HasMaxLength(100);
+            e.Property(s => s.Notes).HasMaxLength(500);
+            e.HasOne(s => s.Item)
+                .WithMany(i => i.Sales)
+                .HasForeignKey(s => s.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Expense>(e =>
+        {
+            e.Property(ex => ex.Category).HasMaxLength(100);
+            e.Property(ex => ex.Description).HasMaxLength(500);
+            e.Property(ex => ex.Amount).HasColumnType("decimal(18,2)");
+            e.Property(ex => ex.Notes).HasMaxLength(500);
+            e.Property(ex => ex.PaymentMethod).HasConversion<string>().HasMaxLength(20);
         });
     }
 }
