@@ -137,6 +137,66 @@
                 </StackPanel>
             </Border>
 
+            <!-- Parts -->
+            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="قطع الغيار والإكسسوارات" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding AvailableItems}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Id"
+                                  SelectedValue="{Binding SelectedPartItemId}"
+                                  Height="30" FontSize="14"/>
+                        <TextBox Grid.Column="1" Text="{Binding PartQuantity, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="30" FontSize="14" Margin="8,0,0,0"/>
+                        <TextBox Grid.Column="2" Text="{Binding PartUnitCost, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="30" FontSize="14" Margin="8,0,0,0"/>
+                        <Button Grid.Column="3" Content="إضافة قطعة"
+                                Command="{Binding AddPartCommand}"
+                                Margin="8,0,0,0" Padding="10,5"
+                                Background="#0078D7" Foreground="White"/>
+                    </Grid>
+
+                    <DataGrid ItemsSource="{Binding Parts}"
+                              AutoGenerateColumns="False" Height="150"
+                              Margin="0,0,0,8">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="القطعة" Binding="{Binding ItemName}" Width="*"/>
+                            <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="70"/>
+                            <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitCost, StringFormat={}{0:N0}}" Width="90"/>
+                            <DataGridTextColumn Header="الإجمالي" Binding="{Binding TotalCost, StringFormat={}{0:N0}}" Width="90"/>
+                            <DataGridTemplateColumn Header="حذف" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="×"
+                                                Command="{Binding DataContext.RemovePartCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="5,2" Foreground="Red"
+                                                Background="Transparent" BorderThickness="0"
+                                                Cursor="Hand"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock HorizontalAlignment="Left" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#0078D7">
+                        <Run Text="إجمالي تكلفة القطع:"/>
+                        <Run Text="{Binding PartsTotalCost, StringFormat={}{0:N0}}" FontWeight="Bold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
             <!-- Photos -->
             <Border BorderBrush="#E0E0E0" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">

@@ -17,7 +17,23 @@ public record RepairTicketDto(
     decimal Cost,
     DateTime? DeliveryDate,
     TimeSpan? DeliveryTime,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    List<RepairTicketPartDto>? Parts = null,
+    decimal PartsCost = 0);
+
+public record RepairTicketPartDto(
+    int Id,
+    int ItemId,
+    string ItemName,
+    int Quantity,
+    decimal UnitCost,
+    decimal TotalCost);
+
+public record AddPartToTicketDto(
+    int TicketId,
+    int ItemId,
+    int Quantity,
+    decimal UnitCost);
 
 public record CreateRepairTicketDto(
     int DeviceId,

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
@@ -39,10 +40,13 @@ public class RepairTicketService : IRepairTicketService
         var ticket = tickets.FirstOrDefault();
         if (ticket is null) return null;
         var dto = MapToDto(ticket);
+        var parts = await GetPartsAsync(id);
         return dto with
         {
             DeviceInfo = $"{ticket.Device?.Brand} {ticket.Device?.Model}",
-            CustomerName = ticket.Device?.Customer?.FullName
+            CustomerName = ticket.Device?.Customer?.FullName,
+            Parts = parts.ToList(),
+            PartsCost = parts.Sum(p => p.TotalCost)
         };
     }
 
@@ -60,6 +64,7 @@ public class RepairTicketService : IRepairTicketService
         if (ticket.Status == TicketStatus.Delivered || ticket.Status == TicketStatus.Cancelled)
             return false;
 
+        var oldStatus = ticket.Status;
         ticket.Status = dto.NewStatus;
 
         if (dto.NewStatus == TicketStatus.Delivered)
@@ -67,6 +72,9 @@ public class RepairTicketService : IRepairTicketService
             ticket.DeliveryDate = DateTime.UtcNow.Date;
             ticket.DeliveryTime = DateTime.UtcNow.TimeOfDay;
         }
+
+        if (dto.NewStatus == TicketStatus.InRepair && oldStatus != TicketStatus.InRepair)
+            await DeductPartsStockAsync(dto.TicketId);
 
         _uow.RepairTickets.Update(ticket);
         await _uow.CompleteAsync();
@@ -135,6 +143,83 @@ public class RepairTicketService : IRepairTicketService
             TotalDevices: allDevices.Count(),
             TotalTickets: allTickets.Count()
         );
+    }
+
+    public async Task<IEnumerable<RepairTicketPartDto>> GetPartsAsync(int ticketId)
+    {
+        var items = await _uow.RepairTicketItems
+            .Query()
+            .Include(i => i.Item)
+            .Where(i => i.RepairTicketId == ticketId)
+            .ToListAsync();
+
+        return items.Select(i => new RepairTicketPartDto(
+            i.Id, i.ItemId, i.Item.Name, i.Quantity, i.UnitCost, i.TotalCost));
+    }
+
+    public async Task<RepairTicketPartDto> AddPartAsync(AddPartToTicketDto dto)
+    {
+        var part = new RepairTicketItem
+        {
+            RepairTicketId = dto.TicketId,
+            ItemId = dto.ItemId,
+            Quantity = dto.Quantity,
+            UnitCost = dto.UnitCost
+        };
+
+        var ticket = await _uow.RepairTickets.GetByIdAsync(dto.TicketId);
+        if (ticket is not null && ticket.Status == TicketStatus.InRepair)
+        {
+            var item = await _uow.Items.GetByIdAsync(dto.ItemId);
+            if (item is not null)
+                item.CurrentStock -= dto.Quantity;
+        }
+
+        await _uow.RepairTicketItems.AddAsync(part);
+        await _uow.CompleteAsync();
+
+        var saved = await _uow.RepairTicketItems
+            .Query()
+            .Include(i => i.Item)
+            .FirstAsync(i => i.Id == part.Id);
+
+        return new RepairTicketPartDto(
+            saved.Id, saved.ItemId, saved.Item.Name, saved.Quantity, saved.UnitCost, saved.TotalCost);
+    }
+
+    public async Task RemovePartAsync(int ticketItemId)
+    {
+        var part = await _uow.RepairTicketItems
+            .Query()
+            .Include(i => i.RepairTicket)
+            .FirstOrDefaultAsync(i => i.Id == ticketItemId);
+
+        if (part is null) return;
+
+        if (part.RepairTicket.Status == TicketStatus.InRepair)
+        {
+            var item = await _uow.Items.GetByIdAsync(part.ItemId);
+            if (item is not null)
+                item.CurrentStock += part.Quantity;
+        }
+
+        _uow.RepairTicketItems.Delete(part);
+        await _uow.CompleteAsync();
+    }
+
+    private async Task DeductPartsStockAsync(int ticketId)
+    {
+        var parts = await _uow.RepairTicketItems
+            .Query()
+            .Where(i => i.RepairTicketId == ticketId)
+            .ToListAsync();
+
+        foreach (var part in parts)
+        {
+            var item = await _uow.Items.GetByIdAsync(part.ItemId);
+            if (item is not null)
+                item.CurrentStock -= part.Quantity;
+        }
     }
 
     private async Task<string> GenerateTicketNumberAsync()

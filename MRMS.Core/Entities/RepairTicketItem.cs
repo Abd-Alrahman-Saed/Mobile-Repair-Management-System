@@ -7,6 +7,7 @@ public class RepairTicketItem
     public int ItemId { get; set; }
     public int Quantity { get; set; }
     public decimal UnitCost { get; set; }
+    public decimal TotalCost => Quantity * UnitCost;
 
     public RepairTicket RepairTicket { get; set; } = null!;
     public Item Item { get; set; } = null!;

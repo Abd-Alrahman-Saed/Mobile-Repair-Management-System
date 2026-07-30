@@ -12,4 +12,7 @@ public interface IRepairTicketService
     Task<IEnumerable<RepairTicketDto>> GetAllActiveAsync();
     Task<IEnumerable<RepairTicketDto>> GetAllAsync();
     Task<DashboardStatsDto> GetDashboardStatsAsync();
+    Task<IEnumerable<RepairTicketPartDto>> GetPartsAsync(int ticketId);
+    Task<RepairTicketPartDto> AddPartAsync(AddPartToTicketDto dto);
+    Task RemovePartAsync(int ticketItemId);
 }

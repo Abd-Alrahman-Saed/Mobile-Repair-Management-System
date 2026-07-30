@@ -42,6 +42,7 @@ public partial class RepairTicketDetailPage : Page
                 if (ticket is not null)
                     _vm.SelectedTicket = ticket;
                 await LoadPhotosAndWarrantyAsync(ticketId.Value);
+                await _vm.LoadItemsCommand.ExecuteAsync(null);
             }
         };
     }

@@ -13,6 +13,7 @@ public partial class RepairTicketViewModel : ObservableObject
     private readonly IRepairTicketService _repairTicketService;
     private readonly IDeviceService _deviceService;
     private readonly ICustomerService _customerService;
+    private readonly IItemService _itemService;
     private readonly NotificationService _notificationService;
 
     [ObservableProperty]
@@ -49,6 +50,11 @@ public partial class RepairTicketViewModel : ObservableObject
             SelectedStatus = value.Status;
             RepairDescription = value.RepairDescription;
             Cost = value.Cost;
+
+            if (value.Parts is not null)
+                Parts = new ObservableCollection<RepairTicketPartDto>(value.Parts);
+            else
+                Parts = [];
         }
     }
 
@@ -87,18 +93,119 @@ public partial class RepairTicketViewModel : ObservableObject
     [ObservableProperty]
     private string _warrantyInfo = "";
 
+    [ObservableProperty]
+    private ObservableCollection<RepairTicketPartDto> _parts = [];
+
+    [ObservableProperty]
+    private ObservableCollection<ItemDto> _availableItems = [];
+
+    [ObservableProperty]
+    private int _selectedPartItemId;
+
+    [ObservableProperty]
+    private int _partQuantity = 1;
+
+    [ObservableProperty]
+    private decimal _partUnitCost;
+
+    public decimal PartsTotalCost => Parts.Sum(p => p.TotalCost);
+
     public event Action? TicketCreated;
 
     public RepairTicketViewModel(
         IRepairTicketService repairTicketService,
         IDeviceService deviceService,
         ICustomerService customerService,
+        IItemService itemService,
         NotificationService notificationService)
     {
         _repairTicketService = repairTicketService;
         _deviceService = deviceService;
         _customerService = customerService;
+        _itemService = itemService;
         _notificationService = notificationService;
+    }
+
+    partial void OnSelectedPartItemIdChanged(int value)
+    {
+        var item = AvailableItems.FirstOrDefault(i => i.Id == value);
+        if (item is not null)
+            PartUnitCost = item.CostPrice;
+    }
+
+    [RelayCommand]
+    private async Task LoadItemsAsync()
+    {
+        var items = await _itemService.GetAllAsync();
+        AvailableItems = new ObservableCollection<ItemDto>(items);
+    }
+
+    [RelayCommand]
+    private async Task AddPartAsync()
+    {
+        if (SelectedTicket is null) return;
+        if (SelectedPartItemId <= 0)
+        {
+            ErrorMessage = "يرجى اختيار قطعة";
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            var part = await _repairTicketService.AddPartAsync(new AddPartToTicketDto(
+                SelectedTicket.Id, SelectedPartItemId, PartQuantity, PartUnitCost));
+            Parts.Add(part);
+            SelectedPartItemId = 0;
+            PartQuantity = 1;
+            PartUnitCost = 0;
+            ErrorMessage = "";
+            OnPropertyChanged(nameof(PartsTotalCost));
+
+            var updated = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
+            if (updated is not null)
+                SelectedTicket = updated;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemovePartAsync(RepairTicketPartDto part)
+    {
+        if (SelectedTicket is null) return;
+
+        var confirm = System.Windows.MessageBox.Show(
+            "هل أنت متأكد من حذف هذه القطعة؟", "تأكيد الحذف",
+            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+        if (confirm != System.Windows.MessageBoxResult.Yes)
+            return;
+
+        IsLoading = true;
+        try
+        {
+            await _repairTicketService.RemovePartAsync(part.Id);
+            Parts.Remove(part);
+            OnPropertyChanged(nameof(PartsTotalCost));
+
+            var updated = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
+            if (updated is not null)
+                SelectedTicket = updated;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
