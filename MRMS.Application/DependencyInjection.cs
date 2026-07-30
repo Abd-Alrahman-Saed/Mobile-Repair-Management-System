@@ -15,6 +15,9 @@ public static class DependencyInjection
         services.AddTransient<ISearchService, SearchService>();
         services.AddTransient<IWarrantyService, WarrantyService>();
         services.AddTransient<IPhotoService, PhotoService>();
+        services.AddTransient<IItemService, ItemService>();
+        services.AddTransient<ISupplierService, SupplierService>();
+        services.AddTransient<ISystemSettingService, SystemSettingService>();
 
         return services;
     }

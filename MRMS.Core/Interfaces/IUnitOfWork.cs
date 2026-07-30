@@ -5,10 +5,14 @@ namespace MRMS.Core.Interfaces;
 public interface IUnitOfWork : IDisposable
 {
     IRepository<User> Users { get; }
-    IRepository<Entities.Customer> Customers { get; }
-    IRepository<Entities.Device> Devices { get; }
-    IRepository<Entities.RepairTicket> RepairTickets { get; }
-    IRepository<Entities.DevicePhoto> DevicePhotos { get; }
-    IRepository<Entities.Warranty> Warranties { get; }
+    IRepository<Customer> Customers { get; }
+    IRepository<Device> Devices { get; }
+    IRepository<RepairTicket> RepairTickets { get; }
+    IRepository<DevicePhoto> DevicePhotos { get; }
+    IRepository<Warranty> Warranties { get; }
+    IRepository<Item> Items { get; }
+    IRepository<Supplier> Suppliers { get; }
+    IRepository<SystemSetting> SystemSettings { get; }
+    IRepository<RepairTicketItem> RepairTicketItems { get; }
     Task<int> CompleteAsync();
 }

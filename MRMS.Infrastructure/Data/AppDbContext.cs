@@ -13,6 +13,10 @@ public class AppDbContext : DbContext
     public DbSet<RepairTicket> RepairTickets => Set<RepairTicket>();
     public DbSet<DevicePhoto> DevicePhotos => Set<DevicePhoto>();
     public DbSet<Warranty> Warranties => Set<Warranty>();
+    public DbSet<Item> Items => Set<Item>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<RepairTicketItem> RepairTicketItems => Set<RepairTicketItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +79,47 @@ public class AppDbContext : DbContext
                 .WithOne(t => t.Warranty)
                 .HasForeignKey<Warranty>(w => w.RepairTicketId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Item>(e =>
+        {
+            e.Property(i => i.Code).HasMaxLength(50);
+            e.Property(i => i.Name).HasMaxLength(200);
+            e.Property(i => i.Unit).HasMaxLength(20);
+            e.Property(i => i.CostPrice).HasColumnType("decimal(18,2)");
+            e.Property(i => i.SellingPrice).HasColumnType("decimal(18,2)");
+            e.Property(i => i.Type).HasConversion<string>().HasMaxLength(20);
+            e.HasIndex(i => i.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<Supplier>(e =>
+        {
+            e.Property(s => s.Code).HasMaxLength(50);
+            e.Property(s => s.Name).HasMaxLength(200);
+            e.Property(s => s.Phone).HasMaxLength(50);
+            e.Property(s => s.OpeningBalance).HasColumnType("decimal(18,2)");
+            e.Property(s => s.Notes).HasMaxLength(500);
+            e.HasIndex(s => s.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<SystemSetting>(e =>
+        {
+            e.Property(s => s.Key).HasMaxLength(100);
+            e.Property(s => s.Value).HasMaxLength(500);
+            e.HasIndex(s => s.Key).IsUnique();
+        });
+
+        modelBuilder.Entity<RepairTicketItem>(e =>
+        {
+            e.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            e.HasOne(i => i.RepairTicket)
+                .WithMany(t => t.RepairTicketItems)
+                .HasForeignKey(i => i.RepairTicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(i => i.Item)
+                .WithMany()
+                .HasForeignKey(i => i.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

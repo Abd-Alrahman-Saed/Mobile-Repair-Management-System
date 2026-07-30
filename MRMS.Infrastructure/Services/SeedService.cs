@@ -83,5 +83,34 @@ public class SeedService
             });
             await _context.SaveChangesAsync();
         }
+
+        if (!await _context.Items.AnyAsync())
+        {
+            _context.Items.AddRange(
+                new Item { Code = "CH-001", Name = "شاحن سريع 20W", Type = ItemType.Accessory, Unit = "قطعة", CostPrice = 25, SellingPrice = 45, ReorderLevel = 10, CurrentStock = 50 },
+                new Item { Code = "CB-001", Name = "كابل USB-C", Type = ItemType.Accessory, Unit = "قطعة", CostPrice = 8, SellingPrice = 18, ReorderLevel = 20, CurrentStock = 100 },
+                new Item { Code = "SC-001", Name = "شاشة جلاس سامسونج S24", Type = ItemType.SparePart, Unit = "قطعة", CostPrice = 180, SellingPrice = 320, ReorderLevel = 3, CurrentStock = 5 },
+                new Item { Code = "BT-001", Name = "بطارية ايفون 15 برو", Type = ItemType.SparePart, Unit = "قطعة", CostPrice = 120, SellingPrice = 250, ReorderLevel = 3, CurrentStock = 4 }
+            );
+            await _context.SaveChangesAsync();
+        }
+
+        if (!await _context.Suppliers.AnyAsync())
+        {
+            _context.Suppliers.AddRange(
+                new Supplier { Code = "SUP-001", Name = "مؤسسة الإلكترونيات الحديثة", Phone = "0555000111", OpeningBalance = 0, Notes = "مورد رئيسي للإكسسوارات" },
+                new Supplier { Code = "SUP-002", Name = "شركة قطع الغيار المتكاملة", Phone = "0555000222", OpeningBalance = 1500, Notes = "مورد قطع غيار الصيانة" }
+            );
+            await _context.SaveChangesAsync();
+        }
+
+        if (!await _context.SystemSettings.AnyAsync())
+        {
+            _context.SystemSettings.AddRange(
+                new SystemSetting { Key = "PaymentMethods", Value = "نقدي,آجل" },
+                new SystemSetting { Key = "ExpenseCategories", Value = "إيجار,كهرباء,رواتب,إنترنت,مواصلات,صيانة,أخرى" }
+            );
+            await _context.SaveChangesAsync();
+        }
     }
 }

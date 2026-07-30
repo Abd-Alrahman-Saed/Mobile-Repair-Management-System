@@ -49,6 +49,15 @@ public partial class HomePage : Page
     private void TransferDevice_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DeviceTransferPage>());
 
+    private void Items_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ItemsPage>());
+
+    private void Suppliers_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SuppliersPage>());
+
+    private void Settings_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SettingsPage>());
+
     private void Search_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<SearchPage>());
 

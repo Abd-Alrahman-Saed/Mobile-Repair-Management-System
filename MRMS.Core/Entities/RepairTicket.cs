@@ -21,4 +21,5 @@ public class RepairTicket
     public Device Device { get; set; } = null!;
     public ICollection<DevicePhoto> Photos { get; set; } = new List<DevicePhoto>();
     public Warranty? Warranty { get; set; }
+    public ICollection<RepairTicketItem> RepairTicketItems { get; set; } = new List<RepairTicketItem>();
 }

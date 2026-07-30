@@ -46,6 +46,11 @@ public partial class App : System.Windows.Application
         services.AddTransient<RepairTicketListViewModel>();
         services.AddTransient<CustomerProfileViewModel>();
         services.AddTransient<SearchViewModel>();
+        services.AddTransient<ItemsViewModel>();
+        services.AddTransient<ItemFormViewModel>();
+        services.AddTransient<SuppliersViewModel>();
+        services.AddTransient<SupplierFormViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
@@ -60,6 +65,11 @@ public partial class App : System.Windows.Application
         services.AddTransient<RepairTicketListPage>();
         services.AddTransient<CustomerProfilePage>();
         services.AddTransient<SearchPage>();
+        services.AddTransient<ItemsPage>();
+        services.AddTransient<ItemFormPage>();
+        services.AddTransient<SuppliersPage>();
+        services.AddTransient<SupplierFormPage>();
+        services.AddTransient<SettingsPage>();
 
         services.AddSingleton<AppNavigationService>();
         services.AddSingleton<NotificationService>();

@@ -1,0 +1,59 @@
+<Page x:Class="MRMS.UI.Views.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="الإعدادات" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,28">
+            <TextBlock Text="الإعدادات" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="إدارة الإعدادات العامة للنظام" Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="24" Width="550" HorizontalAlignment="Center">
+            <StackPanel>
+                <StackPanel Margin="0,0,0,24">
+                    <TextBlock Text="طرق الدفع" Style="{StaticResource FormLabel}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="أدخل طرق الدفع مفصولة بفواصل" FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding PaymentMethods, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FormTextBox}"/>
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,24">
+                    <TextBlock Text="بنود المصروفات" Style="{StaticResource FormLabel}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="أدخل بنود المصروفات مفصولة بفواصل" FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding ExpenseCategories, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FormTextBox}" AcceptsReturn="True" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Border Background="{StaticResource DangerLightBrush}"
+                        CornerRadius="8" Padding="12,10"
+                        Margin="0,0,0,4"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Foreground="{StaticResource DangerBrush}" FontSize="13"
+                               FontWeight="Medium"/>
+                </Border>
+
+                <Button Content="حفظ الإعدادات" Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SaveCommand}"
+                        HorizontalAlignment="Left" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <ProgressBar IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                     Height="3" VerticalAlignment="Top"
+                     Style="{StaticResource ModernProgressBar}"/>
+    </Grid>
+</Page>

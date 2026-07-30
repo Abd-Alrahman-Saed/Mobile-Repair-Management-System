@@ -49,6 +49,27 @@
                         FontSize="15"
                         Click="TransferDevice_Click"/>
 
+                <Button Content="الأصناف" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Items_Click"/>
+
+                <Button Content="الموردون" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Suppliers_Click"/>
+
+                <Button Content="الإعدادات" Padding="14,12"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalContentAlignment="Right"
+                        FontSize="15"
+                        Click="Settings_Click"/>
+
                 <Button Content="بحث" Padding="14,12"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Cursor="Hand"
