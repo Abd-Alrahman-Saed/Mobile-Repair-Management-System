@@ -26,6 +26,15 @@ public class ItemService : IItemService
         return item is null ? null : MapToDto(item);
     }
 
+    public async Task<ItemDto?> GetByCodeAsync(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return null;
+
+        var items = await _uow.Items.FindAsync(i => i.Code == code);
+        var item = items.FirstOrDefault();
+        return item is null ? null : MapToDto(item);
+    }
+
     public async Task<ItemDto> CreateAsync(CreateItemDto dto)
     {
         var item = new Item
@@ -63,6 +72,18 @@ public class ItemService : IItemService
         return MapToDto(item);
     }
 
+    public async Task UpdatePricesAsync(int id, decimal costPrice, decimal sellingPrice)
+    {
+        var item = await _uow.Items.GetByIdAsync(id);
+        if (item is null)
+            throw new KeyNotFoundException($"Item {id} not found");
+
+        item.CostPrice = costPrice;
+        item.SellingPrice = sellingPrice;
+        _uow.Items.Update(item);
+        await _uow.CompleteAsync();
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var item = await _uow.Items.GetByIdAsync(id);
@@ -91,5 +112,17 @@ public class ItemService : IItemService
     }
 
     private static ItemDto MapToDto(Item i) =>
-        new(i.Id, i.Code, i.Name, i.Type, i.Unit, i.CostPrice, i.SellingPrice, i.ReorderLevel, i.CurrentStock, i.CreatedAt);
+        new()
+        {
+            Id = i.Id,
+            Code = i.Code,
+            Name = i.Name,
+            Type = i.Type,
+            Unit = i.Unit,
+            CostPrice = i.CostPrice,
+            SellingPrice = i.SellingPrice,
+            ReorderLevel = i.ReorderLevel,
+            CurrentStock = i.CurrentStock,
+            CreatedAt = i.CreatedAt
+        };
 }

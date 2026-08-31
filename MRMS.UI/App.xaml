@@ -15,6 +15,8 @@
             <converters:FirstLetterConverter x:Key="FirstLetter"/>
             <converters:InverseSignConverter x:Key="InverseSign"/>
             <converters:LessThanZeroConverter x:Key="LessThanZero"/>
+            <converters:FileSizeConverter x:Key="FileSize"/>
+            <converters:BoolToResultTextConverter x:Key="BoolToResultText"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

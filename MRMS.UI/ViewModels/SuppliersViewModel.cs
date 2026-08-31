@@ -11,12 +11,13 @@ namespace MRMS.UI.ViewModels;
 public partial class SuppliersViewModel : ObservableObject
 {
     private readonly ISupplierService _supplierService;
+    private readonly IReportService _reportService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
-    private List<SupplierDto> _allSuppliers = [];
+    private List<SupplierListItem> _allSuppliers = [];
 
     [ObservableProperty]
-    private ObservableCollection<SupplierDto> _suppliers = [];
+    private ObservableCollection<SupplierListItem> _suppliers = [];
 
     [ObservableProperty]
     private bool _isLoading;
@@ -27,18 +28,23 @@ public partial class SuppliersViewModel : ObservableObject
     partial void OnSearchQueryChanged(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            Suppliers = new ObservableCollection<SupplierDto>(_allSuppliers);
+            Suppliers = new ObservableCollection<SupplierListItem>(_allSuppliers);
         else
-            Suppliers = new ObservableCollection<SupplierDto>(
+            Suppliers = new ObservableCollection<SupplierListItem>(
                 _allSuppliers.Where(s =>
                     s.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
                     s.Code.Contains(value, StringComparison.OrdinalIgnoreCase) ||
                     s.Phone.Contains(value)));
     }
 
-    public SuppliersViewModel(ISupplierService supplierService, AppNavigationService navigationService, NotificationService notificationService)
+    public SuppliersViewModel(
+        ISupplierService supplierService,
+        IReportService reportService,
+        AppNavigationService navigationService,
+        NotificationService notificationService)
     {
         _supplierService = supplierService;
+        _reportService = reportService;
         _navigationService = navigationService;
         _notificationService = notificationService;
     }
@@ -47,9 +53,29 @@ public partial class SuppliersViewModel : ObservableObject
     private async Task LoadAsync()
     {
         IsLoading = true;
-        var items = await _supplierService.GetAllAsync();
-        _allSuppliers = items.ToList();
-        Suppliers = new ObservableCollection<SupplierDto>(_allSuppliers);
+        var suppliers = await _supplierService.GetAllAsync();
+        var payables = (await _reportService.GetPayablesAsync()).ToDictionary(p => p.SupplierId);
+
+        _allSuppliers = suppliers
+            .Select(s =>
+            {
+                payables.TryGetValue(s.Id, out var p);
+                return new SupplierListItem
+                {
+                    Id = s.Id,
+                    Code = s.Code,
+                    Name = s.Name,
+                    Phone = s.Phone,
+                    Notes = s.Notes,
+                    OpeningBalance = s.OpeningBalance,
+                    TotalPurchases = p?.TotalPurchases ?? 0,
+                    TotalPayments = p?.TotalPayments ?? 0,
+                    OutstandingBalance = p?.OutstandingBalance ?? s.OpeningBalance
+                };
+            })
+            .ToList();
+
+        Suppliers = new ObservableCollection<SupplierListItem>(_allSuppliers);
         IsLoading = false;
     }
 
@@ -80,4 +106,17 @@ public partial class SuppliersViewModel : ObservableObject
         var page = App.ServiceProvider!.GetRequiredService<Views.SupplierFormPage>();
         _navigationService.NavigateTo(page, "EditSupplierId", id);
     }
+}
+
+public class SupplierListItem
+{
+    public int Id { get; init; }
+    public string Code { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Phone { get; init; } = "";
+    public string Notes { get; init; } = "";
+    public decimal OpeningBalance { get; init; }
+    public decimal TotalPurchases { get; init; }
+    public decimal TotalPayments { get; init; }
+    public decimal OutstandingBalance { get; init; }
 }

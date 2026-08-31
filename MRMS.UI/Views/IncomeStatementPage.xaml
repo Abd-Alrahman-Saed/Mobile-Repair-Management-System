@@ -59,7 +59,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="إيرادات الإصلاح" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text="إيرادات الصيانة" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="{Binding Statement.RepairRevenue, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>
@@ -99,7 +99,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="140"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="تكلفة قطع الإصلاح" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text="تكلفة قطع الصيانة" FontSize="15" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <TextBlock Grid.Column="1" Text="{Binding Statement.RepairPartsCost, StringFormat={}{0:N0}}"
                                    FontSize="15" FontWeight="Medium" HorizontalAlignment="Right"/>
                     </Grid>

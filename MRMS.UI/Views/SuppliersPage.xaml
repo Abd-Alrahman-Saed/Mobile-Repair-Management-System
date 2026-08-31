@@ -51,6 +51,9 @@
                         <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="الهاتف" Binding="{Binding Phone}" Width="130"/>
                         <DataGridTextColumn Header="الرصيد الافتتاحي" Binding="{Binding OpeningBalance, StringFormat={}{0:N0}}" Width="120"/>
+                        <DataGridTextColumn Header="إجمالي المشتريات" Binding="{Binding TotalPurchases, StringFormat={}{0:N0}}" Width="130"/>
+                        <DataGridTextColumn Header="إجمالي المدفوعات" Binding="{Binding TotalPayments, StringFormat={}{0:N0}}" Width="130"/>
+                        <DataGridTextColumn Header="المستحق" Binding="{Binding OutstandingBalance, StringFormat={}{0:N0}}" Width="120"/>
                         <DataGridTextColumn Header="ملاحظات" Binding="{Binding Notes}" Width="150"/>
                         <DataGridTemplateColumn Header="الإجراءات" Width="160">
                             <DataGridTemplateColumn.CellTemplate>

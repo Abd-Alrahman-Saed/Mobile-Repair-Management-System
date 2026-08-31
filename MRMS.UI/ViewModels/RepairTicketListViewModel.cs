@@ -32,8 +32,8 @@ public partial class RepairTicketListViewModel : ObservableObject
             new(TicketStatus.Received, "مستلم", new SolidColorBrush(Color.FromRgb(44, 62, 80))),
             new(TicketStatus.UnderInspection, "قيد الفحص", new SolidColorBrush(Color.FromRgb(52, 73, 94))),
             new(TicketStatus.WaitingForParts, "بانتظار القطع", new SolidColorBrush(Color.FromRgb(142, 68, 173))),
-            new(TicketStatus.InRepair, "قيد الإصلاح", new SolidColorBrush(Color.FromRgb(41, 128, 185))),
-            new(TicketStatus.Repaired, "تم الإصلاح", new SolidColorBrush(Color.FromRgb(39, 174, 96))),
+            new(TicketStatus.InRepair, "قيد الصيانة", new SolidColorBrush(Color.FromRgb(41, 128, 185))),
+            new(TicketStatus.Repaired, "تمت الصيانة", new SolidColorBrush(Color.FromRgb(39, 174, 96))),
             new(TicketStatus.Delivered, "تم التسليم", new SolidColorBrush(Color.FromRgb(127, 140, 141))),
             new(TicketStatus.Cancelled, "ملغي", new SolidColorBrush(Color.FromRgb(192, 57, 43))),
         ];

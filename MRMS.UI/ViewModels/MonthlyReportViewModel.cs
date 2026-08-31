@@ -132,7 +132,7 @@ public partial class MonthlyReportViewModel : ObservableObject
             new StackedColumnSeries<double>
             {
                 Values = Report.Rows.Select(r => (double)r.RepairRevenue).ToArray(),
-                Name = "إصلاح",
+                Name = "صيانة",
                 Fill = new SolidColorPaint(SuccessColor),
                 Stroke = null
             }

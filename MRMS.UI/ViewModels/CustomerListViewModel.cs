@@ -59,7 +59,7 @@ public partial class CustomerListViewModel : ObservableObject
         if (hasDevices)
         {
             System.Windows.MessageBox.Show(
-                "لا يمكن حذف العميل لأنه يمتلك أجهزة أو تذاكر إصلاح",
+                "لا يمكن حذف العميل لأنه يمتلك أجهزة أو تذاكر صيانة",
                 "خطأ", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }

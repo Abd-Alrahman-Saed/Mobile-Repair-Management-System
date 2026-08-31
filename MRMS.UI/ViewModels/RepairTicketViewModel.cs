@@ -34,6 +34,14 @@ public partial class RepairTicketViewModel : ObservableObject
     [ObservableProperty]
     private decimal _cost;
 
+    /// <summary>
+    /// Cost is the single final amount charged to the customer (parts + labor combined).
+    /// Expected profit = that amount minus the cost of parts actually consumed on this ticket.
+    /// </summary>
+    public decimal ExpectedProfit => Cost - PartsTotalCost;
+
+    partial void OnCostChanged(decimal value) => OnPropertyChanged(nameof(ExpectedProfit));
+
     [ObservableProperty]
     private TicketStatus _selectedStatus = TicketStatus.Received;
 
@@ -55,6 +63,9 @@ public partial class RepairTicketViewModel : ObservableObject
                 Parts = new ObservableCollection<RepairTicketPartDto>(value.Parts);
             else
                 Parts = [];
+
+            OnPropertyChanged(nameof(PartsTotalCost));
+            OnPropertyChanged(nameof(ExpectedProfit));
         }
     }
 
@@ -133,6 +144,12 @@ public partial class RepairTicketViewModel : ObservableObject
             PartUnitCost = item.CostPrice;
     }
 
+    public void AddAndSelectNewPart(ItemDto item)
+    {
+        AvailableItems.Add(item);
+        SelectedPartItemId = item.Id;
+    }
+
     [RelayCommand]
     private async Task LoadItemsAsync()
     {
@@ -161,6 +178,7 @@ public partial class RepairTicketViewModel : ObservableObject
             PartUnitCost = 0;
             ErrorMessage = "";
             OnPropertyChanged(nameof(PartsTotalCost));
+            OnPropertyChanged(nameof(ExpectedProfit));
 
             var updated = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
             if (updated is not null)
@@ -193,6 +211,7 @@ public partial class RepairTicketViewModel : ObservableObject
             await _repairTicketService.RemovePartAsync(part.Id);
             Parts.Remove(part);
             OnPropertyChanged(nameof(PartsTotalCost));
+            OnPropertyChanged(nameof(ExpectedProfit));
 
             var updated = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
             if (updated is not null)
@@ -251,8 +270,8 @@ public partial class RepairTicketViewModel : ObservableObject
                     TicketStatus.Received => "مستلم",
                     TicketStatus.UnderInspection => "تحت الفحص",
                     TicketStatus.WaitingForParts => "بانتظار القطع",
-                    TicketStatus.InRepair => "قيد الإصلاح",
-                    TicketStatus.Repaired => "تم الإصلاح",
+                    TicketStatus.InRepair => "قيد الصيانة",
+                    TicketStatus.Repaired => "تمت الصيانة",
                     TicketStatus.Delivered => "تم التسليم",
                     TicketStatus.Cancelled => "ملغي",
                     _ => SelectedStatus.ToString()
@@ -289,7 +308,7 @@ public partial class RepairTicketViewModel : ObservableObject
                         new UpdateRepairTicketStatusDto(SelectedTicket.Id, TicketStatus.Repaired));
                 }
                 SelectedTicket = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
-                _notificationService.Show("تم حفظ بيانات الإصلاح بنجاح", NotificationType.Success);
+                _notificationService.Show("تم حفظ بيانات الصيانة بنجاح", NotificationType.Success);
             }
             else
                 ErrorMessage = "لم يتم العثور على التذكرة";

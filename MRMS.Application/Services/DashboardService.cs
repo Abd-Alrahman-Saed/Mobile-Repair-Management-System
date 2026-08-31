@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Entities;
 using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
@@ -103,6 +104,9 @@ public class DashboardService : IDashboardService
         var allExpenses = await _uow.Expenses.GetAllAsync();
         var allPayments = await _uow.SupplierPayments.GetAllAsync();
 
+        // ticket.Cost is the full amount the customer pays (parts + labor). Repair parts cost is not a
+        // separate cash inflow - it's a non-cash COGS reallocation (the parts were already paid for
+        // via their Purchase). Adding it here would double-count cash that was never actually received twice.
         var inflows = allSales.Sum(s => s.TotalPrice)
                     + allTickets.Sum(t => t.Cost);
 

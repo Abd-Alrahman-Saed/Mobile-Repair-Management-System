@@ -83,7 +83,9 @@ public class RepairTicketService : IRepairTicketService
 
         if (dto.NewStatus == TicketStatus.Delivered)
         {
-            await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, ticket.Id);
+            var parts = await GetPartsAsync(dto.TicketId);
+            var partsCost = parts.Sum(p => p.TotalCost);
+            await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, partsCost, ticket.Id);
             await _uow.CompleteAsync();
         }
 

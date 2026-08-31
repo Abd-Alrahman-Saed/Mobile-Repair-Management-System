@@ -4,56 +4,284 @@
       Title="الإعدادات" FlowDirection="RightToLeft"
       Style="{StaticResource PageBackground}">
 
-    <Grid Margin="28">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer>
+        <StackPanel Margin="28" MaxWidth="820" HorizontalAlignment="Center">
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,28">
-            <TextBlock Text="الإعدادات" Style="{StaticResource PageTitle}"/>
-            <TextBlock Text="إدارة الإعدادات العامة للنظام" Style="{StaticResource PageSubtitle}"/>
-        </StackPanel>
-
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="24" Width="550" HorizontalAlignment="Center">
-            <StackPanel>
-                <StackPanel Margin="0,0,0,24">
-                    <TextBlock Text="طرق الدفع" Style="{StaticResource FormLabel}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Text="أدخل طرق الدفع مفصولة بفواصل" FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding PaymentMethods, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource FormTextBox}"/>
-                </StackPanel>
-
-                <StackPanel Margin="0,0,0,24">
-                    <TextBlock Text="بنود المصروفات" Style="{StaticResource FormLabel}"
-                               Margin="0,0,0,8"/>
-                    <TextBlock Text="أدخل بنود المصروفات مفصولة بفواصل" FontSize="12"
-                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6"/>
-                    <TextBox Text="{Binding ExpenseCategories, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource FormTextBox}" AcceptsReturn="True" TextWrapping="Wrap"/>
-                </StackPanel>
-
-                <Border Background="{StaticResource DangerLightBrush}"
-                        CornerRadius="8" Padding="12,10"
-                        Margin="0,0,0,4"
-                        Visibility="{Binding ErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
-                    <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="{StaticResource DangerBrush}" FontSize="13"
-                               FontWeight="Medium"/>
-                </Border>
-
-                <Button Content="حفظ الإعدادات" Style="{StaticResource PrimaryButton}"
-                        Command="{Binding SaveCommand}"
-                        HorizontalAlignment="Left" Margin="0,16,0,0"/>
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="الإعدادات" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="إدارة إعدادات النظام والحساب" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
-        </Border>
 
-        <ProgressBar IsIndeterminate="True"
-                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
-                     Height="3" VerticalAlignment="Top"
-                     Style="{StaticResource ModernProgressBar}"/>
-    </Grid>
+            <!-- ===== Account / Security ===== -->
+            <TextBlock Text="الحساب والأمان" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="تغيير كلمة المرور" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16"/>
+
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="كلمة المرور الحالية" Style="{StaticResource FormLabel}"/>
+                        <PasswordBox x:Name="CurrentPasswordBox" Style="{StaticResource FormTextBox}" Margin="0,6,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="كلمة المرور الجديدة" Style="{StaticResource FormLabel}"/>
+                        <PasswordBox x:Name="NewPasswordBox" Style="{StaticResource FormTextBox}" Margin="0,6,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="تأكيد كلمة المرور الجديدة" Style="{StaticResource FormLabel}"/>
+                        <PasswordBox x:Name="ConfirmPasswordBox" Style="{StaticResource FormTextBox}" Margin="0,6,0,0"/>
+                    </StackPanel>
+
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10"
+                            Margin="0,0,0,12"
+                            Visibility="{Binding ChangePasswordErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                        <TextBlock Text="{Binding ChangePasswordErrorMessage}"
+                                   Foreground="{StaticResource DangerBrush}" FontSize="13"
+                                   FontWeight="Medium" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Button Content="تغيير كلمة المرور" Style="{StaticResource PrimaryButton}"
+                            Click="ChangePassword_Click"
+                            HorizontalAlignment="Left"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== General Settings ===== -->
+            <TextBlock Text="الإعدادات العامة" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <StackPanel Margin="0,0,0,24">
+                        <TextBlock Text="طرق الدفع" Style="{StaticResource FormLabel}"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="NewPaymentMethodBox" Grid.Column="0"
+                                     Text="{Binding NewPaymentMethod, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource FormTextBox}" KeyDown="NewPaymentMethod_KeyDown"/>
+                            <Button Grid.Column="1" Content="+ إضافة" Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding AddPaymentMethodCommand}" Margin="8,0,0,0"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding PaymentMethodsList}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="14"
+                                            Padding="10,5" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" FontSize="13"
+                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <Button Content="×" Width="18" Height="18" Padding="0"
+                                                    Background="Transparent" BorderThickness="0"
+                                                    Foreground="{StaticResource PrimaryBrush}" FontWeight="Bold"
+                                                    Cursor="Hand"
+                                                    Command="{Binding DataContext.RemovePaymentMethodCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,4">
+                        <TextBlock Text="بنود المصروفات" Style="{StaticResource FormLabel}"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="NewExpenseCategoryBox" Grid.Column="0"
+                                     Text="{Binding NewExpenseCategory, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource FormTextBox}" KeyDown="NewExpenseCategory_KeyDown"/>
+                            <Button Grid.Column="1" Content="+ إضافة" Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding AddExpenseCategoryCommand}" Margin="8,0,0,0"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding ExpenseCategoriesList}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource WarningLightBrush}" CornerRadius="14"
+                                            Padding="10,5" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" FontSize="13"
+                                                       Foreground="{StaticResource WarningBrush}"
+                                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <Button Content="×" Width="18" Height="18" Padding="0"
+                                                    Background="Transparent" BorderThickness="0"
+                                                    Foreground="{StaticResource WarningBrush}" FontWeight="Bold"
+                                                    Cursor="Hand"
+                                                    Command="{Binding DataContext.RemoveExpenseCategoryCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10"
+                            Margin="0,16,0,4"
+                            Visibility="{Binding ErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="{StaticResource DangerBrush}" FontSize="13"
+                                   FontWeight="Medium"/>
+                    </Border>
+
+                    <Button Content="حفظ الإعدادات العامة" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveCommand}"
+                            HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Backup & Restore ===== -->
+            <TextBlock Text="النسخ الاحتياطي والاسترجاع" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="مجلد النسخ الاحتياطية" Style="{StaticResource FormLabel}" Margin="0,0,0,8"/>
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding EffectiveBackupFolder, Mode=OneWay}"
+                                 IsReadOnly="True" Style="{StaticResource FormTextBox}"/>
+                        <Button Grid.Column="1" Content="اختيار مجلد..." Style="{StaticResource SecondaryButton}"
+                                Click="ChooseBackupFolder_Click" Margin="8,0,0,0"/>
+                    </Grid>
+                    <TextBlock Text="لو المجلد المحدد بقى غير متاح وقت أخذ النسخة (فلاشة اتشالت مثلاً)، هيستخدم النظام مجلد افتراضي تلقائيًا مع تنبيهك بذلك"
+                               FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,0,0,20" TextWrapping="Wrap"/>
+
+                    <TextBlock Text="عدد النسخ المحتفظ بها" Style="{StaticResource FormLabel}" Margin="0,0,0,8"/>
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding RetentionCount, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}"/>
+                        <Button Grid.Column="1" Content="حفظ" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding SaveRetentionCommand}" Margin="8,0,0,0"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                                <Run Text="آخر نسخة احتياطية:"/>
+                                <Run Text="{Binding LastBackupDateText}" FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                            </TextBlock>
+                            <TextBlock Text="يتم أخذ نسخة احتياطية تلقائية يوميًا الساعة 12:00 ظهرًا طالما البرنامج مفتوح أو بمجرد فتحه لو فات الميعاد"
+                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="نسخ احتياطي الآن" Style="{StaticResource PrimaryButton}"
+                                Command="{Binding BackupNowCommand}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,12"
+                                 Visibility="{Binding IsBackingUp, Converter={StaticResource BoolToVis}}"
+                                 Style="{StaticResource ModernProgressBar}"/>
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10" Margin="0,0,0,12"
+                            Visibility="{Binding BackupErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                        <TextBlock Text="{Binding BackupErrorMessage}"
+                                   Foreground="{StaticResource DangerBrush}" FontSize="13"
+                                   FontWeight="Medium" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Rectangle Style="{StaticResource Divider}" Margin="0,4,0,20"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="النسخ الاحتياطية المتاحة" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Content="استعراض ملف آخر للاسترجاع..." Style="{StaticResource SecondaryButton}"
+                                Click="BrowseRestoreFile_Click"/>
+                    </Grid>
+
+                    <DataGrid ItemsSource="{Binding Backups}" Style="{StaticResource ModernDataGrid}"
+                              AutoGenerateColumns="False" MaxHeight="220" Margin="0,0,0,12">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="اسم الملف" Binding="{Binding FileName}" Width="*"/>
+                            <DataGridTextColumn Header="التاريخ" Binding="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="150"/>
+                            <DataGridTextColumn Header="الحجم" Binding="{Binding SizeBytes, Converter={StaticResource FileSize}}" Width="100"/>
+                            <DataGridTemplateColumn Header="الإجراءات" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="استرجاع" Style="{StaticResource DangerActionButton}"
+                                                Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,12"
+                                 Visibility="{Binding IsRestoring, Converter={StaticResource BoolToVis}}"
+                                 Style="{StaticResource ModernProgressBar}"/>
+                    <Border Background="{StaticResource DangerLightBrush}"
+                            CornerRadius="8" Padding="12,10" Margin="0,0,0,20"
+                            Visibility="{Binding RestoreErrorMessage, Converter={StaticResource InverseBoolToVis}, FallbackValue=Collapsed}">
+                        <TextBlock Text="{Binding RestoreErrorMessage}"
+                                   Foreground="{StaticResource DangerBrush}" FontSize="13"
+                                   FontWeight="Medium" TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Rectangle Style="{StaticResource Divider}" Margin="0,4,0,20"/>
+
+                    <TextBlock Text="سجل عمليات النسخ والاسترجاع" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+                    <DataGrid ItemsSource="{Binding BackupHistory}" Style="{StaticResource ModernDataGrid}"
+                              AutoGenerateColumns="False" MaxHeight="220">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="الوقت" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="140"/>
+                            <DataGridTextColumn Header="العملية" Binding="{Binding Action}" Width="160"/>
+                            <DataGridTextColumn Header="النتيجة" Binding="{Binding Success, Converter={StaticResource BoolToResultText}}" Width="70"/>
+                            <DataGridTextColumn Header="الحجم" Binding="{Binding SizeBytes, Converter={StaticResource FileSize}}" Width="90"/>
+                            <DataGridTextColumn Header="التفاصيل" Binding="{Binding Message}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!--
+                لإضافة قسم إعدادات جديد مستقبلاً: أضف TextBlock بـ SectionTitle كعنوان،
+                وBorder بـ CardBorder جديد تحته، بنفس نمط الأقسام أعلاه.
+            -->
+
+            <ProgressBar IsIndeterminate="True"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                         Height="3"
+                         Style="{StaticResource ModernProgressBar}"/>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

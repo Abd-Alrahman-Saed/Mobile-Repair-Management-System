@@ -15,6 +15,7 @@ public partial class LoginWindow : Window
         DataContext = vm;
         _vm.LoginSucceeded += OnLoginSucceeded;
         _vm.LoginFailed += OnLoginFailed;
+        Loaded += (_, _) => PasswordBox.Focus();
     }
 
     private async void PasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

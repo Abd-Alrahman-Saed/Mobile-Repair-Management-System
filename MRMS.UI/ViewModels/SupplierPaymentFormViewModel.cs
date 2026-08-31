@@ -11,8 +11,10 @@ public partial class SupplierPaymentFormViewModel : ObservableObject
 {
     private readonly ISupplierPaymentService _paymentService;
     private readonly ISupplierService _supplierService;
+    private readonly IReportService _reportService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
+    private Dictionary<int, PayableItemDto> _payablesBySupplier = [];
 
     [ObservableProperty]
     private DateTime _date = DateTime.Today;
@@ -22,6 +24,17 @@ public partial class SupplierPaymentFormViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<SupplierDto> _suppliers = [];
+
+    [ObservableProperty]
+    private decimal _outstandingBalance;
+
+    partial void OnSelectedSupplierIdChanged(int value)
+    {
+        if (value > 0 && _payablesBySupplier.TryGetValue(value, out var payable))
+            OutstandingBalance = payable.OutstandingBalance;
+        else
+            OutstandingBalance = 0;
+    }
 
     [ObservableProperty]
     private decimal _amount;
@@ -41,11 +54,13 @@ public partial class SupplierPaymentFormViewModel : ObservableObject
     public SupplierPaymentFormViewModel(
         ISupplierPaymentService paymentService,
         ISupplierService supplierService,
+        IReportService reportService,
         AppNavigationService navigationService,
         NotificationService notificationService)
     {
         _paymentService = paymentService;
         _supplierService = supplierService;
+        _reportService = reportService;
         _navigationService = navigationService;
         _notificationService = notificationService;
     }
@@ -55,6 +70,8 @@ public partial class SupplierPaymentFormViewModel : ObservableObject
     {
         IsLoading = true;
         var suppliers = await _supplierService.GetAllAsync();
+        var payables = await _reportService.GetPayablesAsync();
+        _payablesBySupplier = payables.ToDictionary(p => p.SupplierId);
         Suppliers = new ObservableCollection<SupplierDto>(suppliers);
         IsLoading = false;
     }

@@ -274,7 +274,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
                 new CreateRepairTicketDto(FoundDevice.Id, ProblemDescription, ReceptionNotes));
 
             SuccessMessage = $"تم إنشاء التذكرة بنجاح: {ticket.TicketNumber}";
-            _notificationService.Show($"تم إنشاء تذكرة الإصلاح بنجاح: {ticket.TicketNumber}", NotificationType.Success);
+            _notificationService.Show($"تم إنشاء تذكرة الصيانة بنجاح: {ticket.TicketNumber}", NotificationType.Success);
             ProblemDescription = "";
             ReceptionNotes = "";
         }

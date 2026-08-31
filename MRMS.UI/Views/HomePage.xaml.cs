@@ -20,6 +20,8 @@ public partial class HomePage : Page
         var notification = new NotificationControl(notificationService);
         NotificationLayer.Children.Add(notification);
 
+        App.ServiceProvider!.GetRequiredService<BackupSchedulerService>().Start();
+
         Loaded += (_, _) => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DashboardPage>());
     }
 
@@ -71,20 +73,11 @@ public partial class HomePage : Page
     private void Cashbook_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<CashbookPage>());
 
-    private void Payables_Click(object sender, System.Windows.RoutedEventArgs e)
-        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<PayablesPage>());
-
     private void IncomeStatement_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<IncomeStatementPage>());
 
     private void MonthlyReport_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<MonthlyReportPage>());
-
-    private void JournalEntries_Click(object sender, System.Windows.RoutedEventArgs e)
-        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<JournalEntriesPage>());
-
-    private void TrialBalance_Click(object sender, System.Windows.RoutedEventArgs e)
-        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<TrialBalancePage>());
 
     private void Items_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<ItemsPage>());

@@ -1,0 +1,81 @@
+<Window x:Class="MRMS.UI.Views.QuickAddItemWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إضافة صنف جديد" Height="620" Width="440"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FlowDirection="RightToLeft"
+        Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer>
+        <StackPanel Margin="24">
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="إضافة صنف جديد" Style="{StaticResource PageTitle}"/>
+                <TextBlock Text="يُضاف الصنف مباشرة ويظهر جاهزاً في الفاتورة" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="كود الصنف (يمكن المسح مباشرة بجهاز QR / Barcode)" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="CodeBox" Style="{StaticResource FormTextBox}" KeyDown="CodeBox_KeyDown"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="اسم الصنف" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="NameBox" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="النوع" Style="{StaticResource FormLabel}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <RadioButton x:Name="AccessoryRadio" Content="إكسسوار" GroupName="ItemType"
+                                 IsChecked="True" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                    <RadioButton x:Name="SparePartRadio" Content="قطعة غيار" GroupName="ItemType"
+                                 VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="وحدة القياس" Style="{StaticResource FormLabel}"/>
+                <ComboBox x:Name="UnitBox" Style="{StaticResource FormTextBox}">
+                    <ComboBoxItem Content="قطعة" IsSelected="True"/>
+                    <ComboBoxItem Content="زوج"/>
+                    <ComboBoxItem Content="كرتونة"/>
+                    <ComboBoxItem Content="كيلو جرام"/>
+                    <ComboBoxItem Content="متر"/>
+                    <ComboBoxItem Content="لتر"/>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="تكلفة الشراء" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="CostPriceBox" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="سعر البيع" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="SellingPriceBox" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="حد إعادة الطلب" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="ReorderLevelBox" Text="0" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <Border x:Name="ErrorBorder"
+                    Background="{StaticResource DangerLightBrush}"
+                    CornerRadius="8" Padding="12,10"
+                    Margin="0,0,0,10" Visibility="Collapsed">
+                <TextBlock x:Name="ErrorText"
+                           Foreground="{StaticResource DangerBrush}" FontSize="13"
+                           FontWeight="Medium" TextWrapping="Wrap"/>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4,0,0">
+                <Button x:Name="SaveButton" Content="إضافة" Style="{StaticResource PrimaryButton}"
+                        Click="Save_Click" Margin="0,0,12,0"/>
+                <Button Content="إلغاء" Style="{StaticResource SecondaryButton}"
+                        Click="Cancel_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

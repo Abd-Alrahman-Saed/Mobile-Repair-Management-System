@@ -22,7 +22,7 @@ public class SaleService : ISaleService
         var sales = await _unitOfWork.Sales
             .Query()
             .Include(s => s.Item)
-            .OrderByDescending(s => s.Date)
+            .OrderByDescending(s => s.Date).ThenByDescending(s => s.CreatedAt)
             .ToListAsync();
 
         return sales.Select(MapToDto);

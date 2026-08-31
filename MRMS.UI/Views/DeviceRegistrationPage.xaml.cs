@@ -23,6 +23,20 @@ public partial class DeviceRegistrationPage : Page
             if (_navigationService.CanGoBack)
                 _navigationService.GoBack();
         };
+
+        // Keep the IMEI field scan-ready: focused on load and again whenever the
+        // wizard returns to the "search IMEI" step, so a barcode/QR scanner
+        // (which just types text + Enter into whatever has focus) works without extra clicks.
+        _vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(DeviceRegistrationViewModel.CurrentStep)
+                && _vm.CurrentStep == DeviceRegistrationStep.SearchImei)
+            {
+                Dispatcher.BeginInvoke(() => ImeiBox.Focus());
+            }
+        };
+
+        Loaded += (_, _) => ImeiBox.Focus();
     }
 
     private void Imei_KeyDown(object sender, KeyEventArgs e)

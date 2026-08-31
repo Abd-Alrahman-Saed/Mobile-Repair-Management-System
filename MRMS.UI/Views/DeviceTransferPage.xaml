@@ -18,8 +18,9 @@
         <StackPanel Grid.Row="1" Margin="0,0,0,10">
             <TextBlock Text="رقم IMEI" Margin="0,0,0,5"/>
             <StackPanel Orientation="Horizontal">
-                <TextBox Text="{Binding Imei, UpdateSourceTrigger=PropertyChanged}"
-                         Height="30" Width="250" FontSize="14"/>
+                <TextBox x:Name="ImeiBox" Text="{Binding Imei, UpdateSourceTrigger=PropertyChanged}"
+                         Height="30" Width="250" FontSize="14"
+                         KeyDown="Imei_KeyDown"/>
                 <Button Content="بحث" Command="{Binding FindDeviceCommand}"
                         Margin="10,0,0,0" Padding="15,5"
                         Background="#0078D7" Foreground="White"/>

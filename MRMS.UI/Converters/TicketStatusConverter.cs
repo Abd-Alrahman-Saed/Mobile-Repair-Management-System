@@ -15,8 +15,8 @@ public class TicketStatusConverter : IValueConverter
                 TicketStatus.Received => "مستلم",
                 TicketStatus.UnderInspection => "قيد الفحص",
                 TicketStatus.WaitingForParts => "بانتظار القطع",
-                TicketStatus.InRepair => "قيد الإصلاح",
-                TicketStatus.Repaired => "تم الإصلاح",
+                TicketStatus.InRepair => "قيد الصيانة",
+                TicketStatus.Repaired => "تمت الصيانة",
                 TicketStatus.Delivered => "تم التسليم",
                 TicketStatus.Cancelled => "ملغي",
                 _ => status.ToString()

@@ -107,6 +107,17 @@ public partial class RepairTicketDetailPage : Page
         _notificationService.Show("تم تعيين الضمان بنجاح", NotificationType.Success);
     }
 
+    private void AddNewPart_Click(object sender, RoutedEventArgs e)
+    {
+        var window = App.ServiceProvider!.GetRequiredService<QuickAddItemWindow>();
+        window.Owner = Window.GetWindow(this);
+
+        if (window.ShowDialog() == true && window.CreatedItem is not null)
+        {
+            _vm.AddAndSelectNewPart(window.CreatedItem);
+        }
+    }
+
     private void PrintInvoice(object sender, System.Windows.RoutedEventArgs e)
     {
         if (_vm.SelectedTicket is null) return;

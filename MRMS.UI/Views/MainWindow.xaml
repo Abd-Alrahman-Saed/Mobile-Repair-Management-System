@@ -1,7 +1,8 @@
 <Window x:Class="MRMS.UI.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="نظام إصلاح الأجهزة المحمولة" Height="700" Width="1100"
+        Title="نظام صيانة الأجهزة المحمولة" Height="700" Width="1100"
+        Icon="/Resources/AppIcon.ico"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         FlowDirection="RightToLeft"
@@ -35,7 +36,7 @@
                                    Foreground="#FFFFFF" VerticalAlignment="Center"/>
                         <TextBlock Text=" | " FontSize="14" Foreground="#64748B"
                                    VerticalAlignment="Center"/>
-                        <TextBlock Text="نظام إصلاح الأجهزة المحمولة" FontSize="12"
+                        <TextBlock Text="نظام صيانة الأجهزة المحمولة" FontSize="12"
                                    Foreground="#94A3B8" VerticalAlignment="Center"/>
                     </StackPanel>
 

@@ -3,6 +3,26 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="الرئيسية" FlowDirection="RightToLeft"
       KeyDown="Page_KeyDown">
+
+    <Page.Resources>
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Padding" Value="14,11"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+        <Style x:Key="NavSectionHeader" TargetType="TextBlock">
+            <Setter Property="Text" Value=""/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#7C93AA"/>
+            <Setter Property="Margin" Value="14,18,14,4"/>
+        </Style>
+    </Page.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="260"/>
@@ -10,167 +30,79 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="#2D3E50">
-            <StackPanel Margin="10">
-                <TextBlock Text="KMG" FontSize="26" FontWeight="Bold"
-                           Foreground="White" HorizontalAlignment="Center"
-                           Margin="0,16,0,36"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <Button Content="لوحة التحكم" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Dashboard_Click"/>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="KMG" FontSize="26" FontWeight="Bold"
+                                   Foreground="White" HorizontalAlignment="Center"
+                                   Margin="0,16,0,20"/>
 
-                <Button Content="العملاء" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Customers_Click"/>
+                        <Button Content="لوحة التحكم" Style="{StaticResource NavButton}"
+                                Click="Dashboard_Click"/>
 
-                <Button Content="تسجيل جهاز" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="RegisterDevice_Click"/>
+                        <!-- ===== العملاء والأجهزة ===== -->
+                        <TextBlock Text="العملاء والأجهزة" Style="{StaticResource NavSectionHeader}"/>
+                        <Button Content="العملاء" Style="{StaticResource NavButton}"
+                                Click="Customers_Click"/>
+                        <Button Content="تسجيل جهاز" Style="{StaticResource NavButton}"
+                                Click="RegisterDevice_Click"/>
+                        <Button Content="تذاكر الصيانة" Style="{StaticResource NavButton}"
+                                Click="RepairTickets_Click"/>
+                        <Button Content="نقل ملكية جهاز" Style="{StaticResource NavButton}"
+                                Click="TransferDevice_Click"/>
 
-                <Button Content="تذاكر الإصلاح" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="RepairTickets_Click"/>
+                        <!-- ===== المخزون ===== -->
+                        <TextBlock Text="المخزون" Style="{StaticResource NavSectionHeader}"/>
+                        <Button Content="الأصناف" Style="{StaticResource NavButton}"
+                                Click="Items_Click"/>
+                        <Button Content="الحركات المخزنية" Style="{StaticResource NavButton}"
+                                Click="StockMovements_Click"/>
+                        <Button Content="كشف الرصيد المخزني" Style="{StaticResource NavButton}"
+                                Click="StockBalance_Click"/>
 
-                <Button Content="نقل ملكية جهاز" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="TransferDevice_Click"/>
+                        <!-- ===== المبيعات والمشتريات ===== -->
+                        <TextBlock Text="المبيعات والمشتريات" Style="{StaticResource NavSectionHeader}"/>
+                        <Button Content="المبيعات" Style="{StaticResource NavButton}"
+                                Click="Sales_Click"/>
+                        <Button Content="المشتريات" Style="{StaticResource NavButton}"
+                                Click="Purchases_Click"/>
+                        <Button Content="الموردون" Style="{StaticResource NavButton}"
+                                Click="Suppliers_Click"/>
+                        <Button Content="دفعات الموردين" Style="{StaticResource NavButton}"
+                                Click="SupplierPayments_Click"/>
+                        <Button Content="المصروفات" Style="{StaticResource NavButton}"
+                                Click="Expenses_Click"/>
 
-                <Button Content="المشتريات" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Purchases_Click"/>
+                        <!-- ===== التقارير المالية ===== -->
+                        <TextBlock Text="التقارير المالية" Style="{StaticResource NavSectionHeader}"/>
+                        <Button Content="كشف حساب النقدية" Style="{StaticResource NavButton}"
+                                Click="Cashbook_Click"/>
+                        <Button Content="قائمة الدخل" Style="{StaticResource NavButton}"
+                                Click="IncomeStatement_Click"/>
+                        <Button Content="التقرير الشهري" Style="{StaticResource NavButton}"
+                                Click="MonthlyReport_Click"/>
 
-                <Button Content="المبيعات" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Sales_Click"/>
+                        <!-- ===== النظام ===== -->
+                        <TextBlock Text="النظام" Style="{StaticResource NavSectionHeader}"/>
+                        <Button Content="بحث" Style="{StaticResource NavButton}"
+                                Click="Search_Click"/>
+                        <Button Content="الإعدادات" Style="{StaticResource NavButton}"
+                                Click="Settings_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
 
-                <Button Content="دفعات الموردين" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="SupplierPayments_Click"/>
-
-                <Button Content="الحركات المخزنية" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="StockMovements_Click"/>
-
-                <Button Content="المصروفات" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Expenses_Click"/>
-
-                <Button Content="كشف الرصيد المخزني" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="StockBalance_Click"/>
-
-                <Button Content="كشف حساب النقدية" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Cashbook_Click"/>
-
-                <Button Content="المستحقات للموردين" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Payables_Click"/>
-
-                <Button Content="قائمة الدخل" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="IncomeStatement_Click"/>
-
-                <Button Content="التقرير الشهري" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="MonthlyReport_Click"/>
-
-                <Button Content="قيود اليومية" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="JournalEntries_Click"/>
-
-                <Button Content="ميزان المراجعة" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="TrialBalance_Click"/>
-
-                <Button Content="الأصناف" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Items_Click"/>
-
-                <Button Content="الموردون" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Suppliers_Click"/>
-
-                <Button Content="الإعدادات" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Settings_Click"/>
-
-                <Button Content="بحث" Padding="14,12"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        Click="Search_Click"/>
-
-                <Button Content="تسجيل خروج" Padding="14,12"
-                        Background="Transparent" Foreground="#E74C3C"
-                        BorderThickness="0" Cursor="Hand"
-                        HorizontalContentAlignment="Right"
-                        FontSize="15"
-                        VerticalAlignment="Bottom"
-                        Margin="0,50,0,0"
-                        Click="Logout_Click"/>
-            </StackPanel>
+                <StackPanel Grid.Row="1" Margin="10,0,10,10">
+                    <Rectangle Height="1" Fill="#3E5266" Margin="4,0,4,8"/>
+                    <Button Content="تسجيل خروج" Style="{StaticResource NavButton}"
+                            Foreground="#E74C3C"
+                            Click="Logout_Click"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <Grid Grid.Column="1">

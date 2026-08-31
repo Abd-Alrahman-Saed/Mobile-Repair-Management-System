@@ -9,6 +9,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -17,19 +18,25 @@
             <TextBlock Text="تسجيل وعرض المصروفات اليومية" Style="{StaticResource PageSubtitle}"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                           FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
-                    <Run Text="إجمالي المصروفات:"/>
-                    <Run Text="{Binding Expenses.Count, Mode=OneWay, FallbackValue=0}" FontWeight="SemiBold"
-                         Foreground="{StaticResource TextPrimaryBrush}"/>
-                </TextBlock>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                        <Run Text="عدد المصروفات:"/>
+                        <Run Text="{Binding Expenses.Count, Mode=OneWay, FallbackValue=0}" FontWeight="SemiBold"
+                             Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="15" Margin="0,4,0,0">
+                        <Run Text="الإجمالي:" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Run Text="{Binding FilteredTotal, Mode=OneWay, StringFormat={}{0:N0}, FallbackValue=0}"
+                             FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                    </TextBlock>
+                </StackPanel>
 
                 <Button Grid.Column="1" Content="+ مصروف جديد"
                         Style="{StaticResource PrimaryButton}"
@@ -37,11 +44,20 @@
             </Grid>
         </Border>
 
-        <TextBox Grid.Row="2" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16">
+            <Button x:Name="AllPeriodButton" Content="الكل" Style="{StaticResource SecondaryButton}"
+                    Padding="14,7" Margin="0,0,8,0" Click="PeriodAll_Click"/>
+            <Button x:Name="ThisMonthButton" Content="هذا الشهر" Style="{StaticResource SecondaryButton}"
+                    Padding="14,7" Margin="0,0,8,0" Click="PeriodThisMonth_Click"/>
+            <Button x:Name="LastMonthButton" Content="الشهر الماضي" Style="{StaticResource SecondaryButton}"
+                    Padding="14,7" Click="PeriodLastMonth_Click"/>
+        </StackPanel>
+
+        <TextBox Grid.Row="3" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource SearchTextBox}"
                  Margin="0,0,0,16"/>
 
-        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+        <Border Grid.Row="4" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
             <Grid>
                 <DataGrid ItemsSource="{Binding Expenses}"
                           Style="{StaticResource ModernDataGrid}"

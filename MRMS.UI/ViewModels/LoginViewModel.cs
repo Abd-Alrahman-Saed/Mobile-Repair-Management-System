@@ -11,9 +11,6 @@ public partial class LoginViewModel : ObservableObject
     private readonly IAuthService _authService;
 
     [ObservableProperty]
-    private string _username = "";
-
-    [ObservableProperty]
     private string _password = "";
 
     [ObservableProperty]
@@ -38,7 +35,7 @@ public partial class LoginViewModel : ObservableObject
 
         try
         {
-            var result = await _authService.LoginAsync(new LoginDto(Username, Password));
+            var result = await _authService.LoginAsync(new LoginDto(Password));
 
             if (result.Success)
                 LoginSucceeded?.Invoke();

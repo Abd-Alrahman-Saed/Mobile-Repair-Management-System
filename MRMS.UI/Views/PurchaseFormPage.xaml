@@ -68,26 +68,57 @@
                 <StackPanel>
                     <TextBlock Text="الأصناف" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
 
-                    <Grid Margin="0,0,0,16">
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="مسح باركود الصنف (QR / Barcode)" Style="{StaticResource FormLabel}"/>
+                        <TextBox x:Name="ScanBox" Text="{Binding ScanCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}" KeyDown="ScanBox_KeyDown"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <ComboBox Grid.Column="0" ItemsSource="{Binding Items}"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="الصنف"
+                                   Style="{StaticResource FormLabel}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="الكمية"
+                                   Style="{StaticResource FormLabel}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="سعر الشراء"
+                                   Style="{StaticResource FormLabel}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+
+                        <ComboBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Items}"
                                   DisplayMemberPath="Name"
                                   SelectedValuePath="Id"
                                   SelectedValue="{Binding SelectedItemId}"
                                   Style="{StaticResource FormTextBox}"/>
-                        <TextBox Grid.Column="1" Text="{Binding SelectedQuantity, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="QuantityBox" Grid.Row="1" Grid.Column="1" Text="{Binding SelectedQuantity, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FormTextBox}" Margin="8,0,0,0"/>
-                        <TextBox Grid.Column="2" Text="{Binding SelectedUnitCost, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding SelectedUnitCost, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FormTextBox}" Margin="8,0,0,0"/>
-                        <Button Grid.Column="3" Content="إضافة" Style="{StaticResource PrimaryButton}"
+                        <Button Grid.Row="1" Grid.Column="3" Content="إضافة" Style="{StaticResource PrimaryButton}"
                                 Command="{Binding AddItemCommand}" Margin="8,0,0,0"/>
+                        <Button Grid.Row="1" Grid.Column="4" Content="+ صنف جديد" Style="{StaticResource SecondaryButton}"
+                                Click="AddNewItem_Click" Margin="8,0,0,0"/>
                     </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <TextBlock VerticalAlignment="Center" FontSize="12"
+                                   Foreground="{StaticResource TextSecondaryBrush}">
+                            <Run Text="الكمية المتوفرة حالياً من الصنف المحدد:"/>
+                            <Run Text="{Binding SelectedItemCurrentStock, Mode=OneWay}" FontWeight="SemiBold"
+                                 Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </TextBlock>
+                        <Button Content="تعديل أسعار الصنف" Style="{StaticResource ActionButton}"
+                                Click="EditPrices_Click" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
 
                     <DataGrid ItemsSource="{Binding PurchaseItems}"
                               Style="{StaticResource ModernDataGrid}"

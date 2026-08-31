@@ -100,7 +100,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="الشهر" Binding="{Binding MonthName}" Width="70"/>
                         <DataGridTextColumn Header="مبيعات" Binding="{Binding SalesRevenue, StringFormat={}{0:N0}}" Width="100"/>
-                        <DataGridTextColumn Header="إصلاح" Binding="{Binding RepairRevenue, StringFormat={}{0:N0}}" Width="90"/>
+                        <DataGridTextColumn Header="صيانة" Binding="{Binding RepairRevenue, StringFormat={}{0:N0}}" Width="90"/>
                         <DataGridTextColumn Header="إيرادات" Binding="{Binding TotalRevenue, StringFormat={}{0:N0}}" Width="100"/>
                         <DataGridTextColumn Header="تكلفة م.مباعة" Binding="{Binding CostOfGoodsSold, StringFormat={}{0:N0}}" Width="100"/>
                         <DataGridTextColumn Header="تكلفة قطع" Binding="{Binding PartsCost, StringFormat={}{0:N0}}" Width="90"/>
@@ -124,6 +124,7 @@
                                    Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
                         <lvc:CartesianChart Series="{Binding NetProfitSeries}"
                                             XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"
+                                            FlowDirection="LeftToRight"
                                             Height="280"/>
                     </StackPanel>
                 </Border>
@@ -134,29 +135,22 @@
                                    Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
                         <lvc:CartesianChart Series="{Binding IncomeVsExpensesSeries}"
                                             XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"
+                                            FlowDirection="LeftToRight"
                                             Height="280"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardBorder}" Width="540" Height="360" Margin="0,0,14,14"
                         Effect="{StaticResource CardShadow}" Padding="16">
                     <StackPanel>
-                        <TextBlock Text="توزيع الإيرادات (مبيعات vs إصلاح)" FontSize="16" FontWeight="SemiBold"
+                        <TextBlock Text="توزيع الإيرادات (مبيعات vs صيانة)" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
                         <lvc:CartesianChart Series="{Binding RevenueBreakdownSeries}"
                                             XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"
+                                            FlowDirection="LeftToRight"
                                             Height="280"/>
                     </StackPanel>
                 </Border>
-                <Border Style="{StaticResource CardBorder}" Width="540" Height="360" Margin="0,0,14,14"
-                        Effect="{StaticResource CardShadow}" Padding="16">
-                    <StackPanel>
-                        <TextBlock Text="أفضل 10 أصناف مبيعاً" FontSize="16" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
-                        <lvc:CartesianChart Series="{Binding TopItemsSeries}"
-                                            XAxes="{Binding TopItemsXAxes}" YAxes="{Binding TopItemsYAxes}"
-                                            Height="280"/>
-                    </StackPanel>
-                </Border>
+              
             </WrapPanel>
 
             <ProgressBar IsIndeterminate="True"

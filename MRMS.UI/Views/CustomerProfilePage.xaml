@@ -62,7 +62,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="{Binding SelectedDeviceTickets.Count}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource InfoBrush}"/>
-                        <TextBlock Text="تذاكر الإصلاح" Style="{StaticResource StatLabel}"/>
+                        <TextBlock Text="تذاكر الصيانة" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
                 </Border>
             </WrapPanel>
@@ -87,8 +87,44 @@
                 </Grid>
             </Border>
 
+            <!-- ===== New Repair Ticket Section ===== -->
+            <TextBlock Text="إنشاء تذكرة صيانة جديدة" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+
+            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,14" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                        <Run Text="لإنشاء تذكرة صيانة جديدة لجهاز موجود، اختر الجهاز من الجدول أعلاه أولاً، الجهاز المختار حالياً:"/>
+                        <Run Text="{Binding SelectedDevice.Brand, FallbackValue='لم يتم اختيار جهاز', TargetNullValue='لم يتم اختيار جهاز'}" FontWeight="SemiBold"/>
+                        <Run Text="{Binding SelectedDevice.Model}" FontWeight="SemiBold"/>
+                    </TextBlock>
+
+                    <StackPanel IsEnabled="{Binding HasSelectedDevice}">
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Text="وصف المشكلة" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding NewTicketProblemDescription, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource FormTextBox}" Height="60" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,14">
+                            <TextBlock Text="ملاحظات الاستقبال" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding NewTicketReceptionNotes, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource FormTextBox}" Height="50" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <Button Content="إنشاء تذكرة صيانة جديدة لهذا الجهاز"
+                                Command="{Binding CreateTicketForSelectedDeviceCommand}"
+                                Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}"
+                               Margin="0,10,0,0" FontSize="13"
+                               Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </Border>
+
             <!-- ===== Repair History Section ===== -->
-            <TextBlock Text="تاريخ الإصلاح" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <TextBlock Text="تاريخ الصيانة" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
 
             <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20"
                     Effect="{StaticResource CardShadow}">
@@ -115,7 +151,7 @@
                                                         <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
                                                             <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
                                                             <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
@@ -136,7 +172,7 @@
                                                             <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
                                                                 <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
                                                                 <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">

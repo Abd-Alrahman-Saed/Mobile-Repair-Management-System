@@ -43,9 +43,9 @@
                            Margin="0,0,0,15"/>
 
                 <StackPanel Margin="0,0,0,10">
-                    <TextBlock Text="رقم IMEI" Margin="0,0,0,5"/>
+                    <TextBlock Text="رقم IMEI (يمكن المسح مباشرة بجهاز QR / Barcode)" Margin="0,0,0,5"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBox Text="{Binding Imei, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="ImeiBox" Text="{Binding Imei, UpdateSourceTrigger=PropertyChanged}"
                                  Height="35" Width="280" FontSize="14" Padding="5"
                                  KeyDown="Imei_KeyDown"/>
                         <Button Content="بحث" Command="{Binding SearchImeiCommand}"
@@ -62,7 +62,7 @@
                 CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="#E8F8F0"
                 Visibility="{Binding ShowExistingDeviceStep, Converter={StaticResource BoolToVis}}">
             <StackPanel>
-                <TextBlock Text="الجهاز مسجل مسبقاً - إنشاء تذكرة إصلاح" FontWeight="Bold" FontSize="16"
+                <TextBlock Text="الجهاز مسجل مسبقاً - إنشاء تذكرة صيانة" FontWeight="Bold" FontSize="16"
                            Foreground="#27AE60" Margin="0,0,0,15"/>
 
                 <Grid Margin="0,0,0,15">
@@ -115,7 +115,7 @@
                              AcceptsReturn="True" TextWrapping="Wrap"/>
                 </StackPanel>
 
-                <Button Content="إنشاء تذكرة الإصلاح"
+                <Button Content="إنشاء تذكرة الصيانة"
                         Command="{Binding CreateTicketForExistingDeviceCommand}"
                         Padding="30,10" Background="#27AE60" Foreground="White"
                         FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>

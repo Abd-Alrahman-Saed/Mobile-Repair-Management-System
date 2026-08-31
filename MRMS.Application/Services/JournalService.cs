@@ -63,20 +63,38 @@ public class JournalService : IJournalService
         });
     }
 
-    public async Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal cost, int ticketId)
+    public async Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal totalCost, decimal partsCost, int ticketId)
     {
+        // totalCost is the full amount charged to the customer (parts + labor already combined) -
+        // it is the revenue for this line; partsCost is posted separately below as COGS, not added here.
         await _uow.JournalEntries.AddAsync(new JournalEntry
         {
             Date = date,
-            Description = $"إصلاح: {ticketNumber} - {cost:N2}",
+            Description = $"صيانة: {ticketNumber} - {totalCost:N2}",
             ReferenceType = "RepairDelivery",
             ReferenceId = ticketId,
             Lines =
             [
-                new() { AccountName = "الصندوق", DebitAmount = cost },
-                new() { AccountName = "إيرادات الإصلاح", CreditAmount = cost }
+                new() { AccountName = "الصندوق", DebitAmount = totalCost },
+                new() { AccountName = "إيرادات الصيانة", CreditAmount = totalCost }
             ]
         });
+
+        if (partsCost > 0)
+        {
+            await _uow.JournalEntries.AddAsync(new JournalEntry
+            {
+                Date = date,
+                Description = $"تكلفة قطع صيانة: {ticketNumber}",
+                ReferenceType = "RepairParts",
+                ReferenceId = ticketId,
+                Lines =
+                [
+                    new() { AccountName = "تكلفة الصيانة", DebitAmount = partsCost },
+                    new() { AccountName = "المخزون", CreditAmount = partsCost }
+                ]
+            });
+        }
     }
 
     public async Task PostSupplierPaymentAsync(DateTime date, string supplierName, decimal amount, int paymentId)

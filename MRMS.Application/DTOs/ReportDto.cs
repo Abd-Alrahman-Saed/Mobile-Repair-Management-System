@@ -15,7 +15,8 @@ public record CashbookEntryDto(
     string Description,
     string Type,
     decimal Amount,
-    decimal RunningBalance);
+    decimal RunningBalance,
+    DateTime CreatedAt);
 
 public record CashbookReportDto(
     decimal OpeningBalance,

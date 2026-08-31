@@ -55,7 +55,30 @@ public partial class PurchaseFormViewModel : ObservableObject
     [ObservableProperty]
     private decimal _selectedUnitCost;
 
+    [ObservableProperty]
+    private int _selectedItemCurrentStock;
+
+    [ObservableProperty]
+    private string _scanCode = "";
+
     public decimal TotalCost => PurchaseItems.Sum(i => i.TotalCost);
+
+    /// <summary>Raised after a barcode scan successfully resolves an item, so the view can move focus to Quantity.</summary>
+    public event Action? ItemScanned;
+
+    partial void OnSelectedItemIdChanged(int value)
+    {
+        var item = Items.FirstOrDefault(i => i.Id == value);
+        if (item is not null)
+        {
+            SelectedUnitCost = item.CostPrice;
+            SelectedItemCurrentStock = item.CurrentStock;
+        }
+        else
+        {
+            SelectedItemCurrentStock = 0;
+        }
+    }
 
     public PurchaseFormViewModel(
         IPurchaseService purchaseService,
@@ -81,6 +104,47 @@ public partial class PurchaseFormViewModel : ObservableObject
         var items = await _itemService.GetAllAsync();
         Items = new ObservableCollection<ItemDto>(items);
         IsLoading = false;
+    }
+
+    public void AddAndSelectNewItem(ItemDto item)
+    {
+        Items.Add(item);
+        SelectedItemId = item.Id;
+    }
+
+    public void ApplyPriceUpdate(int itemId, decimal costPrice, decimal sellingPrice)
+    {
+        var existing = Items.FirstOrDefault(i => i.Id == itemId);
+        if (existing is not null)
+        {
+            existing.CostPrice = costPrice;
+            existing.SellingPrice = sellingPrice;
+        }
+
+        if (SelectedItemId == itemId)
+            SelectedUnitCost = costPrice;
+    }
+
+    [RelayCommand]
+    private async Task ScanItemAsync()
+    {
+        var code = ScanCode.Trim();
+        ScanCode = "";
+        if (string.IsNullOrWhiteSpace(code)) return;
+
+        ErrorMessage = "";
+        var item = await _itemService.GetByCodeAsync(code);
+        if (item is null)
+        {
+            ErrorMessage = $"لم يتم العثور على صنف بالكود: {code}";
+            return;
+        }
+
+        if (Items.All(i => i.Id != item.Id))
+            Items.Add(item);
+
+        SelectedItemId = item.Id;
+        ItemScanned?.Invoke();
     }
 
     [RelayCommand]

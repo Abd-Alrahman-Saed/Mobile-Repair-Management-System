@@ -1,7 +1,7 @@
 <Page x:Class="MRMS.UI.Views.RepairTicketListPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="تذاكر الإصلاح" FlowDirection="RightToLeft"
+      Title="تذاكر الصيانة" FlowDirection="RightToLeft"
       Background="#F0F2F5">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -9,7 +9,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="تذاكر الإصلاح" FontSize="22"
+        <TextBlock Grid.Row="0" Text="تذاكر الصيانة" FontSize="22"
                    FontWeight="Bold" Margin="0,0,0,10" Foreground="#2C3E50"/>
 
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"

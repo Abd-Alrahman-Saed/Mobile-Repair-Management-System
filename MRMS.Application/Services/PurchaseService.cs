@@ -23,7 +23,7 @@ public class PurchaseService : IPurchaseService
             .Query()
             .Include(p => p.Supplier)
             .Include(p => p.PurchaseItems).ThenInclude(pi => pi.Item)
-            .OrderByDescending(p => p.Date)
+            .OrderByDescending(p => p.Date).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
         return purchases.Select(MapToDto);

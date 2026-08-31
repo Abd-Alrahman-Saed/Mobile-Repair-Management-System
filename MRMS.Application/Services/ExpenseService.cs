@@ -21,7 +21,7 @@ public class ExpenseService : IExpenseService
     {
         var expenses = await _unitOfWork.Expenses
             .Query()
-            .OrderByDescending(e => e.Date)
+            .OrderByDescending(e => e.Date).ThenByDescending(e => e.CreatedAt)
             .ToListAsync();
 
         return expenses.Select(MapToDto);

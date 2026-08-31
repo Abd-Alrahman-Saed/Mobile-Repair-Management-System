@@ -93,7 +93,7 @@ public partial class PrintPreviewWindow : Window
 
         // Repair Description
         var problemStack = new StackPanel();
-        problemStack.Children.Add(new TextBlock(new Run("وصف الإصلاح"))
+        problemStack.Children.Add(new TextBlock(new Run("وصف الصيانة"))
         { FontWeight = FontWeights.Bold, FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
         problemStack.Children.Add(new TextBlock(new Run(
             string.IsNullOrEmpty(ticket.RepairDescription) ? ticket.ProblemDescription : ticket.RepairDescription))
@@ -101,13 +101,20 @@ public partial class PrintPreviewWindow : Window
         stack.Children.Add(new Border
         { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Padding = new Thickness(8), Margin = new Thickness(0, 0, 0, 6), Child = problemStack });
 
-        // Cost
+        // Cost — ticket.Cost is the single, final amount charged to the customer (already includes
+        // both spare parts and labor, entered by the technician as one figure). It must not be added
+        // to anything else here, or the customer is charged for parts twice on their own invoice.
         if (ticket.Cost > 0)
         {
             var costStack = new StackPanel();
-            costStack.Children.Add(new TextBlock(new Run("التكلفة"))
-            { FontWeight = FontWeights.Bold, FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
-            AddInfoRow(costStack, "التكلفة الكلية", $"{ticket.Cost:N0} جنيه", true);
+            if (ticket.Parts is { Count: > 0 })
+            {
+                costStack.Children.Add(new TextBlock(new Run("القطع المستخدمة"))
+                { FontWeight = FontWeights.Bold, FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
+                foreach (var part in ticket.Parts)
+                    AddInfoRow(costStack, part.ItemName, $"x{part.Quantity}");
+            }
+            AddInfoRow(costStack, "المبلغ الإجمالي المستحق", $"{ticket.Cost:N0} جنيه", true);
             stack.Children.Add(new Border
             { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Padding = new Thickness(8), Margin = new Thickness(0, 0, 0, 6), Child = costStack });
         }
@@ -119,8 +126,8 @@ public partial class PrintPreviewWindow : Window
             TicketStatus.Received => "مستلم",
             TicketStatus.UnderInspection => "تحت الفحص",
             TicketStatus.WaitingForParts => "بانتظار القطع",
-            TicketStatus.InRepair => "قيد الإصلاح",
-            TicketStatus.Repaired => "تم الإصلاح",
+            TicketStatus.InRepair => "قيد الصيانة",
+            TicketStatus.Repaired => "تمت الصيانة",
             TicketStatus.Delivered => "تم التسليم",
             TicketStatus.Cancelled => "ملغي",
             _ => ticket.Status.ToString()

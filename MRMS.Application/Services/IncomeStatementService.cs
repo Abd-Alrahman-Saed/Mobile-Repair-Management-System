@@ -41,11 +41,13 @@ public class IncomeStatementService : IIncomeStatementService
             .ToListAsync();
 
         var salesRevenue = sales.Sum(s => s.TotalPrice);
+        var repairPartsCost = repairParts.Sum(rp => rp.TotalCost);
+        // ticket.Cost is the final amount the customer pays (parts + labor combined, entered by the technician) —
+        // it must NOT have repairPartsCost added on top, or revenue gets inflated by the parts cost.
         var repairRevenue = deliveredTickets.Sum(t => t.Cost);
         var totalRevenue = salesRevenue + repairRevenue;
 
         var cogs = sales.Sum(s => s.Quantity * s.CostPrice);
-        var repairPartsCost = repairParts.Sum(rp => rp.TotalCost);
 
         var grossProfit = totalRevenue - cogs - repairPartsCost;
 

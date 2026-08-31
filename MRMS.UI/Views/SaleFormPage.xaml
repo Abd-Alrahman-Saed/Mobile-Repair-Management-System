@@ -14,6 +14,12 @@
             <Border Style="{StaticResource CardBorder}" Padding="20" Width="550" HorizontalAlignment="Center" Margin="0,0,0,24">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="مسح باركود الصنف (QR / Barcode)" Style="{StaticResource FormLabel}"/>
+                        <TextBox x:Name="ScanBox" Text="{Binding ScanCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}" KeyDown="ScanBox_KeyDown"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="التاريخ" Style="{StaticResource FormLabel}"/>
                         <DatePicker SelectedDate="{Binding Date, UpdateSourceTrigger=PropertyChanged}"
                                     Style="{StaticResource FormTextBox}"/>
@@ -26,11 +32,17 @@
                                   SelectedValuePath="Id"
                                   SelectedValue="{Binding SelectedItemId, UpdateSourceTrigger=PropertyChanged}"
                                   Style="{StaticResource FormTextBox}"/>
+                        <TextBlock Margin="0,6,0,0" FontSize="12"
+                                   Foreground="{StaticResource TextSecondaryBrush}">
+                            <Run Text="الكمية المتوفرة حالياً:"/>
+                            <Run Text="{Binding SelectedItemCurrentStock, Mode=OneWay}" FontWeight="SemiBold"
+                                 Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </TextBlock>
                     </StackPanel>
 
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="الكمية" Style="{StaticResource FormLabel}"/>
-                        <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="QuantityBox" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FormTextBox}"/>
                     </StackPanel>
 

@@ -45,10 +45,11 @@
                         <DataGridTextColumn Header="المبلغ" Binding="{Binding Amount, StringFormat={}{0:N0}}" Width="100"/>
                         <DataGridTextColumn Header="المرجع" Binding="{Binding Reference}" Width="120"/>
                         <DataGridTextColumn Header="ملاحظات" Binding="{Binding Notes}" Width="150"/>
-                        <DataGridTemplateColumn Header="حذف" Width="60">
+                        <DataGridTemplateColumn Header="الإجراءات" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="حذف" Style="{StaticResource DangerActionButton}"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Command="{Binding DataContext.DeletePaymentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                             CommandParameter="{Binding Id}"/>
                                 </DataTemplate>

@@ -23,7 +23,7 @@ public class StockMovementService : IStockMovementService
         var movements = await _unitOfWork.StockMovements
             .Query()
             .Include(m => m.Item)
-            .OrderByDescending(m => m.Date)
+            .OrderByDescending(m => m.Date).ThenByDescending(m => m.CreatedAt)
             .ToListAsync();
 
         return movements.Select(MapToDto);
@@ -35,7 +35,7 @@ public class StockMovementService : IStockMovementService
             .Query()
             .Include(m => m.Item)
             .Where(m => m.ItemId == itemId)
-            .OrderByDescending(m => m.Date)
+            .OrderByDescending(m => m.Date).ThenByDescending(m => m.CreatedAt)
             .ToListAsync();
 
         return movements.Select(MapToDto);

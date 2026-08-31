@@ -44,8 +44,17 @@ public partial class SaleFormViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    [ObservableProperty]
+    private string _scanCode = "";
+
+    [ObservableProperty]
+    private int _selectedItemCurrentStock;
+
     public decimal TotalPrice => Quantity * UnitPrice;
     public decimal Profit => TotalPrice - (Quantity * CostPrice);
+
+    /// <summary>Raised after a barcode scan successfully resolves an item, so the view can move focus to Quantity.</summary>
+    public event Action? ItemScanned;
 
     public SaleFormViewModel(
         ISaleService saleService,
@@ -66,6 +75,11 @@ public partial class SaleFormViewModel : ObservableObject
         {
             UnitPrice = item.SellingPrice;
             CostPrice = item.CostPrice;
+            SelectedItemCurrentStock = item.CurrentStock;
+        }
+        else
+        {
+            SelectedItemCurrentStock = 0;
         }
     }
 
@@ -81,6 +95,11 @@ public partial class SaleFormViewModel : ObservableObject
         OnPropertyChanged(nameof(Profit));
     }
 
+    partial void OnCostPriceChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(Profit));
+    }
+
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -88,6 +107,28 @@ public partial class SaleFormViewModel : ObservableObject
         var items = await _itemService.GetAllAsync();
         Items = new ObservableCollection<ItemDto>(items);
         IsLoading = false;
+    }
+
+    [RelayCommand]
+    private async Task ScanItemAsync()
+    {
+        var code = ScanCode.Trim();
+        ScanCode = "";
+        if (string.IsNullOrWhiteSpace(code)) return;
+
+        ErrorMessage = "";
+        var item = await _itemService.GetByCodeAsync(code);
+        if (item is null)
+        {
+            ErrorMessage = $"لم يتم العثور على صنف بالكود: {code}";
+            return;
+        }
+
+        if (Items.All(i => i.Id != item.Id))
+            Items.Add(item);
+
+        SelectedItemId = item.Id;
+        ItemScanned?.Invoke();
     }
 
     [RelayCommand]

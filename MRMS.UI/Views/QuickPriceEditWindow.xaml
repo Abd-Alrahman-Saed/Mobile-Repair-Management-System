@@ -1,0 +1,44 @@
+<Window x:Class="MRMS.UI.Views.QuickPriceEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="تعديل أسعار الصنف" Height="320" Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FlowDirection="RightToLeft"
+        Background="{StaticResource BackgroundBrush}">
+
+    <ScrollViewer>
+        <StackPanel Margin="24">
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="تعديل أسعار الصنف" Style="{StaticResource PageTitle}"/>
+                <TextBlock x:Name="ItemInfoText" Style="{StaticResource PageSubtitle}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="تكلفة الشراء" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="CostPriceBox" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+                <TextBlock Text="سعر البيع" Style="{StaticResource FormLabel}"/>
+                <TextBox x:Name="SellingPriceBox" Style="{StaticResource FormTextBox}"/>
+            </StackPanel>
+
+            <Border x:Name="ErrorBorder"
+                    Background="{StaticResource DangerLightBrush}"
+                    CornerRadius="8" Padding="12,10"
+                    Margin="0,0,0,10" Visibility="Collapsed">
+                <TextBlock x:Name="ErrorText"
+                           Foreground="{StaticResource DangerBrush}" FontSize="13"
+                           FontWeight="Medium" TextWrapping="Wrap"/>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4,0,0">
+                <Button x:Name="SaveButton" Content="حفظ" Style="{StaticResource PrimaryButton}"
+                        Click="Save_Click" Margin="0,0,12,0"/>
+                <Button Content="إلغاء" Style="{StaticResource SecondaryButton}"
+                        Click="Cancel_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

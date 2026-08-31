@@ -55,13 +55,19 @@
                         <DataGridTextColumn Header="سعر البيع" Binding="{Binding SellingPrice, StringFormat={}{0:N0}}" Width="110"/>
                         <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock}" Width="80"/>
                         <DataGridTextColumn Header="حد الطلب" Binding="{Binding ReorderLevel}" Width="80"/>
-                        <DataGridTemplateColumn Header="الإجراءات" Width="100">
+                        <DataGridTemplateColumn Header="الإجراءات" Width="160">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="حذف"
-                                            Style="{StaticResource DangerActionButton}"
-                                            Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                            CommandParameter="{Binding Id}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="تعديل"
+                                                Style="{StaticResource ActionButton}"
+                                                Command="{Binding DataContext.EditItemCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                        <Button Content="حذف"
+                                                Style="{StaticResource DangerActionButton}"
+                                                Command="{Binding DataContext.DeleteItemCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

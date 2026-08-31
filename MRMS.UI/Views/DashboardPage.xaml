@@ -9,7 +9,7 @@
             <!-- ===== Header ===== -->
             <StackPanel Margin="0,0,0,28">
                 <TextBlock Text="لوحة التحكم" Style="{StaticResource PageTitle}"/>
-                <TextBlock Text="نظرة عامة على أداء مركز الإصلاح" Style="{StaticResource PageSubtitle}"/>
+                <TextBlock Text="نظرة عامة على أداء مركز الصيانة" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
             <!-- ===== Stats Cards ===== -->
@@ -38,7 +38,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="{Binding Stats.CurrentlyInRepair}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource WarningBrush}"/>
-                        <TextBlock Text="قيد الإصلاح" Style="{StaticResource StatLabel}"/>
+                        <TextBlock Text="قيد الصيانة" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
                 </Border>
                 <!-- Waiting For Parts -->
@@ -56,7 +56,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="{Binding Stats.TotalRepaired}" Style="{StaticResource StatValue}"
                                    Foreground="{StaticResource SuccessBrush}"/>
-                        <TextBlock Text="تم الإصلاح" Style="{StaticResource StatLabel}"/>
+                        <TextBlock Text="تمت الصيانة" Style="{StaticResource StatLabel}"/>
                     </StackPanel>
                 </Border>
                 <!-- Total Delivered -->
@@ -231,13 +231,13 @@
                                                 <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
                                                     <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تمت الصيانة">
                                                             <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
                                                             <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
                                                             <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الفحص">
@@ -258,13 +258,13 @@
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الإصلاح">
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تمت الصيانة">
                                                                 <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
                                                                 <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الإصلاح">
+                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
                                                                 <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الفحص">

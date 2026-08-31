@@ -55,10 +55,11 @@ public class MonthlyReportService : IMonthlyReportService
             var payments = allPayments.Where(sp => sp.Date.Month == m).ToList();
 
             var salesRevenue = sales.Sum(s => s.TotalPrice);
+            var partsCost = parts.Sum(p => p.TotalCost);
+            // ticket.Cost already includes parts + labor (the full amount the customer pays) - don't add partsCost again.
             var repairRevenue = tickets.Sum(t => t.Cost);
             var totalRevenue = salesRevenue + repairRevenue;
             var cogs = sales.Sum(s => s.Quantity * s.CostPrice);
-            var partsCost = parts.Sum(p => p.TotalCost);
             var grossProfit = totalRevenue - cogs - partsCost;
             var expSum = expenses.Sum(e => e.Amount);
             var netProfit = grossProfit - expSum;

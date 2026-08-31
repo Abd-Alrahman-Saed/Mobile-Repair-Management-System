@@ -28,7 +28,7 @@ public class AuthServiceTests
                 users.AsQueryable().Where(predicate).ToList());
 
         var service = new AuthService(mockUow.Object);
-        var result = await service.LoginAsync(new LoginDto("tech", "admin123"));
+        var result = await service.LoginAsync(new LoginDto("admin123"));
 
         result.Success.Should().BeTrue();
     }
@@ -47,7 +47,7 @@ public class AuthServiceTests
                 users.AsQueryable().Where(predicate).ToList());
 
         var service = new AuthService(mockUow.Object);
-        var result = await service.LoginAsync(new LoginDto("tech", "wrongpassword"));
+        var result = await service.LoginAsync(new LoginDto("wrongpassword"));
 
         result.Success.Should().BeFalse();
     }

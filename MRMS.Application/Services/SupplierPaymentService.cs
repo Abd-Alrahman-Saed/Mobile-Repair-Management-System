@@ -22,7 +22,7 @@ public class SupplierPaymentService : ISupplierPaymentService
         var payments = await _unitOfWork.SupplierPayments
             .Query()
             .Include(p => p.Supplier)
-            .OrderByDescending(p => p.Date)
+            .OrderByDescending(p => p.Date).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
         return payments.Select(MapToDto);
@@ -34,7 +34,7 @@ public class SupplierPaymentService : ISupplierPaymentService
             .Query()
             .Include(p => p.Supplier)
             .Where(p => p.SupplierId == supplierId)
-            .OrderByDescending(p => p.Date)
+            .OrderByDescending(p => p.Date).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
         return payments.Select(MapToDto);

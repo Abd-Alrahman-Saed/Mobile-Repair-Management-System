@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MRMS.Application;
 using MRMS.Infrastructure;
+using MRMS.Infrastructure.Configuration;
 using MRMS.Infrastructure.Services;
 using MRMS.UI.Services;
 using MRMS.UI.ViewModels;
@@ -30,8 +31,13 @@ public partial class App : System.Windows.Application
 
         var services = new ServiceCollection();
 
-        services.AddInfrastructure(
-            "Server=ABDO-DESKTOP\\SQLEXPRESS;Database=MRMS;Trusted_Connection=True;TrustServerCertificate=True;Connection Timeout=5;");
+        // Database provider + connection string live in %AppData%\MRMS\connection-config.json, not baked
+        // into the app, so they survive updates and can differ per machine without rebuilding. A machine
+        // that already has this config (e.g. this dev machine, pointed at SQL Server) keeps working as-is;
+        // a brand-new machine with no config yet bootstraps a self-contained local SQLite database with no
+        // external server required. See ConnectionStringProvider for details.
+        var databaseConfig = ConnectionStringProvider.GetDatabaseConfig();
+        services.AddInfrastructure(databaseConfig);
 
         services.AddApplication();
 
@@ -63,11 +69,8 @@ public partial class App : System.Windows.Application
         services.AddTransient<StockMovementFormViewModel>();
         services.AddTransient<StockBalanceViewModel>();
         services.AddTransient<CashbookViewModel>();
-        services.AddTransient<PayablesViewModel>();
         services.AddTransient<IncomeStatementViewModel>();
         services.AddTransient<MonthlyReportViewModel>();
-        services.AddTransient<JournalEntriesViewModel>();
-        services.AddTransient<TrialBalanceViewModel>();
 
         services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
@@ -89,6 +92,8 @@ public partial class App : System.Windows.Application
         services.AddTransient<SettingsPage>();
         services.AddTransient<PurchasesPage>();
         services.AddTransient<PurchaseFormPage>();
+        services.AddTransient<QuickAddItemWindow>();
+        services.AddTransient<QuickPriceEditWindow>();
         services.AddTransient<SalesPage>();
         services.AddTransient<SaleFormPage>();
         services.AddTransient<ExpensesPage>();
@@ -99,14 +104,12 @@ public partial class App : System.Windows.Application
         services.AddTransient<StockMovementFormPage>();
         services.AddTransient<StockBalancePage>();
         services.AddTransient<CashbookPage>();
-        services.AddTransient<PayablesPage>();
         services.AddTransient<IncomeStatementPage>();
         services.AddTransient<MonthlyReportPage>();
-        services.AddTransient<JournalEntriesPage>();
-        services.AddTransient<TrialBalancePage>();
 
         services.AddSingleton<AppNavigationService>();
         services.AddSingleton<NotificationService>();
+        services.AddSingleton<BackupSchedulerService>();
 
         ServiceProvider = services.BuildServiceProvider();
 
@@ -126,8 +129,8 @@ public partial class App : System.Windows.Application
             }
         });
 
-        var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+        var loginWindow = ServiceProvider.GetRequiredService<LoginWindow>();
+        loginWindow.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)

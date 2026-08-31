@@ -15,14 +15,14 @@
             <Border Style="{StaticResource CardBorder}" Margin="0,0,0,24" Width="500" HorizontalAlignment="Center">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="كود الصنف" Style="{StaticResource FormLabel}"/>
-                        <TextBox Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource FormTextBox}"/>
+                        <TextBlock Text="كود الصنف (يمكن المسح مباشرة بجهاز QR / Barcode)" Style="{StaticResource FormLabel}"/>
+                        <TextBox x:Name="CodeBox" Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource FormTextBox}" KeyDown="CodeBox_KeyDown"/>
                     </StackPanel>
 
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="اسم الصنف" Style="{StaticResource FormLabel}"/>
-                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="NameBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource FormTextBox}"/>
                     </StackPanel>
 

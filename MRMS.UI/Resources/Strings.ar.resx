@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="LoginTitle" xml:space="preserve"><value>تسجيل الدخول - نظام إصلاح الأجهزة</value></data>
+  <data name="LoginTitle" xml:space="preserve"><value>تسجيل الدخول - نظام صيانة الأجهزة</value></data>
   <data name="Username" xml:space="preserve"><value>اسم المستخدم</value></data>
   <data name="Password" xml:space="preserve"><value>كلمة المرور</value></data>
   <data name="LoginButton" xml:space="preserve"><value>دخول</value></data>
   <data name="Dashboard" xml:space="preserve"><value>لوحة التحكم</value></data>
   <data name="Customers" xml:space="preserve"><value>العملاء</value></data>
   <data name="Devices" xml:space="preserve"><value>الأجهزة</value></data>
-  <data name="RepairTickets" xml:space="preserve"><value>تذاكر الإصلاح</value></data>
+  <data name="RepairTickets" xml:space="preserve"><value>تذاكر الصيانة</value></data>
   <data name="Search" xml:space="preserve"><value>بحث</value></data>
   <data name="Add" xml:space="preserve"><value>إضافة</value></data>
   <data name="Edit" xml:space="preserve"><value>تعديل</value></data>
@@ -25,17 +25,17 @@
   <data name="TicketNumber" xml:space="preserve"><value>رقم التذكرة</value></data>
   <data name="TodayReceived" xml:space="preserve"><value>مستلم اليوم</value></data>
   <data name="TodayDelivered" xml:space="preserve"><value>مسلم اليوم</value></data>
-  <data name="InRepair" xml:space="preserve"><value>قيد الإصلاح</value></data>
+  <data name="InRepair" xml:space="preserve"><value>قيد الصيانة</value></data>
   <data name="TotalCustomers" xml:space="preserve"><value>إجمالي العملاء</value></data>
   <data name="TotalDevices" xml:space="preserve"><value>إجمالي الأجهزة</value></data>
   <data name="TotalTickets" xml:space="preserve"><value>إجمالي التذاكر</value></data>
   <data name="Logout" xml:space="preserve"><value>تسجيل خروج</value></data>
   <data name="RegisterDevice" xml:space="preserve"><value>تسجيل جهاز</value></data>
   <data name="TransferOwnership" xml:space="preserve"><value>نقل ملكية</value></data>
-  <data name="RepairHistory" xml:space="preserve"><value>سجل الإصلاحات</value></data>
+  <data name="RepairHistory" xml:space="preserve"><value>سجل الصيانةات</value></data>
   <data name="NewTicket" xml:space="preserve"><value>تذكرة جديدة</value></data>
   <data name="Cost" xml:space="preserve"><value>التكلفة</value></data>
-  <data name="RepairDescription" xml:space="preserve"><value>وصف الإصلاح</value></data>
+  <data name="RepairDescription" xml:space="preserve"><value>وصف الصيانة</value></data>
   <data name="DeliveryDate" xml:space="preserve"><value>تاريخ التسليم</value></data>
   <data name="Warranty" xml:space="preserve"><value>الضمان</value></data>
   <data name="Photos" xml:space="preserve"><value>الصور</value></data>
