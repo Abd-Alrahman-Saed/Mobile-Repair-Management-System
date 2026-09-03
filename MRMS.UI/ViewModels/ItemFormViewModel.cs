@@ -99,7 +99,7 @@ public partial class ItemFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ الصنف");
         }
         finally
         {

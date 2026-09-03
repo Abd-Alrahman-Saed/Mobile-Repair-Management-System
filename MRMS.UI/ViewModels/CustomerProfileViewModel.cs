@@ -99,7 +99,7 @@ public partial class CustomerProfileViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "تحميل تذاكر الجهاز في ملف العميل");
         }
         finally
         {
@@ -145,7 +145,7 @@ public partial class CustomerProfileViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "إنشاء تذكرة صيانة من ملف العميل");
         }
         finally
         {

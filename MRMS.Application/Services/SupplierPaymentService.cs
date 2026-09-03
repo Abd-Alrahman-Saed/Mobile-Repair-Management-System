@@ -51,16 +51,21 @@ public class SupplierPaymentService : ISupplierPaymentService
             Notes = dto.Notes
         };
 
-        await _unitOfWork.SupplierPayments.AddAsync(payment);
-        await _unitOfWork.CompleteAsync();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _unitOfWork.SupplierPayments.AddAsync(payment);
+            await _unitOfWork.CompleteAsync();
+
+            var supplier = await _unitOfWork.Suppliers.GetByIdAsync(payment.SupplierId);
+            await _journalService.PostSupplierPaymentAsync(
+                payment.Date, supplier?.Name ?? $"Supplier#{payment.SupplierId}", payment.Amount, payment.Id);
+            await _unitOfWork.CompleteAsync();
+        });
 
         var saved = await _unitOfWork.SupplierPayments
             .Query()
             .Include(p => p.Supplier)
             .FirstAsync(p => p.Id == payment.Id);
-
-        await _journalService.PostSupplierPaymentAsync(saved.Date, saved.Supplier.Name, saved.Amount, saved.Id);
-        await _unitOfWork.CompleteAsync();
 
         return MapToDto(saved);
     }

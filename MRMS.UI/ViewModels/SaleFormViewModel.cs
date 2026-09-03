@@ -157,7 +157,7 @@ public partial class SaleFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "تسجيل عملية البيع");
         }
         finally
         {

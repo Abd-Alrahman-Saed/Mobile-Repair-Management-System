@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
 
@@ -74,7 +75,7 @@ public partial class DeviceTransferViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "نقل ملكية الجهاز");
         }
         finally
         {

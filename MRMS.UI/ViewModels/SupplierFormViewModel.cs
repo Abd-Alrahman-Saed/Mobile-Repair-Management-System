@@ -90,7 +90,7 @@ public partial class SupplierFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ بيانات المورد");
         }
         finally
         {

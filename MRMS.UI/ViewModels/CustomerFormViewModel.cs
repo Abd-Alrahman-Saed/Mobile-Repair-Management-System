@@ -71,7 +71,7 @@ public partial class CustomerFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ بيانات العميل");
         }
         finally
         {

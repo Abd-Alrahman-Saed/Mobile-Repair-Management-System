@@ -20,6 +20,9 @@ public partial class App : System.Windows.Application
         DispatcherUnhandledException += (_, args) =>
         {
             Log.Error(args.Exception, "Unhandled exception");
+            MessageBox.Show(
+                "حدث خطأ غير متوقّع. تم تسجيل التفاصيل في ملف السجل.",
+                "خطأ", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };
 

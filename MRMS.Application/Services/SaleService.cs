@@ -63,14 +63,16 @@ public class SaleService : ISaleService
         if (item.CurrentStock < dto.Quantity)
             throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
 
-        item.CurrentStock -= dto.Quantity;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            item.CurrentStock -= dto.Quantity;
 
-        await _unitOfWork.Sales.AddAsync(sale);
-        await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Sales.AddAsync(sale);
+            await _unitOfWork.CompleteAsync();
 
-        var itemName = (await _unitOfWork.Items.GetByIdAsync(dto.ItemId))?.Name ?? $"Item#{dto.ItemId}";
-        await _journalService.PostSaleAsync(sale.Date, $"بيع: {itemName} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
-        await _unitOfWork.CompleteAsync();
+            await _journalService.PostSaleAsync(sale.Date, $"بيع: {item.Name} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
+            await _unitOfWork.CompleteAsync();
+        });
 
         return (await GetByIdAsync(sale.Id))!;
     }

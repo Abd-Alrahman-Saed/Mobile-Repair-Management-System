@@ -201,7 +201,7 @@ public partial class PurchaseFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ فاتورة المشتريات");
         }
         finally
         {

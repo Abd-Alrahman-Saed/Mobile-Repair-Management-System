@@ -77,7 +77,7 @@ public partial class SalesViewModel : ObservableObject
         if (!confirmed) return;
 
         try { await _saleService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(ex.Message, NotificationType.Error); return; }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف عملية البيع"), NotificationType.Error); return; }
 
         _notificationService.Show("تم حذف عملية البيع بنجاح", NotificationType.Success);
         await LoadAsync();

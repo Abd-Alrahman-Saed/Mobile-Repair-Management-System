@@ -51,27 +51,30 @@ public class PurchaseService : IPurchaseService
             Notes = dto.Notes
         };
 
-        foreach (var itemDto in dto.Items)
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var purchaseItem = new PurchaseItem
+            foreach (var itemDto in dto.Items)
             {
-                ItemId = itemDto.ItemId,
-                Quantity = itemDto.Quantity,
-                UnitCost = itemDto.UnitCost
-            };
-            purchase.PurchaseItems.Add(purchaseItem);
+                var purchaseItem = new PurchaseItem
+                {
+                    ItemId = itemDto.ItemId,
+                    Quantity = itemDto.Quantity,
+                    UnitCost = itemDto.UnitCost
+                };
+                purchase.PurchaseItems.Add(purchaseItem);
 
-            var item = await _unitOfWork.Items.GetByIdAsync(itemDto.ItemId);
-            if (item is not null)
-                item.CurrentStock += itemDto.Quantity;
-        }
+                var item = await _unitOfWork.Items.GetByIdAsync(itemDto.ItemId);
+                if (item is not null)
+                    item.CurrentStock += itemDto.Quantity;
+            }
 
-        await _unitOfWork.Purchases.AddAsync(purchase);
-        await _unitOfWork.CompleteAsync();
+            await _unitOfWork.Purchases.AddAsync(purchase);
+            await _unitOfWork.CompleteAsync();
 
-        var supplierName = (await _unitOfWork.Suppliers.GetByIdAsync(dto.SupplierId))?.Name ?? $"Supplier#{dto.SupplierId}";
-        await _journalService.PostPurchaseAsync(purchase.Date, $"مشتريات: {supplierName} - {purchase.PaidAmount:N2}", purchase.PaidAmount, purchase.Id);
-        await _unitOfWork.CompleteAsync();
+            var supplierName = (await _unitOfWork.Suppliers.GetByIdAsync(dto.SupplierId))?.Name ?? $"Supplier#{dto.SupplierId}";
+            await _journalService.PostPurchaseAsync(purchase.Date, $"مشتريات: {supplierName} - {purchase.PaidAmount:N2}", purchase.PaidAmount, purchase.Id);
+            await _unitOfWork.CompleteAsync();
+        });
 
         return (await GetByIdAsync(purchase.Id))!;
     }

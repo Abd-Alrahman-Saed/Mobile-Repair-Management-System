@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Enums;
+using MRMS.UI.Services;
 
 namespace MRMS.UI.Views;
 
@@ -75,7 +76,7 @@ public partial class QuickAddItemWindow : Window
         }
         catch (Exception ex)
         {
-            ShowError(ex.Message);
+            ShowError(UiError.Describe(ex, "إضافة صنف سريع"));
         }
         finally
         {

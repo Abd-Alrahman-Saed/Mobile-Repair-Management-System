@@ -131,7 +131,7 @@ public partial class ExpensesViewModel : ObservableObject
         if (!confirmed) return;
 
         try { await _expenseService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(ex.Message, NotificationType.Error); return; }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف المصروف"), NotificationType.Error); return; }
 
         _notificationService.Show("تم حذف المصروف بنجاح", NotificationType.Success);
         await LoadAsync();

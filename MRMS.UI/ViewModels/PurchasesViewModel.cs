@@ -77,7 +77,7 @@ public partial class PurchasesViewModel : ObservableObject
         if (!confirmed) return;
 
         try { await _purchaseService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(ex.Message, NotificationType.Error); return; }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف فاتورة المشتريات"), NotificationType.Error); return; }
 
         _notificationService.Show("تم حذف فاتورة المشتريات بنجاح", NotificationType.Success);
         await LoadAsync();

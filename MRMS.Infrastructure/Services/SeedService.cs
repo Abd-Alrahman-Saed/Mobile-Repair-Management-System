@@ -24,7 +24,17 @@ public class SeedService
 
     public async Task SeedAsync()
     {
-        await _context.Database.EnsureCreatedAsync();
+        // MigrateAsync - not EnsureCreatedAsync - for SQL Server: EnsureCreated builds the schema from the
+        // current model once and never touches __EFMigrationsHistory, so a column/table added in a later
+        // release would never reach an already-installed copy. MigrateAsync applies every pending migration
+        // in order and is a no-op when the database is already current.
+        // The migrations under Migrations/ are generated for the SQL Server provider only. Until a parallel
+        // SQLite migration set exists (planned for the packaged build), the self-contained SQLite path keeps
+        // using EnsureCreated so a fresh install still gets a working schema.
+        if (_context.Database.IsRelational() && !_context.Database.IsSqlite())
+            await _context.Database.MigrateAsync();
+        else
+            await _context.Database.EnsureCreatedAsync();
 
         if (!await _context.Users.AnyAsync())
         {

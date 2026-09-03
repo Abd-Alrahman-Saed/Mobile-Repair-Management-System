@@ -159,7 +159,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ في البحث: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "البحث في شاشة استقبال الجهاز");
         }
         finally
         {
@@ -206,7 +206,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ في البحث: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "البحث في شاشة استقبال الجهاز");
         }
         finally
         {
@@ -280,7 +280,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "استقبال الجهاز وإنشاء التذكرة");
         }
         finally
         {
@@ -318,7 +318,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"خطأ في تسجيل العميل: {ex.InnerException?.Message ?? ex.Message}";
+                ErrorMessage = UiError.Describe(ex, "تسجيل عميل جديد أثناء استقبال الجهاز");
                 IsLoading = false;
                 return;
             }
@@ -372,7 +372,7 @@ public partial class DeviceRegistrationViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "استقبال الجهاز وإنشاء التذكرة");
         }
         finally
         {

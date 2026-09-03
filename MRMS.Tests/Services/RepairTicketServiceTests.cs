@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using MRMS.Application.DTOs;
+using MRMS.Application.Interfaces;
 using MRMS.Application.Services;
 using MRMS.Core.Entities;
 using MRMS.Core.Enums;
@@ -21,7 +22,7 @@ public class RepairTicketServiceTests
             .ReturnsAsync(tickets);
         mockUow.Setup(u => u.CompleteAsync()).ReturnsAsync(1);
 
-        var service = new RepairTicketService(mockUow.Object);
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>());
         var result = await service.CreateAsync(
             new CreateRepairTicketDto(1, "الشاشة مكسورة", "يرجى الفحص"));
 
@@ -30,31 +31,9 @@ public class RepairTicketServiceTests
         result.TicketNumber.Should().StartWith("RPR-");
     }
 
-    [Fact]
-    public async Task UpdateStatusAsync_ToDelivered_SetsDeliveryDateTime()
-    {
-        var ticket = new RepairTicket
-        {
-            Id = 1,
-            Status = TicketStatus.Repaired,
-            DeviceId = 1,
-            TicketNumber = "RPR-00001",
-            ReceiveDate = DateTime.UtcNow.Date,
-            ReceiveTime = TimeSpan.Zero
-        };
-
-        var mockUow = new Mock<IUnitOfWork>();
-        mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
-        mockUow.Setup(u => u.CompleteAsync()).ReturnsAsync(1);
-
-        var service = new RepairTicketService(mockUow.Object);
-        var result = await service.UpdateStatusAsync(
-            new UpdateRepairTicketStatusDto(1, TicketStatus.Delivered));
-
-        result.Should().BeTrue();
-        ticket.DeliveryDate.Should().Be(DateTime.UtcNow.Date);
-        ticket.DeliveryTime.Should().NotBeNull();
-    }
+    // Delivering a ticket now also reads its parts (uow.RepairTicketItems.Query()) and posts a journal
+    // entry inside a transaction - paths a bare Mock<IUnitOfWork> cannot stand in for. That behaviour is
+    // covered end-to-end against a real database in AccountingIntegrationTests.
 
     [Fact]
     public async Task UpdateStatusAsync_FromDelivered_ReturnsFalse()
@@ -74,7 +53,7 @@ public class RepairTicketServiceTests
         var mockUow = new Mock<IUnitOfWork>();
         mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
 
-        var service = new RepairTicketService(mockUow.Object);
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>());
         var result = await service.UpdateStatusAsync(
             new UpdateRepairTicketStatusDto(1, TicketStatus.InRepair));
 
@@ -98,11 +77,12 @@ public class RepairTicketServiceTests
         mockUow.Setup(u => u.Customers.GetAllAsync()).ReturnsAsync(new List<Customer>());
         mockUow.Setup(u => u.Devices.GetAllAsync()).ReturnsAsync(new List<Device>());
 
-        var service = new RepairTicketService(mockUow.Object);
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>());
         var stats = await service.GetDashboardStatsAsync();
 
         stats.TodayReceived.Should().Be(2);
         stats.TodayDelivered.Should().Be(2);
-        stats.CurrentlyInRepair.Should().Be(2);
+        // CurrentlyInRepair = UnderInspection + WaitingForParts + InRepair. Only ticket 2 qualifies.
+        stats.CurrentlyInRepair.Should().Be(1);
     }
 }

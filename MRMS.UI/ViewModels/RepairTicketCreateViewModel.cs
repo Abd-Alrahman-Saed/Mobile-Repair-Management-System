@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
 
@@ -86,7 +87,7 @@ public partial class RepairTicketCreateViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"خطأ: {ex.InnerException?.Message ?? ex.Message}";
+            ErrorMessage = UiError.Describe(ex, "إنشاء تذكرة الصيانة");
         }
         finally
         {

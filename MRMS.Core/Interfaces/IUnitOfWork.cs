@@ -23,4 +23,12 @@ public interface IUnitOfWork : IDisposable
     IRepository<JournalEntry> JournalEntries { get; }
     IRepository<JournalEntryLine> JournalEntryLines { get; }
     Task<int> CompleteAsync();
+
+    /// <summary>
+    /// Runs <paramref name="work"/> inside a single database transaction: everything it saves is
+    /// committed together or rolled back together. Use it for any operation that writes to more than one
+    /// table (e.g. a sale = Sale row + Item stock + journal entry) so a mid-way failure cannot leave a
+    /// half-written operation behind. Safe to nest - an already-open transaction is reused.
+    /// </summary>
+    Task ExecuteInTransactionAsync(Func<Task> work);
 }

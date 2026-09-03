@@ -67,27 +67,31 @@ public class RepairTicketService : IRepairTicketService
             return false;
 
         var oldStatus = ticket.Status;
-        ticket.Status = dto.NewStatus;
 
-        if (dto.NewStatus == TicketStatus.Delivered)
+        await _uow.ExecuteInTransactionAsync(async () =>
         {
-            ticket.DeliveryDate = DateTime.UtcNow.Date;
-            ticket.DeliveryTime = DateTime.UtcNow.TimeOfDay;
-        }
+            ticket.Status = dto.NewStatus;
 
-        if (dto.NewStatus == TicketStatus.InRepair && oldStatus != TicketStatus.InRepair)
-            await DeductPartsStockAsync(dto.TicketId);
+            if (dto.NewStatus == TicketStatus.Delivered)
+            {
+                ticket.DeliveryDate = DateTime.UtcNow.Date;
+                ticket.DeliveryTime = DateTime.UtcNow.TimeOfDay;
+            }
 
-        _uow.RepairTickets.Update(ticket);
-        await _uow.CompleteAsync();
+            if (dto.NewStatus == TicketStatus.InRepair && oldStatus != TicketStatus.InRepair)
+                await DeductPartsStockAsync(dto.TicketId);
 
-        if (dto.NewStatus == TicketStatus.Delivered)
-        {
-            var parts = await GetPartsAsync(dto.TicketId);
-            var partsCost = parts.Sum(p => p.TotalCost);
-            await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, partsCost, ticket.Id);
+            _uow.RepairTickets.Update(ticket);
             await _uow.CompleteAsync();
-        }
+
+            if (dto.NewStatus == TicketStatus.Delivered)
+            {
+                var parts = await GetPartsAsync(dto.TicketId);
+                var partsCost = parts.Sum(p => p.TotalCost);
+                await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, partsCost, ticket.Id);
+                await _uow.CompleteAsync();
+            }
+        });
 
         return true;
     }

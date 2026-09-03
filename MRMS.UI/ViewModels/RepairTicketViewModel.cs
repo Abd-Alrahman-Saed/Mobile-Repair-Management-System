@@ -186,7 +186,7 @@ public partial class RepairTicketViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
         }
         finally
         {
@@ -219,7 +219,7 @@ public partial class RepairTicketViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
         }
         finally
         {
@@ -242,7 +242,7 @@ public partial class RepairTicketViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
         }
         finally
         {
@@ -281,7 +281,7 @@ public partial class RepairTicketViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
         }
         finally
         {
@@ -315,7 +315,7 @@ public partial class RepairTicketViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
         }
         finally
         {

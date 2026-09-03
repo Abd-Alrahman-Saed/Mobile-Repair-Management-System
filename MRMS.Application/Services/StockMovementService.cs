@@ -63,24 +63,27 @@ public class StockMovementService : IStockMovementService
             Notes = dto.Notes
         };
 
-        if (dto.Type == MovementType.CustomerReturn)
-            item.CurrentStock += dto.Quantity;
-        else
-            item.CurrentStock -= dto.Quantity;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            if (dto.Type == MovementType.CustomerReturn)
+                item.CurrentStock += dto.Quantity;
+            else
+                item.CurrentStock -= dto.Quantity;
 
-        await _unitOfWork.StockMovements.AddAsync(movement);
-        await _unitOfWork.CompleteAsync();
+            await _unitOfWork.StockMovements.AddAsync(movement);
+            await _unitOfWork.CompleteAsync();
+
+            if (dto.Type == MovementType.Damaged)
+            {
+                await _journalService.PostDamagedAsync(movement.Date, item.Name, movement.Quantity, movement.Value, movement.Id);
+                await _unitOfWork.CompleteAsync();
+            }
+        });
 
         var saved = await _unitOfWork.StockMovements
             .Query()
             .Include(m => m.Item)
             .FirstAsync(m => m.Id == movement.Id);
-
-        if (dto.Type == MovementType.Damaged)
-        {
-            await _journalService.PostDamagedAsync(saved.Date, saved.Item.Name, saved.Quantity, saved.Value, saved.Id);
-            await _unitOfWork.CompleteAsync();
-        }
 
         return MapToDto(saved);
     }

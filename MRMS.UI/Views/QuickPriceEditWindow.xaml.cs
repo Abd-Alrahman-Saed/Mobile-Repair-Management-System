@@ -1,6 +1,7 @@
 using System.Windows;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.UI.Services;
 
 namespace MRMS.UI.Views;
 
@@ -59,7 +60,7 @@ public partial class QuickPriceEditWindow : Window
         }
         catch (Exception ex)
         {
-            ShowError(ex.Message);
+            ShowError(UiError.Describe(ex, "تعديل سعر الصنف السريع"));
         }
         finally
         {

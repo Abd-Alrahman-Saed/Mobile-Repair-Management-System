@@ -96,7 +96,7 @@ public partial class StockMovementFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ حركة المخزون");
         }
         finally
         {

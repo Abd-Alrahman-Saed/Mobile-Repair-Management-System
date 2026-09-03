@@ -73,7 +73,7 @@ public partial class ExpenseFormViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = UiError.Describe(ex, "حفظ المصروف");
         }
         finally
         {

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MRMS.Core.Entities;
 using MRMS.Core.Interfaces;
 using MRMS.Infrastructure.Data;
@@ -51,6 +52,28 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<JournalEntryLine> JournalEntryLines => _journalEntryLines ??= new Repository<JournalEntryLine>(_context);
 
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
+
+    public async Task ExecuteInTransactionAsync(Func<Task> work)
+    {
+        // Already inside a transaction (nested call) - just run the work; the outermost caller commits.
+        if (_context.Database.CurrentTransaction is not null)
+        {
+            await work();
+            return;
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            await work();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
     public void Dispose() => _context.Dispose();
 }

@@ -75,6 +75,35 @@ Mobile-Repair-Management-System---MRMS/
 └── logs/                      # Runtime log output (not tracked in git)
 ```
 
+## Database migrations
+
+On startup `SeedService.SeedAsync` brings the schema up to date:
+
+- **SQL Server** — `Database.MigrateAsync()` applies every pending migration from
+  `MRMS.Infrastructure/Migrations/`, so an updated install picks up new columns/tables with no manual step.
+- **SQLite** (the self-contained default) — `Database.EnsureCreatedAsync()`, until a parallel SQLite
+  migration set is added for the packaged build. The two providers are not migration-compatible.
+
+Migrations are generated for the **SQL Server** provider. Design-time tooling reads the same
+`%AppData%\MRMS\connection-config.json` as the app via `AppDbContextFactory`.
+
+**Add a migration after changing the model:**
+
+```powershell
+dotnet ef migrations add <Name> --project MRMS.Infrastructure --startup-project MRMS.UI --context AppDbContext
+```
+
+**Local dev database created by the old `EnsureCreated()` path:** it has no usable
+`__EFMigrationsHistory` row, so `MigrateAsync()` will try to create tables that already exist and
+fail. Drop it once and let the app recreate it (development data is disposable):
+
+```powershell
+dotnet ef database drop --project MRMS.Infrastructure --startup-project MRMS.UI --context AppDbContext
+```
+
+A dedicated SQLite migration set (for the self-contained shipping build) is a later task — the two
+providers are not migration-compatible.
+
 ## License
 
 No license has been specified for this project yet. All rights are reserved by the author unless a license is added.

@@ -51,11 +51,14 @@ public class ExpenseService : IExpenseService
             Notes = dto.Notes
         };
 
-        await _unitOfWork.Expenses.AddAsync(expense);
-        await _unitOfWork.CompleteAsync();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _unitOfWork.Expenses.AddAsync(expense);
+            await _unitOfWork.CompleteAsync();
 
-        await _journalService.PostExpenseAsync(expense.Date, expense.Category, expense.Description, expense.Amount, expense.Id);
-        await _unitOfWork.CompleteAsync();
+            await _journalService.PostExpenseAsync(expense.Date, expense.Category, expense.Description, expense.Amount, expense.Id);
+            await _unitOfWork.CompleteAsync();
+        });
 
         return MapToDto(expense);
     }
