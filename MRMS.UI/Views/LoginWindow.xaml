@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MRMS - تسجيل الدخول"
         Icon="/Resources/AppIcon.ico"
-        Height="310" Width="400"
+        Height="360" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Topmost="True"
@@ -17,30 +17,38 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="نظام صيانة الأجهزة المحمولة"
                    FontSize="20" FontWeight="Bold"
                    HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+            <TextBlock Text="اسم المستخدم" Margin="0,0,0,5"/>
+            <TextBox x:Name="UsernameBox" Height="30" FontSize="14" Padding="5,0"
+                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                     KeyDown="PasswordBox_KeyDown"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,12">
             <TextBlock Text="كلمة المرور" Margin="0,0,0,5"/>
             <PasswordBox x:Name="PasswordBox" Height="30"
                          FontSize="14" Padding="5,0"
                          KeyDown="PasswordBox_KeyDown"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}"
-                   Foreground="Red" HorizontalAlignment="Center"
-                   Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}"
+                   Foreground="{StaticResource DangerBrush}" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" Margin="0,0,0,10"/>
 
-        <Button Grid.Row="3" Content="دخول"
+        <Button Grid.Row="4" Content="دخول"
                 Click="Login_Click"
                 Height="35" FontSize="14"
                 Background="{StaticResource PrimaryBrush}" Foreground="White"
                 Cursor="Hand"/>
 
-        <ProgressBar Grid.Row="4"
+        <ProgressBar Grid.Row="5"
                      IsIndeterminate="True"
                      Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
                      Height="5" Margin="0,15,0,0"/>

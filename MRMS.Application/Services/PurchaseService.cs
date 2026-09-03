@@ -10,11 +10,13 @@ public class PurchaseService : IPurchaseService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
+    private readonly IAuditService _audit;
 
-    public PurchaseService(IUnitOfWork unitOfWork, IJournalService journalService)
+    public PurchaseService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
+        _audit = audit;
     }
 
     public async Task<IEnumerable<PurchaseDto>> GetAllAsync()
@@ -73,6 +75,8 @@ public class PurchaseService : IPurchaseService
 
             var supplierName = (await _unitOfWork.Suppliers.GetByIdAsync(dto.SupplierId))?.Name ?? $"Supplier#{dto.SupplierId}";
             await _journalService.PostPurchaseAsync(purchase.Date, $"مشتريات: {supplierName} - {purchase.PaidAmount:N2}", purchase.PaidAmount, purchase.Id);
+            await _audit.LogAsync("Purchase.Create", nameof(Purchase), purchase.Id,
+                $"{supplierName} - مدفوع {purchase.PaidAmount:N0}");
             await _unitOfWork.CompleteAsync();
         });
 

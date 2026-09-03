@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -9,10 +10,12 @@ namespace MRMS.Application.Services;
 public class JournalService : IJournalService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public JournalService(IUnitOfWork uow)
+    public JournalService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task PostSaleAsync(DateTime date, string description, decimal amount, int saleId)
@@ -133,6 +136,7 @@ public class JournalService : IJournalService
 
     public async Task<IEnumerable<JournalEntryDto>> GetAllEntriesAsync()
     {
+        _permissions.Require(Permission.ViewReports);
         var entries = await _uow.JournalEntries.Query()
             .Include(je => je.Lines)
             .OrderByDescending(je => je.Date).ThenByDescending(je => je.Id)
@@ -143,6 +147,7 @@ public class JournalService : IJournalService
 
     public async Task<JournalEntryDto?> GetEntryByIdAsync(int id)
     {
+        _permissions.Require(Permission.ViewReports);
         var entry = await _uow.JournalEntries.Query()
             .Include(je => je.Lines)
             .FirstOrDefaultAsync(je => je.Id == id);
@@ -152,6 +157,7 @@ public class JournalService : IJournalService
 
     public async Task<TrialBalanceDto> GetTrialBalanceAsync(DateTime? asOf = null)
     {
+        _permissions.Require(Permission.ViewReports);
         var query = _uow.JournalEntryLines.Query();
 
         if (asOf.HasValue)

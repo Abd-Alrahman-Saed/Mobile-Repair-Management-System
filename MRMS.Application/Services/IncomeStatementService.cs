@@ -9,14 +9,17 @@ namespace MRMS.Application.Services;
 public class IncomeStatementService : IIncomeStatementService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public IncomeStatementService(IUnitOfWork uow)
+    public IncomeStatementService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IncomeStatementDto> GetIncomeStatementAsync(DateTime from, DateTime to)
     {
+        _permissions.Require(Permission.ViewReports);
         var toEnd = to.Date.AddDays(1).AddTicks(-1);
 
         var sales = await _uow.Sales.Query()

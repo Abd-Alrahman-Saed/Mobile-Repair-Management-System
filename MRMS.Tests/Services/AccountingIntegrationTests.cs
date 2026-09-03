@@ -3,9 +3,11 @@ using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
+using MRMS.Application.Interfaces;
 using MRMS.Application.Services;
 using MRMS.Core.Entities;
 using MRMS.Core.Enums;
+using MRMS.Core.Interfaces;
 using MRMS.Infrastructure.Data;
 using MRMS.Infrastructure.Repositories;
 
@@ -36,6 +38,11 @@ public sealed class AccountingIntegrationTests : IDisposable
     public void Dispose() => _connection.Dispose();
 
     private AppDbContext NewContext() => new(_options);
+
+    private static readonly ICurrentUserService Owner = new FakeCurrentUserService();
+    private static IPermissionService Perms => TestServices.Permissions(Owner);
+    private static IAuditService Audit(IUnitOfWork uow) => new AuditService(uow, Owner);
+    private static JournalService Journal(IUnitOfWork uow) => new(uow, Perms);
 
     [Fact]
     public async Task SeedService_brings_up_a_usable_schema_and_baseline_on_a_fresh_database()
@@ -74,7 +81,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var sales = new SaleService(uow, new JournalService(uow));
+            var sales = new SaleService(uow, Journal(uow), Audit(uow));
 
             await sales.CreateAsync(new CreateSaleDto(
                 DateTime.Today, itemId, Quantity: 3, UnitPrice: 50, CostPrice: 30,
@@ -92,6 +99,10 @@ public sealed class AccountingIntegrationTests : IDisposable
             lines.Sum(l => l.DebitAmount).Should().Be(lines.Sum(l => l.CreditAmount));
 
             (await assert.Items.FindAsync(itemId))!.CurrentStock.Should().Be(7);
+
+            var audit = await assert.AuditLogs.SingleAsync();
+            audit.Action.Should().Be("Sale.Create");
+            audit.UserName.Should().Be("المالك");
         }
     }
 
@@ -112,7 +123,7 @@ public sealed class AccountingIntegrationTests : IDisposable
             var uow = new UnitOfWork(ctx);
             // Journal service pointed at a poisoned context so the second SaveChanges throws AFTER the
             // Sale row + stock change have already been written once inside the transaction.
-            var sales = new SaleService(uow, new ThrowingJournalService());
+            var sales = new SaleService(uow, new ThrowingJournalService(), Audit(uow));
 
             var act = async () => await sales.CreateAsync(new CreateSaleDto(
                 DateTime.Today, itemId, Quantity: 2, UnitPrice: 40, CostPrice: 20, CustomerName: "x", Notes: ""));
@@ -153,7 +164,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var service = new RepairTicketService(uow, new JournalService(uow));
+            var service = new RepairTicketService(uow, Journal(uow), Audit(uow));
 
             var ok = await service.UpdateStatusAsync(
                 new UpdateRepairTicketStatusDto(ticketId, TicketStatus.Delivered));

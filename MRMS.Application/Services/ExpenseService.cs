@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -10,11 +11,16 @@ public class ExpenseService : IExpenseService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
+    private readonly IAuditService _audit;
+    private readonly IPermissionService _permissions;
 
-    public ExpenseService(IUnitOfWork unitOfWork, IJournalService journalService)
+    public ExpenseService(IUnitOfWork unitOfWork, IJournalService journalService,
+        IAuditService audit, IPermissionService permissions)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
+        _audit = audit;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<ExpenseDto>> GetAllAsync()
@@ -35,6 +41,7 @@ public class ExpenseService : IExpenseService
 
     public async Task<ExpenseDto> CreateAsync(CreateExpenseDto dto)
     {
+        _permissions.Require(Permission.ManageExpenses);
         if (dto.Amount <= 0)
             throw new InvalidOperationException("المبلغ يجب أن يكون أكبر من صفر");
 
@@ -57,6 +64,8 @@ public class ExpenseService : IExpenseService
             await _unitOfWork.CompleteAsync();
 
             await _journalService.PostExpenseAsync(expense.Date, expense.Category, expense.Description, expense.Amount, expense.Id);
+            await _audit.LogAsync("Expense.Create", nameof(Expense), expense.Id,
+                $"{expense.Category} - {expense.Amount:N0}");
             await _unitOfWork.CompleteAsync();
         });
 
@@ -65,6 +74,7 @@ public class ExpenseService : IExpenseService
 
     public async Task UpdateAsync(UpdateExpenseDto dto)
     {
+        _permissions.Require(Permission.ManageExpenses);
         if (dto.Amount <= 0)
             throw new InvalidOperationException("المبلغ يجب أن يكون أكبر من صفر");
 
@@ -86,6 +96,7 @@ public class ExpenseService : IExpenseService
 
     public async Task DeleteAsync(int id)
     {
+        _permissions.Require(Permission.ManageExpenses);
         var expense = await _unitOfWork.Expenses.GetByIdAsync(id);
         if (expense is null) return;
 

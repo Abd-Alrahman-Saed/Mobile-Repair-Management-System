@@ -10,11 +10,13 @@ public class SaleService : ISaleService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
+    private readonly IAuditService _audit;
 
-    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService)
+    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
+        _audit = audit;
     }
 
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
@@ -71,6 +73,8 @@ public class SaleService : ISaleService
             await _unitOfWork.CompleteAsync();
 
             await _journalService.PostSaleAsync(sale.Date, $"بيع: {item.Name} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
+            await _audit.LogAsync("Sale.Create", nameof(Sale), sale.Id,
+                $"{item.Name} x{sale.Quantity} = {sale.TotalPrice:N0}");
             await _unitOfWork.CompleteAsync();
         });
 

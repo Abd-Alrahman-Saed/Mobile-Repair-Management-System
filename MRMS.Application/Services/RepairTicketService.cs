@@ -11,11 +11,13 @@ public class RepairTicketService : IRepairTicketService
 {
     private readonly IUnitOfWork _uow;
     private readonly IJournalService _journalService;
+    private readonly IAuditService _audit;
 
-    public RepairTicketService(IUnitOfWork uow, IJournalService journalService)
+    public RepairTicketService(IUnitOfWork uow, IJournalService journalService, IAuditService audit)
     {
         _uow = uow;
         _journalService = journalService;
+        _audit = audit;
     }
 
     public async Task<RepairTicketDto> CreateAsync(CreateRepairTicketDto dto)
@@ -82,6 +84,8 @@ public class RepairTicketService : IRepairTicketService
                 await DeductPartsStockAsync(dto.TicketId);
 
             _uow.RepairTickets.Update(ticket);
+            await _audit.LogAsync("RepairTicket.StatusChange", nameof(RepairTicket), ticket.Id,
+                $"{ticket.TicketNumber}: {oldStatus} → {dto.NewStatus}");
             await _uow.CompleteAsync();
 
             if (dto.NewStatus == TicketStatus.Delivered)

@@ -26,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
     private Repository<Expense>? _expenses;
     private Repository<JournalEntry>? _journalEntries;
     private Repository<JournalEntryLine>? _journalEntryLines;
+    private Repository<AuditLog>? _auditLogs;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -50,6 +51,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Expense> Expenses => _expenses ??= new Repository<Expense>(_context);
     public IRepository<JournalEntry> JournalEntries => _journalEntries ??= new Repository<JournalEntry>(_context);
     public IRepository<JournalEntryLine> JournalEntryLines => _journalEntryLines ??= new Repository<JournalEntryLine>(_context);
+    public IRepository<AuditLog> AuditLogs => _auditLogs ??= new Repository<AuditLog>(_context);
 
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
 

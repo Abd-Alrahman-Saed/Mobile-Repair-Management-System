@@ -14,8 +14,9 @@ public partial class LoginWindow : Window
         _vm = vm;
         DataContext = vm;
         _vm.LoginSucceeded += OnLoginSucceeded;
+        _vm.MustChangePassword += OnMustChangePassword;
         _vm.LoginFailed += OnLoginFailed;
-        Loaded += (_, _) => PasswordBox.Focus();
+        Loaded += (_, _) => UsernameBox.Focus();
     }
 
     private async void PasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -40,6 +41,19 @@ public partial class LoginWindow : Window
         var mainWindow = App.ServiceProvider!.GetRequiredService<MainWindow>();
         mainWindow.Show();
         Close();
+    }
+
+    private void OnMustChangePassword()
+    {
+        var dialog = App.ServiceProvider!.GetRequiredService<ChangePasswordWindow>();
+        dialog.Owner = this;
+        if (dialog.ShowDialog() == true)
+            OnLoginSucceeded();
+        else
+        {
+            PasswordBox.Clear();
+            PasswordBox.Focus();
+        }
     }
 
     private void OnLoginFailed()

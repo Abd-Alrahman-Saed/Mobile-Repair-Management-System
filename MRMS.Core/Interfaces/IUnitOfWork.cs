@@ -22,6 +22,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<Expense> Expenses { get; }
     IRepository<JournalEntry> JournalEntries { get; }
     IRepository<JournalEntryLine> JournalEntryLines { get; }
+    IRepository<AuditLog> AuditLogs { get; }
     Task<int> CompleteAsync();
 
     /// <summary>

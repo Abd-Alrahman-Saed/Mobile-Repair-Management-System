@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
+using MRMS.Application.Security;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Infrastructure.Data;
 
 namespace MRMS.Infrastructure.Services;
@@ -36,19 +36,7 @@ public class SeedService
         else
             await _context.Database.EnsureCreatedAsync();
 
-        if (!await _context.Users.AnyAsync())
-        {
-            var passwordHash = Convert.ToHexString(
-                SHA256.HashData(Encoding.UTF8.GetBytes("admin123")));
-
-            _context.Users.Add(new User
-            {
-                Username = "tech",
-                PasswordHash = passwordHash,
-                CreatedAt = DateTime.UtcNow
-            });
-            await _context.SaveChangesAsync();
-        }
+        await SeedOwnerAsync();
 
         if (!await _context.SystemSettings.AnyAsync())
         {
@@ -58,5 +46,41 @@ public class SeedService
             );
             await _context.SaveChangesAsync();
         }
+    }
+
+    /// <summary>
+    /// A shop must have exactly one usable Owner account to start. Fresh install: create "owner" with a
+    /// throwaway password that must be changed on first login (no other default password lives in code).
+    /// Upgrade from the old single-password model: promote the oldest existing account to Owner.
+    /// </summary>
+    private async Task SeedOwnerAsync()
+    {
+        if (await _context.Users.AnyAsync(u => u.Role == UserRole.Owner))
+            return;
+
+        var oldest = await _context.Users.OrderBy(u => u.Id).FirstOrDefaultAsync();
+        if (oldest is not null)
+        {
+            oldest.Role = UserRole.Owner;
+            oldest.IsActive = true;
+            if (string.IsNullOrWhiteSpace(oldest.FullName))
+                oldest.FullName = "المالك";
+            await _context.SaveChangesAsync();
+            return;
+        }
+
+        var (hash, salt) = PasswordHasher.Hash("owner");
+        _context.Users.Add(new User
+        {
+            Username = "owner",
+            FullName = "المالك",
+            Role = UserRole.Owner,
+            IsActive = true,
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            MustChangePassword = true,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
     }
 }

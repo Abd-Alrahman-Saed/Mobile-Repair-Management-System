@@ -9,17 +9,20 @@ namespace MRMS.Application.Services;
 public class MonthlyReportService : IMonthlyReportService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
     private static readonly string[] ArabicMonths =
         ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
          "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
-    public MonthlyReportService(IUnitOfWork uow)
+    public MonthlyReportService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<MonthlyReportDto> GetMonthlyReportAsync(int year, int month)
     {
+        _permissions.Require(Permission.ViewReports);
         var allSales = await _uow.Sales.Query()
             .Where(s => s.Date.Year == year).ToListAsync();
 

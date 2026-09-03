@@ -11,11 +11,19 @@ public class DashboardService : IDashboardService
 {
     private readonly IUnitOfWork _uow;
     private readonly IRepairTicketService _repairTicketService;
+    private readonly IIncomeStatementService _incomeStatementService;
+    private readonly IPermissionService _permissions;
 
-    public DashboardService(IUnitOfWork uow, IRepairTicketService repairTicketService)
+    public DashboardService(
+        IUnitOfWork uow,
+        IRepairTicketService repairTicketService,
+        IIncomeStatementService incomeStatementService,
+        IPermissionService permissions)
     {
         _uow = uow;
         _repairTicketService = repairTicketService;
+        _incomeStatementService = incomeStatementService;
+        _permissions = permissions;
     }
 
     public async Task<DashboardStatsDto> GetDashboardStatsAsync(DateTime currentPeriodFrom, DateTime currentPeriodTo)
@@ -83,9 +91,14 @@ public class DashboardService : IDashboardService
 
     private async Task<(decimal current, decimal previous)> GetPeriodNetProfitsAsync(DateTime curFrom, DateTime curTo, DateTime prevFrom, DateTime prevTo)
     {
-        var incomeService = new IncomeStatementService(_uow);
-        var current = await incomeService.GetIncomeStatementAsync(curFrom, curTo);
-        var previous = await incomeService.GetIncomeStatementAsync(prevFrom, prevTo);
+        // Net profit is an owner/manager-only figure (it needs the income statement, which requires
+        // ViewReports). For roles that can't see it, leave the dashboard's financial KPIs at zero -
+        // Phase 2.4 will null them out at the DTO instead.
+        if (!_permissions.Can(Permission.ViewReports))
+            return (0, 0);
+
+        var current = await _incomeStatementService.GetIncomeStatementAsync(curFrom, curTo);
+        var previous = await _incomeStatementService.GetIncomeStatementAsync(prevFrom, prevTo);
         return (current.NetProfit, previous.NetProfit);
     }
 

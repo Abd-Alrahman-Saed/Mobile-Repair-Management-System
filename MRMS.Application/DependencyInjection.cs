@@ -8,6 +8,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        // Session identity + authorization. CurrentUserService and PermissionService are stateless-ish
+        // singletons (one signed-in user per process); AuditService writes through the request's UoW.
+        services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<IPermissionService, PermissionService>();
+        services.AddScoped<IAuditService, AuditService>();
+
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<IDeviceService, DeviceService>();

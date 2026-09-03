@@ -13,6 +13,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ISystemSettingService _settingService;
     private readonly IAuthService _authService;
     private readonly IBackupService _backupService;
+    private readonly IPermissionService _permissions;
     private readonly NotificationService _notificationService;
     private List<SystemSettingDto> _allSettings = [];
 
@@ -81,11 +82,13 @@ public partial class SettingsViewModel : ObservableObject
         ISystemSettingService settingService,
         IAuthService authService,
         IBackupService backupService,
+        IPermissionService permissions,
         NotificationService notificationService)
     {
         _settingService = settingService;
         _authService = authService;
         _backupService = backupService;
+        _permissions = permissions;
         _notificationService = notificationService;
     }
 
@@ -260,6 +263,7 @@ public partial class SettingsViewModel : ObservableObject
         IsBackingUp = true;
         try
         {
+            _permissions.Require(MRMS.Core.Enums.Permission.Backup);
             var result = await _backupService.BackupNowAsync(isAutomatic: false);
             if (result.Success)
             {
@@ -275,6 +279,11 @@ public partial class SettingsViewModel : ObservableObject
                 BackupErrorMessage = result.ErrorMessage ?? "فشل أخذ النسخة الاحتياطية";
                 _notificationService.Show(BackupErrorMessage, NotificationType.Error);
             }
+        }
+        catch (Exception ex)
+        {
+            BackupErrorMessage = UiError.Describe(ex, "أخذ نسخة احتياطية");
+            _notificationService.Show(BackupErrorMessage, NotificationType.Error);
         }
         finally
         {
@@ -299,6 +308,7 @@ public partial class SettingsViewModel : ObservableObject
         IsRestoring = true;
         try
         {
+            _permissions.Require(MRMS.Core.Enums.Permission.Backup);
             var result = await _backupService.RestoreAsync(path);
             if (result.Success)
             {
@@ -310,6 +320,11 @@ public partial class SettingsViewModel : ObservableObject
                 _notificationService.Show(RestoreErrorMessage, NotificationType.Error);
                 RestoreCompleted?.Invoke(false, RestoreErrorMessage);
             }
+        }
+        catch (Exception ex)
+        {
+            RestoreErrorMessage = UiError.Describe(ex, "استرجاع نسخة احتياطية");
+            _notificationService.Show(RestoreErrorMessage, NotificationType.Error);
         }
         finally
         {

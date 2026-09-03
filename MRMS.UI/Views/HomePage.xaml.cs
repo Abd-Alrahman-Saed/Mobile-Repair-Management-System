@@ -93,6 +93,7 @@ public partial class HomePage : Page
 
     private void Logout_Click(object sender, System.Windows.RoutedEventArgs e)
     {
+        App.ServiceProvider!.GetRequiredService<MRMS.Application.Interfaces.ICurrentUserService>().Clear();
         var login = App.ServiceProvider!.GetRequiredService<LoginWindow>();
         login.Show();
         System.Windows.Window.GetWindow(this)?.Close();

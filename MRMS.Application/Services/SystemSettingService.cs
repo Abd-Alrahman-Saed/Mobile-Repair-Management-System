@@ -1,5 +1,6 @@
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -7,10 +8,12 @@ namespace MRMS.Application.Services;
 public class SystemSettingService : ISystemSettingService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public SystemSettingService(IUnitOfWork uow)
+    public SystemSettingService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<SystemSettingDto>> GetAllAsync()
@@ -28,6 +31,7 @@ public class SystemSettingService : ISystemSettingService
 
     public async Task<SystemSettingDto> UpdateAsync(UpdateSystemSettingDto dto)
     {
+        _permissions.Require(Permission.ManageSettings);
         var settings = await _uow.SystemSettings.FindAsync(s => s.Id == dto.Id);
         var setting = settings.FirstOrDefault();
         if (setting is null)

@@ -11,11 +11,13 @@ public class StockMovementService : IStockMovementService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
+    private readonly IAuditService _audit;
 
-    public StockMovementService(IUnitOfWork unitOfWork, IJournalService journalService)
+    public StockMovementService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
+        _audit = audit;
     }
 
     public async Task<IEnumerable<StockMovementDto>> GetAllAsync()
@@ -73,11 +75,13 @@ public class StockMovementService : IStockMovementService
             await _unitOfWork.StockMovements.AddAsync(movement);
             await _unitOfWork.CompleteAsync();
 
+            await _audit.LogAsync("StockMovement.Create", nameof(StockMovement), movement.Id,
+                $"{dto.Type} - {item.Name} x{movement.Quantity}");
+
             if (dto.Type == MovementType.Damaged)
-            {
                 await _journalService.PostDamagedAsync(movement.Date, item.Name, movement.Quantity, movement.Value, movement.Id);
-                await _unitOfWork.CompleteAsync();
-            }
+
+            await _unitOfWork.CompleteAsync();
         });
 
         var saved = await _unitOfWork.StockMovements

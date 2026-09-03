@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,7 +33,22 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(u => u.Username).IsUnique();
             e.Property(u => u.Username).HasMaxLength(50);
+            e.Property(u => u.FullName).HasMaxLength(100);
+            e.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
             e.Property(u => u.PasswordHash).HasMaxLength(200);
+            e.Property(u => u.PasswordSalt).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.Property(a => a.UserName).HasMaxLength(100);
+            e.Property(a => a.Action).HasMaxLength(60);
+            e.Property(a => a.EntityType).HasMaxLength(60);
+            e.Property(a => a.Details).HasMaxLength(1000);
+            e.HasIndex(a => a.CreatedAt);
+            e.HasIndex(a => a.UserId);
+            // UserId is a soft reference only - no FK. UserName is a snapshot so the log stays readable
+            // after a user is renamed or removed, and an audit row must never fail to write.
         });
 
         modelBuilder.Entity<Customer>(e =>

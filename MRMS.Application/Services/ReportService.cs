@@ -10,14 +10,17 @@ namespace MRMS.Application.Services;
 public class ReportService : IReportService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public ReportService(IUnitOfWork uow)
+    public ReportService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<StockBalanceItemDto>> GetStockBalanceAsync()
     {
+        // Inventory screen - available to everyone. (The cost column itself is hidden per-DTO in 2.4.)
         var items = await _uow.Items.GetAllAsync();
         return items.Select(i => new StockBalanceItemDto(
             i.Id, i.Code, i.Name, i.CurrentStock, i.CostPrice,
@@ -27,6 +30,7 @@ public class ReportService : IReportService
 
     public async Task<CashbookReportDto> GetCashbookAsync(DateTime from, DateTime to)
     {
+        _permissions.Require(Permission.ViewReports);
         var entries = new List<CashbookEntryDto>();
 
         var sales = await _uow.Sales.Query()
@@ -97,6 +101,7 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<PayableItemDto>> GetPayablesAsync()
     {
+        _permissions.Require(Permission.ViewSupplierBalance);
         var suppliers = await _uow.Suppliers
             .Query()
             .Include(s => s.Purchases)
