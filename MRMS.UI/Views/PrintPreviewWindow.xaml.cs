@@ -4,7 +4,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using MRMS.Application.DTOs;
-using MRMS.Core.Enums;
+using MRMS.UI.Resources;
 
 namespace MRMS.UI.Views;
 
@@ -121,17 +121,7 @@ public partial class PrintPreviewWindow : Window
 
         // Status & Warranty
         var statusStack = new StackPanel();
-        AddInfoRow(statusStack, "الحالة", ticket.Status switch
-        {
-            TicketStatus.Received => "مستلم",
-            TicketStatus.UnderInspection => "تحت الفحص",
-            TicketStatus.WaitingForParts => "بانتظار القطع",
-            TicketStatus.InRepair => "قيد الصيانة",
-            TicketStatus.Repaired => "تمت الصيانة",
-            TicketStatus.Delivered => "تم التسليم",
-            TicketStatus.Cancelled => "ملغي",
-            _ => ticket.Status.ToString()
-        });
+        AddInfoRow(statusStack, "الحالة", TicketStatusPalette.Label(ticket.Status));
         if (!string.IsNullOrEmpty(warrantyInfo))
             AddInfoRow(statusStack, "الضمان", warrantyInfo);
         stack.Children.Add(new Border

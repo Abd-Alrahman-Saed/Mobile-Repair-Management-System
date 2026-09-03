@@ -18,7 +18,7 @@
             <Setter Property="Text" Value=""/>
             <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#7C93AA"/>
+            <Setter Property="Foreground" Value="{StaticResource SidebarTextBrush}"/>
             <Setter Property="Margin" Value="14,18,14,4"/>
         </Style>
     </Page.Resources>
@@ -29,7 +29,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#2D3E50">
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -97,9 +97,9 @@
                 </ScrollViewer>
 
                 <StackPanel Grid.Row="1" Margin="10,0,10,10">
-                    <Rectangle Height="1" Fill="#3E5266" Margin="4,0,4,8"/>
+                    <Rectangle Height="1" Fill="{StaticResource OnDarkSubtleBrush}" Margin="4,0,4,8"/>
                     <Button Content="تسجيل خروج" Style="{StaticResource NavButton}"
-                            Foreground="#E74C3C"
+                            Foreground="{StaticResource DangerBrush}"
                             Click="Logout_Click"/>
                 </StackPanel>
             </Grid>
@@ -111,19 +111,19 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="#F5F5F5" Padding="10,8"
-                    BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Background="{StaticResource SurfaceMutedBrush}" Padding="10,8"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" x:Name="PageTitle"
-                               FontSize="15" FontWeight="SemiBold" Foreground="#444"
+                               FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"
                                VerticalAlignment="Center" Margin="5,0,0,0"/>
                     <Button Grid.Column="1" x:Name="BackButton"
                             Content="← رجوع" Padding="12,6"
-                            Background="#2D3E50" Foreground="White"
+                            Background="{StaticResource SidebarBrush}" Foreground="White"
                             BorderThickness="0" Cursor="Hand"
                             FontSize="13" Click="Back_Click">
                         <Button.Template>

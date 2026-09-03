@@ -12,6 +12,7 @@
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
             <converters:NotConverter x:Key="Not"/>
             <converters:TicketStatusConverter x:Key="TicketStatus"/>
+            <converters:TicketStatusBrushConverter x:Key="TicketStatusBrush"/>
             <converters:FirstLetterConverter x:Key="FirstLetter"/>
             <converters:InverseSignConverter x:Key="InverseSign"/>
             <converters:LessThanZeroConverter x:Key="LessThanZero"/>

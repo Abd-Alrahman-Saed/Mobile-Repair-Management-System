@@ -37,7 +37,7 @@
         <Button Grid.Row="3" Content="دخول"
                 Click="Login_Click"
                 Height="35" FontSize="14"
-                Background="#0078D7" Foreground="White"
+                Background="{StaticResource PrimaryBrush}" Foreground="White"
                 Cursor="Hand"/>
 
         <ProgressBar Grid.Row="4"

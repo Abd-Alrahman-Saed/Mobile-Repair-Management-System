@@ -11,7 +11,7 @@
                 <TextBlock Text="أدخل المعلومات الأساسية للمورد" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,24" Width="500" HorizontalAlignment="Center">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16" Width="500" HorizontalAlignment="Center">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="كود المورد" Style="{StaticResource FormLabel}"/>

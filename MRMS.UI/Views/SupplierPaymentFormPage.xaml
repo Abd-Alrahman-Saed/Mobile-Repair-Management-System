@@ -11,7 +11,7 @@
                 <TextBlock Text="إدخال دفعة جديدة للمورد" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Width="500" HorizontalAlignment="Center" Margin="0,0,0,24">
+            <Border Style="{StaticResource CardBorder}" Padding="20" Width="500" HorizontalAlignment="Center" Margin="0,0,0,16">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="التاريخ" Style="{StaticResource FormLabel}"/>

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Enums;
+using MRMS.UI.Resources;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
@@ -265,18 +266,8 @@ public partial class RepairTicketViewModel : ObservableObject
             else
             {
                 SelectedTicket = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
-                var statusText = SelectedStatus switch
-                {
-                    TicketStatus.Received => "مستلم",
-                    TicketStatus.UnderInspection => "تحت الفحص",
-                    TicketStatus.WaitingForParts => "بانتظار القطع",
-                    TicketStatus.InRepair => "قيد الصيانة",
-                    TicketStatus.Repaired => "تمت الصيانة",
-                    TicketStatus.Delivered => "تم التسليم",
-                    TicketStatus.Cancelled => "ملغي",
-                    _ => SelectedStatus.ToString()
-                };
-                _notificationService.Show($"تم تحديث الحالة إلى: {statusText}", NotificationType.Success);
+                _notificationService.Show(
+                    $"تم تحديث الحالة إلى: {TicketStatusPalette.Label(SelectedStatus)}", NotificationType.Success);
             }
         }
         catch (Exception ex)

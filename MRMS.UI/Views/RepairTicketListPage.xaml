@@ -2,15 +2,15 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="تذاكر الصيانة" FlowDirection="RightToLeft"
-      Background="#F0F2F5">
-    <Grid Margin="15">
+      Background="{StaticResource BackgroundBrush}">
+    <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="تذاكر الصيانة" FontSize="22"
-                   FontWeight="Bold" Margin="0,0,0,10" Foreground="#2C3E50"/>
+                   FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource TextPrimaryBrush}"/>
 
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled">
@@ -23,7 +23,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Margin="4" MinWidth="210" MaxWidth="240"
-                                BorderBrush="#D5D8DC" BorderThickness="1" CornerRadius="6"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6"
                                 Background="White">
                             <StackPanel>
                                 <Border Background="{Binding HeaderBrush}" CornerRadius="6,6,0,0" Padding="10,8">
@@ -31,7 +31,7 @@
                                         <TextBlock Text="{Binding DisplayName}"
                                                    FontWeight="Bold" FontSize="14" Foreground="White"/>
                                         <TextBlock Text="{Binding Count, StringFormat='عدد {0}'}"
-                                                   FontSize="11" Foreground="#CCD1D9"/>
+                                                   FontSize="11" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
                                 </Border>
 
@@ -42,14 +42,14 @@
                                           ScrollViewer.VerticalScrollBarVisibility="Auto">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <Border BorderBrush="#EAECEE" BorderThickness="0,0,0,1" Padding="8,6">
+                                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding TicketNumber}"
-                                                               FontWeight="Bold" FontSize="13" Foreground="#2C3E50"/>
+                                                               FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
                                                     <TextBlock Text="{Binding DeviceInfo}"
-                                                               FontSize="12" Foreground="#7F8C8D"/>
+                                                               FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
                                                     <TextBlock Text="{Binding ProblemDescription}"
-                                                               FontSize="11" Foreground="#95A5A6"
+                                                               FontSize="11" Foreground="{StaticResource TextMutedBrush}"
                                                                TextTrimming="CharacterEllipsis"
                                                                MaxHeight="28" Margin="0,2,0,2"/>
                                                     <Grid>
@@ -64,12 +64,12 @@
                                                                            FontSize="10" Foreground="White"/>
                                                             </Border>
                                                             <TextBlock Text="{Binding ReceiveDate, StringFormat='{}{0:yyyy-MM-dd}'}"
-                                                                       FontSize="11" Foreground="#BDC3C7"
+                                                                       FontSize="11" Foreground="{StaticResource TextMutedBrush}"
                                                                        VerticalAlignment="Center" Margin="6,0,0,0"/>
                                                         </StackPanel>
                                                         <Button Grid.Column="1" Content="فتح"
                                                                 Padding="8,2" FontSize="11"
-                                                                Background="#3498DB" Foreground="White"
+                                                                Background="{StaticResource PrimaryBrush}" Foreground="White"
                                                                 BorderThickness="0" Cursor="Hand"
                                                                 Command="{Binding DataContext.OpenTicketCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                                 CommandParameter="{Binding Id}"/>

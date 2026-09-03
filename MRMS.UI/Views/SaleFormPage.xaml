@@ -11,7 +11,7 @@
                 <TextBlock Text="تسجيل بيع صنف للعميل مع حساب الربح" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Width="550" HorizontalAlignment="Center" Margin="0,0,0,24">
+            <Border Style="{StaticResource CardBorder}" Padding="20" Width="550" HorizontalAlignment="Center" Margin="0,0,0,16">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="مسح باركود الصنف (QR / Barcode)" Style="{StaticResource FormLabel}"/>

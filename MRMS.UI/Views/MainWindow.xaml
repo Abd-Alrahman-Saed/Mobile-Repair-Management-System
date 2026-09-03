@@ -12,7 +12,7 @@
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="6"/>
     </WindowChrome.WindowChrome>
 
-    <Border Background="#F1F5F9" CornerRadius="0" BorderThickness="1" BorderBrush="#E2E8F0">
+    <Border Background="{StaticResource BackgroundBrush}" CornerRadius="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="36"/>
@@ -20,7 +20,7 @@
             </Grid.RowDefinitions>
 
             <!-- ===== Title Bar ===== -->
-            <Border Grid.Row="0" Background="#1E293B" Padding="0"
+            <Border Grid.Row="0" Background="{StaticResource SidebarBrush}" Padding="0"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid FlowDirection="LeftToRight">
                     <Grid.ColumnDefinitions>
@@ -33,11 +33,11 @@
                     <StackPanel Grid.Column="0" Orientation="Horizontal"
                                 VerticalAlignment="Center" Margin="12,0,0,0">
                         <TextBlock Text="KMG" FontSize="14" FontWeight="Bold"
-                                   Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                        <TextBlock Text=" | " FontSize="14" Foreground="#64748B"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text=" | " FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center"/>
                         <TextBlock Text="نظام صيانة الأجهزة المحمولة" FontSize="12"
-                                   Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                   Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Spacer -->
@@ -49,7 +49,7 @@
                                 Click="Minimize_Click"
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand">
-                            <TextBlock Text="─" FontSize="14" Foreground="#94A3B8"
+                            <TextBlock Text="─" FontSize="14" Foreground="{StaticResource TextMutedBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Button.Resources>
                                 <Style TargetType="Border"/>
@@ -62,7 +62,7 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="border" Property="Background" Value="#334155"/>
+                                            <Setter TargetName="border" Property="Background" Value="{StaticResource OnDarkSubtleBrush}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -73,7 +73,7 @@
                                 Click="Maximize_Click"
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand">
-                            <TextBlock x:Name="MaxIcon" Text="□" FontSize="12" Foreground="#94A3B8"
+                            <TextBlock x:Name="MaxIcon" Text="□" FontSize="12" Foreground="{StaticResource TextMutedBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
@@ -83,7 +83,7 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="border" Property="Background" Value="#334155"/>
+                                            <Setter TargetName="border" Property="Background" Value="{StaticResource OnDarkSubtleBrush}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -94,7 +94,7 @@
                                 Click="Close_Click"
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand">
-                            <TextBlock Text="✕" FontSize="14" Foreground="#94A3B8"
+                            <TextBlock Text="✕" FontSize="14" Foreground="{StaticResource TextMutedBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
@@ -104,7 +104,7 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="border" Property="Background" Value="#EF4444"/>
+                                            <Setter TargetName="border" Property="Background" Value="{StaticResource DangerBrush}"/>
                                             <Setter Property="Foreground" Value="White"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>

@@ -12,7 +12,7 @@
                 <TextBlock Text="أدخل المعلومات الأساسية للصنف" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,24" Width="500" HorizontalAlignment="Center">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16" Width="500" HorizontalAlignment="Center">
                 <StackPanel>
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="كود الصنف (يمكن المسح مباشرة بجهاز QR / Barcode)" Style="{StaticResource FormLabel}"/>

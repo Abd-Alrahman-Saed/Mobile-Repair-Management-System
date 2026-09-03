@@ -13,7 +13,7 @@
                 <TextBlock Text="تحليل الأداء المالي الشهري مع الرسوم البيانية" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,20"
+            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
                 <WrapPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
@@ -93,7 +93,7 @@
 
             <!-- 12-Month Table -->
             <TextBlock Text="جدول 12 شهر" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
-            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,24"
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
                 <DataGrid ItemsSource="{Binding Report.Rows}" Style="{StaticResource ModernDataGrid}"
                           AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="400">

@@ -17,7 +17,7 @@
             <TextBlock Text="عرض الحركات النقدية والرصيد الجاري" Style="{StaticResource PageSubtitle}"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -36,7 +36,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

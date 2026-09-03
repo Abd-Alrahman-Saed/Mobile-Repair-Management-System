@@ -13,7 +13,7 @@
             </StackPanel>
 
             <!-- ===== Profile Header Card ===== -->
-            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,20">
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -126,7 +126,7 @@
             <!-- ===== Repair History Section ===== -->
             <TextBlock Text="تاريخ الصيانة" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
 
-            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20"
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
                 <Grid>
                     <DataGrid x:Name="TicketsGrid" ItemsSource="{Binding SelectedDeviceTickets}"
@@ -139,49 +139,11 @@
                             <DataGridTemplateColumn Header="الحالة" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="10" Padding="8,2"
-                                                HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
-                                                    <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="مكتمل">
-                                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
-                                                            <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
-                                                            <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
-                                                            <Setter Property="Background" Value="{StaticResource DangerLightBrush}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
+                                        <Border Style="{StaticResource StatusTag}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                Background="{Binding Status, Converter={StaticResource TicketStatusBrush}, ConverterParameter=Background}">
                                             <TextBlock Text="{Binding Status, Converter={StaticResource TicketStatus}}"
-                                                       FontSize="12" FontWeight="Medium">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="مكتمل">
-                                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="تم الاستلام">
-                                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="قيد الصيانة">
-                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
-                                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
+                                                       FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="{Binding Status, Converter={StaticResource TicketStatusBrush}, ConverterParameter=Text}"/>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              FlowDirection="RightToLeft">
     <Grid>
-        <Border x:Name="Overlay" Background="#80000000" Visibility="Collapsed"
+        <Border x:Name="Overlay" Background="{StaticResource ScrimBrush}" Visibility="Collapsed"
                 Panel.ZIndex="999">
             <Border CornerRadius="14" Background="White" Padding="28,24"
                     Width="400" Effect="{StaticResource ElevatedShadow}"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel>
-                    <TextBlock x:Name="ConfirmText" FontSize="16" Foreground="#333"
+                    <TextBlock x:Name="ConfirmText" FontSize="16" Foreground="{StaticResource TextPrimaryBrush}"
                                TextWrapping="Wrap" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="YesButton" Content="نعم" Padding="24,10"
@@ -17,7 +17,7 @@
                                 BorderThickness="0" FontSize="14"
                                 Cursor="Hand" Margin="0,0,12,0" Click="Yes_Click"/>
                         <Button x:Name="NoButton" Content="لا" Padding="24,10"
-                                Background="{StaticResource BorderBrush}" Foreground="#333"
+                                Background="{StaticResource BorderBrush}" Foreground="{StaticResource TextPrimaryBrush}"
                                 BorderThickness="0" FontSize="14"
                                 Cursor="Hand" Click="No_Click"/>
                     </StackPanel>
@@ -64,7 +64,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0" Width="24" Height="24"
-                        CornerRadius="12" Background="#FFFFFF40"
+                        CornerRadius="12" Background="{StaticResource OnAccentFillBrush}"
                         VerticalAlignment="Center" Margin="0,0,10,0">
                     <TextBlock x:Name="IconText" FontSize="13" FontWeight="Bold"
                                Foreground="White" HorizontalAlignment="Center"
@@ -77,7 +77,7 @@
                            TextWrapping="Wrap"/>
 
                 <TextBlock Grid.Column="2" Text="✕" FontSize="14"
-                           Foreground="#FFFFFFC0" VerticalAlignment="Center"
+                           Foreground="{StaticResource OnAccentTextBrush}" VerticalAlignment="Center"
                            Margin="10,0,0,0" Cursor="Hand"
                            MouseDown="Close_Click"/>
             </Grid>

@@ -17,7 +17,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" Content="← رجوع" Command="{Binding ResetCommand}"
-                        Padding="15,5" Background="#555" Foreground="White"
+                        Padding="15,5" Background="{StaticResource TextSecondaryBrush}" Foreground="White"
                         Visibility="{Binding ShowSearchImeiStep, Converter={StaticResource InverseBoolToVis}}"/>
                 <TextBlock Grid.Column="1" Text="استقبال جهاز" FontSize="24"
                            FontWeight="Bold" HorizontalAlignment="Right"/>
@@ -35,7 +35,7 @@
                          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
         </StackPanel>
 
-        <Border Grid.Row="2" BorderBrush="#CCC" BorderThickness="1"
+        <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                 CornerRadius="5" Padding="15" Margin="0,5,0,0"
                 Visibility="{Binding ShowSearchImeiStep, Converter={StaticResource BoolToVis}}">
             <StackPanel>
@@ -50,7 +50,7 @@
                                  KeyDown="Imei_KeyDown"/>
                         <Button Content="بحث" Command="{Binding SearchImeiCommand}"
                                 Margin="10,0,0,0" Padding="20,8"
-                                Background="#0078D7" Foreground="White" FontWeight="Bold"/>
+                                Background="{StaticResource PrimaryBrush}" Foreground="White" FontWeight="Bold"/>
                     </StackPanel>
                     <ProgressBar IsIndeterminate="True" Height="3" Margin="0,5,0,0"
                                  Visibility="{Binding IsSearchingImei, Converter={StaticResource BoolToVis}}"/>
@@ -58,12 +58,12 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" BorderBrush="#27AE60" BorderThickness="1"
-                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="#E8F8F0"
+        <Border Grid.Row="2" BorderBrush="{StaticResource SuccessBrush}" BorderThickness="1"
+                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="{StaticResource SuccessLightBrush}"
                 Visibility="{Binding ShowExistingDeviceStep, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <TextBlock Text="الجهاز مسجل مسبقاً - إنشاء تذكرة صيانة" FontWeight="Bold" FontSize="16"
-                           Foreground="#27AE60" Margin="0,0,0,15"/>
+                           Foreground="{StaticResource SuccessBrush}" Margin="0,0,0,15"/>
 
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
@@ -117,17 +117,17 @@
 
                 <Button Content="إنشاء تذكرة الصيانة"
                         Command="{Binding CreateTicketForExistingDeviceCommand}"
-                        Padding="30,10" Background="#27AE60" Foreground="White"
+                        Padding="30,10" Background="{StaticResource SuccessBrush}" Foreground="White"
                         FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" BorderBrush="#3498DB" BorderThickness="1"
-                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="#EBF5FB"
+        <Border Grid.Row="2" BorderBrush="{StaticResource PrimaryBrush}" BorderThickness="1"
+                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="{StaticResource PrimaryLightBrush}"
                 Visibility="{Binding ShowSearchCustomerStep, Converter={StaticResource BoolToVis}}">
             <StackPanel>
                 <TextBlock Text="جهاز جديد - ابحث عن العميل" FontWeight="Bold" FontSize="16"
-                           Foreground="#3498DB" Margin="0,0,0,15"/>
+                           Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,15"/>
 
                 <StackPanel Margin="0,0,0,10">
                     <TextBlock Text="اسم العميل" Margin="0,0,0,5" FontWeight="Bold"/>
@@ -137,11 +137,11 @@
                                  TextChanged="CustomerNameSearch_TextChanged"/>
                         <Button Content="بحث" Command="{Binding SearchCustomerCommand}"
                                 Margin="10,0,0,0" Padding="20,8"
-                                Background="#3498DB" Foreground="White" FontWeight="Bold"/>
+                                Background="{StaticResource PrimaryBrush}" Foreground="White" FontWeight="Bold"/>
                     </StackPanel>
                 </StackPanel>
 
-                <Border BorderBrush="#CCC" BorderThickness="1" CornerRadius="3" Margin="0,5,0,10"
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="3" Margin="0,5,0,10"
                         Visibility="{Binding HasCustomerSearchResults, Converter={StaticResource BoolToVis}}"
                         MaxHeight="150">
                     <ListBox ItemsSource="{Binding CustomerSearchResults}"
@@ -151,7 +151,7 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="5">
                                     <TextBlock Text="{Binding FullName}" FontWeight="Bold" Margin="0,0,15,0"/>
-                                    <TextBlock Text="{Binding PhoneNumber}" Foreground="#666"/>
+                                    <TextBlock Text="{Binding PhoneNumber}" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -162,21 +162,21 @@
                     <Button Content="اختيار هذا العميل"
                             Command="{Binding UseSelectedCustomerCommand}"
                             Padding="20,8" Margin="0,0,10,0"
-                            Background="#27AE60" Foreground="White" FontWeight="Bold"
+                            Background="{StaticResource SuccessBrush}" Foreground="White" FontWeight="Bold"
                             IsEnabled="{Binding HasSelectedCustomerFromSearch}"/>
                     <Button Content="عميل جديد"
                             Command="{Binding SwitchToNewCustomerCommand}"
                             Padding="20,8"
-                            Background="#E67E22" Foreground="White" FontWeight="Bold"/>
+                            Background="{StaticResource WarningBrush}" Foreground="White" FontWeight="Bold"/>
                 </StackPanel>
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" BorderBrush="#8E44AD" BorderThickness="1"
-                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="#F5EEF8"
+        <Border Grid.Row="2" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1"
+                CornerRadius="5" Padding="15" Margin="0,5,0,0" Background="{StaticResource SecondaryLightBrush}"
                 Visibility="{Binding ShowNewDeviceAndTicketStep, Converter={StaticResource BoolToVis}}">
             <StackPanel>
-                <TextBlock FontWeight="Bold" FontSize="16" Foreground="#8E44AD" Margin="0,0,0,15">
+                <TextBlock FontWeight="Bold" FontSize="16" Foreground="{StaticResource SecondaryBrush}" Margin="0,0,0,15">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -191,7 +191,7 @@
                     </TextBlock.Style>
                 </TextBlock>
 
-                <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Margin="0,0,0,15" Padding="0,0,0,10">
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,15" Padding="0,0,0,10">
                     <StackPanel>
                         <TextBlock Text="بيانات العميل" FontWeight="Bold" FontSize="14"
                                    TextDecorations="Underline" Margin="0,0,0,10"/>
@@ -226,7 +226,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border BorderBrush="#DDD" BorderThickness="0,0,0,1" Margin="0,0,0,15" Padding="0,0,0,10">
+                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,15" Padding="0,0,0,10">
                     <StackPanel>
                         <TextBlock Text="بيانات الجهاز" FontWeight="Bold" FontSize="14"
                                    TextDecorations="Underline" Margin="0,0,0,10"/>
@@ -273,11 +273,11 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="رجوع" Command="{Binding BackToCustomerSearchCommand}"
                             Padding="20,8" Margin="0,0,10,0"
-                            Background="#777" Foreground="White" FontWeight="Bold"/>
+                            Background="{StaticResource TextMutedBrush}" Foreground="White" FontWeight="Bold"/>
                     <Button Content="تسجيل وإنشاء التذكرة"
                             Command="{Binding RegisterNewDeviceAndTicketCommand}"
                             Padding="30,10"
-                            Background="#8E44AD" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                            Background="{StaticResource SecondaryBrush}" Foreground="White" FontWeight="Bold" FontSize="14"/>
                 </StackPanel>
             </StackPanel>
         </Border>

@@ -12,7 +12,7 @@
                 <TextBlock Text="تسجيل فاتورة شراء من المورد مع الأصناف" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,20">
+            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -64,7 +64,7 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,20">
+            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="الأصناف" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
 

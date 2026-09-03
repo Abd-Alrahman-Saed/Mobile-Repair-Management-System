@@ -13,7 +13,7 @@
             </StackPanel>
 
             <!-- Ticket Info Card -->
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,20">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -48,43 +48,12 @@
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="الحالة" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,16,8"/>
-                        <Border Grid.Row="3" Grid.Column="1" CornerRadius="10" Padding="10,3"
-                                HorizontalAlignment="Right" Margin="0,0,0,8">
-                            <Border.Style>
-                                <Style TargetType="Border" BasedOn="{StaticResource StatusBadgeBase}">
-                                    <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تمت الصيانة">
-                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
-                                            <Setter Property="Background" Value="{StaticResource SuccessLightBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
-                                            <Setter Property="Background" Value="{StaticResource DangerLightBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
+                        <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource StatusTag}"
+                                HorizontalAlignment="Right" Margin="0,0,0,8"
+                                Background="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatusBrush}, ConverterParameter=Background}">
                             <TextBlock Text="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}"
-                                       FontSize="12" FontWeight="Medium">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تمت الصيانة">
-                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="تم التسليم">
-                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatus}}" Value="ملغي">
-                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{Binding SelectedTicket.Status, Converter={StaticResource TicketStatusBrush}, ConverterParameter=Text}"/>
                         </Border>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Text="تاريخ الاستقبال" FontWeight="SemiBold"
@@ -97,7 +66,7 @@
             </Border>
 
             <!-- Status Update -->
-            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="تحديث الحالة" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
@@ -105,22 +74,22 @@
                         <ComboBox SelectedIndex="{Binding SelectedStatusIndex}"
                                   Width="200" Height="30" FontSize="14">
                             <ComboBoxItem Content="مستلم"/>
-                            <ComboBoxItem Content="تحت الفحص" Tag="1"/>
-                            <ComboBoxItem Content="في انتظار قطع الغيار" Tag="2"/>
-                            <ComboBoxItem Content="قيد الصيانة" Tag="3"/>
-                            <ComboBoxItem Content="تمت الصيانة" Tag="4"/>
+                            <ComboBoxItem Content="قيد الفحص" Tag="1"/>
+                            <ComboBoxItem Content="بانتظار القطع" Tag="2"/>
+                            <ComboBoxItem Content="قيد الإصلاح" Tag="3"/>
+                            <ComboBoxItem Content="تم الإصلاح" Tag="4"/>
                             <ComboBoxItem Content="تم التسليم" Tag="5"/>
                             <ComboBoxItem Content="ملغي" Tag="6"/>
                         </ComboBox>
                         <Button Content="تحديث" Command="{Binding UpdateStatusCommand}"
                                 Margin="10,0,0,0" Padding="15,5"
-                                Background="#0078D7" Foreground="White"/>
+                                Background="{StaticResource PrimaryBrush}" Foreground="White"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
             <!-- Repair Info -->
-            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="بيانات الصيانة" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
@@ -137,16 +106,16 @@
                     </TextBlock>
                     <TextBlock Margin="0,4,0,0" FontSize="13">
                         <Run Text="الربح المتوقع من هذه التذكرة:" Foreground="Gray"/>
-                        <Run Text="{Binding ExpectedProfit, Mode=OneWay, StringFormat={}{0:N0}}" FontWeight="Bold" Foreground="#27AE60"/>
+                        <Run Text="{Binding ExpectedProfit, Mode=OneWay, StringFormat={}{0:N0}}" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
                     </TextBlock>
                     <Button Content="حفظ" Command="{Binding UpdateRepairInfoCommand}"
                             Margin="0,10,0,0" Padding="15,5"
-                            Background="#27AE60" Foreground="White"/>
+                            Background="{StaticResource SuccessBrush}" Foreground="White"/>
                 </StackPanel>
             </Border>
 
             <!-- Parts -->
-            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="قطع الغيار والإكسسوارات" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
@@ -172,11 +141,11 @@
                         <Button Grid.Column="3" Content="إضافة قطعة"
                                 Command="{Binding AddPartCommand}"
                                 Margin="8,0,0,0" Padding="10,5"
-                                Background="#0078D7" Foreground="White"/>
+                                Background="{StaticResource PrimaryBrush}" Foreground="White"/>
                         <Button Grid.Column="4" Content="+ صنف جديد"
                                 Click="AddNewPart_Click"
                                 Margin="8,0,0,0" Padding="10,5"
-                                Background="#555" Foreground="White"/>
+                                Background="{StaticResource TextSecondaryBrush}" Foreground="White"/>
                     </Grid>
 
                     <DataGrid ItemsSource="{Binding Parts}"
@@ -203,7 +172,7 @@
                     </DataGrid>
 
                     <TextBlock HorizontalAlignment="Left" FontSize="14" FontWeight="SemiBold"
-                               Foreground="#0078D7">
+                               Foreground="{StaticResource PrimaryBrush}">
                         <Run Text="إجمالي تكلفة القطع:"/>
                         <Run Text="{Binding PartsTotalCost, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                     </TextBlock>
@@ -211,7 +180,7 @@
             </Border>
 
             <!-- Photos -->
-            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="الصور" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
@@ -230,7 +199,7 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="5"
+                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5"
                                         Margin="5" Padding="3" Cursor="Hand">
                                     <StackPanel>
                                         <Image Source="{Binding FilePath}" Width="150" Height="150"
@@ -247,7 +216,7 @@
             </Border>
 
             <!-- Warranty -->
-            <Border BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
                     CornerRadius="5" Padding="15" Margin="0,0,0,15">
                 <StackPanel>
                     <TextBlock Text="الضمان" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
@@ -257,7 +226,7 @@
                                  HorizontalAlignment="Right" FontSize="14"/>
                         <Button Content="تعيين الضمان" Click="AssignWarranty"
                                 Margin="10,0,0,0" Padding="10,5"
-                                Background="#E67E22" Foreground="White"/>
+                                Background="{StaticResource WarningBrush}" Foreground="White"/>
                     </StackPanel>
                     <TextBlock Text="{Binding WarrantyInfo}" Margin="0,5,0,0" Foreground="Gray"/>
                 </StackPanel>
@@ -270,10 +239,10 @@
             <!-- Print Buttons -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="طباعة الفاتورة" Click="PrintInvoice"
-                        Padding="15,8" Background="#2C3E50" Foreground="White"
+                        Padding="15,8" Background="{StaticResource TextPrimaryBrush}" Foreground="White"
                         Cursor="Hand" Margin="0,0,8,0"/>
                 <Button Content="وصل استلام" Click="PrintReceptionReceipt"
-                        Padding="15,8" Background="#0078D7" Foreground="White"
+                        Padding="15,8" Background="{StaticResource PrimaryBrush}" Foreground="White"
                         Cursor="Hand"/>
             </StackPanel>
 

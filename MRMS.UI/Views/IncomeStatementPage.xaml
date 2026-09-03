@@ -12,7 +12,7 @@
                 <TextBlock Text="بيان الأرباح والخسائر" Style="{StaticResource PageSubtitle}"/>
             </StackPanel>
 
-            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,20"
+            <Border Style="{StaticResource CardBorder}" Padding="20" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
                 <WrapPanel Margin="0,0,0,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,0" VerticalAlignment="Center">
@@ -34,7 +34,7 @@
                 </WrapPanel>
             </Border>
 
-            <Border Style="{StaticResource CardBorder}" Padding="28" Margin="0,0,0,20"
+            <Border Style="{StaticResource CardBorder}" Padding="28" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
                 <StackPanel>
                     <TextBlock Text="ملخص الأرباح والخسائر" Style="{StaticResource SectionTitle}" Margin="0,0,0,20"/>

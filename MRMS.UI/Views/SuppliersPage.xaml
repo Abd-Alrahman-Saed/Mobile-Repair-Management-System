@@ -17,7 +17,7 @@
             <TextBlock Text="عرض وإدارة جميع الموردين" Style="{StaticResource PageSubtitle}"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,20">
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

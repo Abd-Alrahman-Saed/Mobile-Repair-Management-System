@@ -13,7 +13,7 @@
             </StackPanel>
 
             <!-- ===== Form Card ===== -->
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,24" Width="460" HorizontalAlignment="Center">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,16" Width="460" HorizontalAlignment="Center">
                 <StackPanel>
                     <!-- Full Name -->
                     <StackPanel Margin="0,0,0,20">
