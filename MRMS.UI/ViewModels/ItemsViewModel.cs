@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
@@ -14,6 +15,8 @@ public partial class ItemsViewModel : ObservableObject
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
     private List<ItemDto> _allItems = [];
+
+    public bool CanViewCost { get; }
 
     [ObservableProperty]
     private ObservableCollection<ItemDto> _items = [];
@@ -35,11 +38,13 @@ public partial class ItemsViewModel : ObservableObject
                     i.Code.Contains(value, StringComparison.OrdinalIgnoreCase)));
     }
 
-    public ItemsViewModel(IItemService itemService, AppNavigationService navigationService, NotificationService notificationService)
+    public ItemsViewModel(IItemService itemService, AppNavigationService navigationService,
+        NotificationService notificationService, IPermissionService permissions)
     {
         _itemService = itemService;
         _navigationService = navigationService;
         _notificationService = notificationService;
+        CanViewCost = permissions.Can(Permission.ViewCostPrice);
     }
 
     [RelayCommand]

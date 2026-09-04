@@ -12,6 +12,11 @@ public partial class SuppliersPage : Page
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+
+        if (!vm.CanViewBalance)
+            foreach (var col in new[] { OpeningBalanceColumn, TotalPurchasesColumn, TotalPaymentsColumn, OutstandingBalanceColumn })
+                col.Visibility = System.Windows.Visibility.Collapsed;
+
         Loaded += async (_, _) => await _vm.LoadCommand.ExecuteAsync(null);
     }
 }

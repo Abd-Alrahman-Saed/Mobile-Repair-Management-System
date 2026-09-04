@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
@@ -13,6 +14,8 @@ public partial class SaleFormViewModel : ObservableObject
     private readonly IItemService _itemService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
+
+    public bool CanViewProfit { get; }
 
     [ObservableProperty]
     private DateTime _date = DateTime.Today;
@@ -60,12 +63,14 @@ public partial class SaleFormViewModel : ObservableObject
         ISaleService saleService,
         IItemService itemService,
         AppNavigationService navigationService,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        IPermissionService permissions)
     {
         _saleService = saleService;
         _itemService = itemService;
         _navigationService = navigationService;
         _notificationService = notificationService;
+        CanViewProfit = permissions.Can(Permission.ViewProfit);
     }
 
     partial void OnSelectedItemIdChanged(int value)
@@ -74,7 +79,7 @@ public partial class SaleFormViewModel : ObservableObject
         if (item is not null)
         {
             UnitPrice = item.SellingPrice;
-            CostPrice = item.CostPrice;
+            CostPrice = item.CostPrice ?? 0m;
             SelectedItemCurrentStock = item.CurrentStock;
         }
         else

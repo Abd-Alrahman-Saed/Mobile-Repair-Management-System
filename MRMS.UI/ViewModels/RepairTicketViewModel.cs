@@ -142,7 +142,7 @@ public partial class RepairTicketViewModel : ObservableObject
     {
         var item = AvailableItems.FirstOrDefault(i => i.Id == value);
         if (item is not null)
-            PartUnitCost = item.CostPrice;
+            PartUnitCost = item.CostPrice ?? 0m;
     }
 
     public void AddAndSelectNewPart(ItemDto item)

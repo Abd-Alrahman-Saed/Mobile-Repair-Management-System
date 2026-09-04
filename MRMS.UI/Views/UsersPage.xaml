@@ -1,0 +1,79 @@
+<Page x:Class="MRMS.UI.Views.UsersPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="المستخدمون" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="إدارة المستخدمين" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="حسابات الدخول وأدوارها" Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                           FontSize="13" Foreground="{StaticResource TextSecondaryBrush}">
+                    <Run Text="عدد المستخدمين:"/>
+                    <Run Text="{Binding Users.Count, Mode=OneWay, FallbackValue=0}" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}"/>
+                </TextBlock>
+                <Button Grid.Column="1" Content="+ مستخدم جديد"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding AddUserCommand}"/>
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}"
+                   Margin="0,0,0,8" TextWrapping="Wrap"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVis}}"/>
+
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Users}" Style="{StaticResource ModernDataGrid}"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="اسم المستخدم" Binding="{Binding Username}" Width="140"/>
+                        <DataGridTextColumn Header="الاسم الكامل" Binding="{Binding FullName}" Width="*"/>
+                        <DataGridTextColumn Header="الدور" Binding="{Binding Role, Converter={StaticResource UserRole}}" Width="120"/>
+                        <DataGridTextColumn Header="الحالة" Width="90"
+                                            Binding="{Binding IsActive, Converter={StaticResource ActiveStatus}}"/>
+                        <DataGridTextColumn Header="آخر دخول"
+                                            Binding="{Binding LastLoginAt, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="150"/>
+                        <DataGridTemplateColumn Header="الإجراءات" Width="170">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="تعديل" Style="{StaticResource ActionButton}" Margin="0,0,6,0"
+                                                Command="{Binding DataContext.EditUserCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                        <Button Content="تفعيل/إيقاف" Style="{StaticResource SecondaryButton}"
+                                                Padding="10,4" FontSize="12"
+                                                Command="{Binding DataContext.ToggleActiveCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                             Height="3" VerticalAlignment="Top"
+                             Style="{StaticResource ModernProgressBar}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

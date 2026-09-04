@@ -46,6 +46,9 @@ public partial class App : System.Windows.Application
 
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ChangePasswordViewModel>();
+        services.AddTransient<UsersViewModel>();
+        services.AddTransient<UserFormViewModel>();
+        services.AddTransient<AuditLogViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<CustomerListViewModel>();
         services.AddTransient<CustomerFormViewModel>();
@@ -78,6 +81,9 @@ public partial class App : System.Windows.Application
 
         services.AddTransient<LoginWindow>();
         services.AddTransient<ChangePasswordWindow>();
+        services.AddTransient<UsersPage>();
+        services.AddTransient<UserFormPage>();
+        services.AddTransient<AuditLogPage>();
         services.AddTransient<MainWindow>();
         services.AddTransient<HomePage>();
         services.AddTransient<DashboardPage>();

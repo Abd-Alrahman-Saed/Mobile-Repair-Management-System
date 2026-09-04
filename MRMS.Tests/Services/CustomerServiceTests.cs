@@ -18,7 +18,7 @@ public class CustomerServiceTests
             .Callback<Customer>(c => customers.Add(c));
         mockUow.Setup(u => u.CompleteAsync()).ReturnsAsync(1);
 
-        var service = new CustomerService(mockUow.Object);
+        var service = new CustomerService(mockUow.Object, MRMS.Tests.TestServices.Permissions());
         var result = await service.CreateAsync(new CreateCustomerDto("أحمد", "0123456789"));
 
         result.FullName.Should().Be("أحمد");
@@ -35,7 +35,7 @@ public class CustomerServiceTests
         mockUow.Setup(u => u.Devices.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Device, bool>>>()))
             .ReturnsAsync(new List<Device>());
 
-        var service = new CustomerService(mockUow.Object);
+        var service = new CustomerService(mockUow.Object, MRMS.Tests.TestServices.Permissions());
         var result = await service.DeleteAsync(1);
 
         result.Should().BeTrue();
@@ -48,7 +48,7 @@ public class CustomerServiceTests
         mockUow.Setup(u => u.Devices.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Device, bool>>>()))
             .ReturnsAsync(new List<Device> { new() { Id = 1 } });
 
-        var service = new CustomerService(mockUow.Object);
+        var service = new CustomerService(mockUow.Object, MRMS.Tests.TestServices.Permissions());
         var result = await service.HasDevicesOrRepairsAsync(1);
 
         result.Should().BeTrue();
@@ -61,7 +61,7 @@ public class CustomerServiceTests
         mockUow.Setup(u => u.Devices.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Device, bool>>>()))
             .ReturnsAsync(new List<Device>());
 
-        var service = new CustomerService(mockUow.Object);
+        var service = new CustomerService(mockUow.Object, MRMS.Tests.TestServices.Permissions());
         var result = await service.HasDevicesOrRepairsAsync(1);
 
         result.Should().BeFalse();

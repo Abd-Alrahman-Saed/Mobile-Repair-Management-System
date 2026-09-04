@@ -101,7 +101,10 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<PayableItemDto>> GetPayablesAsync()
     {
-        _permissions.Require(Permission.ViewSupplierBalance);
+        // Soft hide, not a hard block: the suppliers screen is open to everyone, but the money columns
+        // are for ViewSupplierBalance only. The payables *report* screen is gated by navigation.
+        var showFigures = _permissions.Can(Permission.ViewSupplierBalance);
+
         var suppliers = await _uow.Suppliers
             .Query()
             .Include(s => s.Purchases)
@@ -110,6 +113,9 @@ public class ReportService : IReportService
 
         return suppliers.Select(s =>
         {
+            if (!showFigures)
+                return new PayableItemDto(s.Id, s.Name, null, null, null, null);
+
             var totalPurchases = s.Purchases.Sum(p => p.PurchaseItems.Sum(pi => pi.TotalCost));
             var totalPayments = s.SupplierPayments.Sum(sp => sp.Amount);
             var outstanding = s.OpeningBalance + totalPurchases - totalPayments;

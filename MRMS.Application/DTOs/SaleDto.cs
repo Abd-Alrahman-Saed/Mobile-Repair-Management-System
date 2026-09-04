@@ -8,8 +8,9 @@ public record SaleDto(
     int Quantity,
     decimal UnitPrice,
     decimal TotalPrice,
-    decimal CostPrice,
-    decimal Profit,
+    // Null when the current user lacks Permission.ViewProfit.
+    decimal? CostPrice,
+    decimal? Profit,
     string CustomerName,
     string Notes,
     DateTime CreatedAt);

@@ -55,7 +55,8 @@
                     <Border Background="{StaticResource PrimaryLightBrush}"
                             CornerRadius="8" Padding="16" Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Foreground="{StaticResource PrimaryBrush}" FontSize="14">
+                            <TextBlock Foreground="{StaticResource PrimaryBrush}" FontSize="14"
+                                       Visibility="{Binding CanViewProfit, Converter={StaticResource BoolToVis}}">
                                 <Run Text="تكلفة الشراء:"/>
                                 <Run Text="{Binding CostPrice, StringFormat={}{0:N0}}" FontWeight="SemiBold"/>
                             </TextBlock>
@@ -63,7 +64,8 @@
                                 <Run Text="الإجمالي:"/>
                                 <Run Text="{Binding TotalPrice, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                             </TextBlock>
-                            <TextBlock Foreground="{StaticResource SuccessBrush}" FontSize="16" Margin="0,8,0,0">
+                            <TextBlock Foreground="{StaticResource SuccessBrush}" FontSize="16" Margin="0,8,0,0"
+                                       Visibility="{Binding CanViewProfit, Converter={StaticResource BoolToVis}}">
                                 <Run Text="الربح المتوقع:"/>
                                 <Run Text="{Binding Profit, StringFormat={}{0:N0}}" FontWeight="Bold"/>
                             </TextBlock>

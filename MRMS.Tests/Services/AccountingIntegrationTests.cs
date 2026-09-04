@@ -41,8 +41,10 @@ public sealed class AccountingIntegrationTests : IDisposable
 
     private static readonly ICurrentUserService Owner = new FakeCurrentUserService();
     private static IPermissionService Perms => TestServices.Permissions(Owner);
-    private static IAuditService Audit(IUnitOfWork uow) => new AuditService(uow, Owner);
+    private static IAuditService Audit(IUnitOfWork uow) => new AuditService(uow, Owner, Perms);
     private static JournalService Journal(IUnitOfWork uow) => new(uow, Perms);
+    private static SaleService Sale(IUnitOfWork uow) => new(uow, Journal(uow), Audit(uow), Perms);
+    private static SaleService Sale(IUnitOfWork uow, IJournalService journal) => new(uow, journal, Audit(uow), Perms);
 
     [Fact]
     public async Task SeedService_brings_up_a_usable_schema_and_baseline_on_a_fresh_database()
@@ -81,7 +83,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var sales = new SaleService(uow, Journal(uow), Audit(uow));
+            var sales = Sale(uow);
 
             await sales.CreateAsync(new CreateSaleDto(
                 DateTime.Today, itemId, Quantity: 3, UnitPrice: 50, CostPrice: 30,
@@ -123,7 +125,7 @@ public sealed class AccountingIntegrationTests : IDisposable
             var uow = new UnitOfWork(ctx);
             // Journal service pointed at a poisoned context so the second SaveChanges throws AFTER the
             // Sale row + stock change have already been written once inside the transaction.
-            var sales = new SaleService(uow, new ThrowingJournalService(), Audit(uow));
+            var sales = Sale(uow, new ThrowingJournalService());
 
             var act = async () => await sales.CreateAsync(new CreateSaleDto(
                 DateTime.Today, itemId, Quantity: 2, UnitPrice: 40, CostPrice: 20, CustomerName: "x", Notes: ""));

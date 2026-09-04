@@ -1,6 +1,7 @@
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -8,10 +9,12 @@ namespace MRMS.Application.Services;
 public class ItemService : IItemService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public ItemService(IUnitOfWork uow)
+    public ItemService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<ItemDto>> GetAllAsync()
@@ -86,6 +89,7 @@ public class ItemService : IItemService
 
     public async Task<bool> DeleteAsync(int id)
     {
+        _permissions.Require(Permission.DeleteEntities);
         var item = await _uow.Items.GetByIdAsync(id);
         if (item is null) return false;
 
@@ -111,7 +115,7 @@ public class ItemService : IItemService
         return items.Select(MapToDto);
     }
 
-    private static ItemDto MapToDto(Item i) =>
+    private ItemDto MapToDto(Item i) =>
         new()
         {
             Id = i.Id,
@@ -119,7 +123,7 @@ public class ItemService : IItemService
             Name = i.Name,
             Type = i.Type,
             Unit = i.Unit,
-            CostPrice = i.CostPrice,
+            CostPrice = _permissions.Can(Permission.ViewCostPrice) ? i.CostPrice : null,
             SellingPrice = i.SellingPrice,
             ReorderLevel = i.ReorderLevel,
             CurrentStock = i.CurrentStock,

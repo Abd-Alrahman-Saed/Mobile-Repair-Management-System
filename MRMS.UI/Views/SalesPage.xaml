@@ -47,7 +47,7 @@
                         <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="70"/>
                         <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitPrice, StringFormat={}{0:N0}}" Width="90"/>
                         <DataGridTextColumn Header="الإجمالي" Binding="{Binding TotalPrice, StringFormat={}{0:N0}}" Width="90"/>
-                        <DataGridTextColumn Header="الربح" Binding="{Binding Profit, StringFormat={}{0:N0}}" Width="80"/>
+                        <DataGridTextColumn x:Name="ProfitColumn" Header="الربح" Binding="{Binding Profit, StringFormat={}{0:N0}}" Width="80"/>
                         <DataGridTextColumn Header="العميل" Binding="{Binding CustomerName}" Width="100"/>
                         <DataGridTemplateColumn Header="الإجراءات" Width="80">
                             <DataGridTemplateColumn.CellTemplate>

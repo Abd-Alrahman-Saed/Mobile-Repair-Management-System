@@ -1,6 +1,7 @@
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -8,10 +9,12 @@ namespace MRMS.Application.Services;
 public class SupplierService : ISupplierService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public SupplierService(IUnitOfWork uow)
+    public SupplierService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<SupplierDto>> GetAllAsync()
@@ -60,6 +63,7 @@ public class SupplierService : ISupplierService
 
     public async Task<bool> DeleteAsync(int id)
     {
+        _permissions.Require(Permission.DeleteEntities);
         var supplier = await _uow.Suppliers.GetByIdAsync(id);
         if (supplier is null) return false;
 

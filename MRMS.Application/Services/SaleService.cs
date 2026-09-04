@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -11,12 +12,15 @@ public class SaleService : ISaleService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
+    private readonly IPermissionService _permissions;
 
-    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
+    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService,
+        IAuditService audit, IPermissionService permissions)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
@@ -48,19 +52,21 @@ public class SaleService : ISaleService
         if (dto.UnitPrice <= 0)
             throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
 
+        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
+            ?? throw new InvalidOperationException("الصنف غير موجود");
+
         var sale = new Sale
         {
             Date = dto.Date,
             ItemId = dto.ItemId,
             Quantity = dto.Quantity,
             UnitPrice = dto.UnitPrice,
-            CostPrice = dto.CostPrice,
+            // Cost basis is locked from the item at the moment of sale - never taken from the caller,
+            // so a receptionist's form (which can't see cost) can't zero out the profit calculation.
+            CostPrice = item.CostPrice,
             CustomerName = dto.CustomerName,
             Notes = dto.Notes
         };
-
-        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
-            ?? throw new InvalidOperationException("الصنف غير موجود");
 
         if (item.CurrentStock < dto.Quantity)
             throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
@@ -125,8 +131,14 @@ public class SaleService : ISaleService
         await _unitOfWork.CompleteAsync();
     }
 
-    private static SaleDto MapToDto(Sale s) => new(
-        s.Id, s.Date, s.ItemId, s.Item.Name,
-        s.Quantity, s.UnitPrice, s.TotalPrice, s.CostPrice, s.Profit,
-        s.CustomerName, s.Notes, s.CreatedAt);
+    private SaleDto MapToDto(Sale s)
+    {
+        var canSeeProfit = _permissions.Can(Permission.ViewProfit);
+        return new(
+            s.Id, s.Date, s.ItemId, s.Item.Name,
+            s.Quantity, s.UnitPrice, s.TotalPrice,
+            canSeeProfit ? s.CostPrice : null,
+            canSeeProfit ? s.Profit : null,
+            s.CustomerName, s.Notes, s.CreatedAt);
+    }
 }

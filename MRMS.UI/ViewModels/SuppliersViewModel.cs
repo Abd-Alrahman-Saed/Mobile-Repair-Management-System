@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
@@ -15,6 +16,8 @@ public partial class SuppliersViewModel : ObservableObject
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
     private List<SupplierListItem> _allSuppliers = [];
+
+    public bool CanViewBalance { get; }
 
     [ObservableProperty]
     private ObservableCollection<SupplierListItem> _suppliers = [];
@@ -41,12 +44,14 @@ public partial class SuppliersViewModel : ObservableObject
         ISupplierService supplierService,
         IReportService reportService,
         AppNavigationService navigationService,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        IPermissionService permissions)
     {
         _supplierService = supplierService;
         _reportService = reportService;
         _navigationService = navigationService;
         _notificationService = notificationService;
+        CanViewBalance = permissions.Can(Permission.ViewSupplierBalance);
     }
 
     [RelayCommand]
@@ -60,6 +65,7 @@ public partial class SuppliersViewModel : ObservableObject
             .Select(s =>
             {
                 payables.TryGetValue(s.Id, out var p);
+                // p.* is null when the user can't see supplier balances; surface that as-is.
                 return new SupplierListItem
                 {
                     Id = s.Id,
@@ -67,10 +73,10 @@ public partial class SuppliersViewModel : ObservableObject
                     Name = s.Name,
                     Phone = s.Phone,
                     Notes = s.Notes,
-                    OpeningBalance = s.OpeningBalance,
-                    TotalPurchases = p?.TotalPurchases ?? 0,
-                    TotalPayments = p?.TotalPayments ?? 0,
-                    OutstandingBalance = p?.OutstandingBalance ?? s.OpeningBalance
+                    OpeningBalance = p?.OpeningBalance,
+                    TotalPurchases = p?.TotalPurchases,
+                    TotalPayments = p?.TotalPayments,
+                    OutstandingBalance = p?.OutstandingBalance
                 };
             })
             .ToList();
@@ -115,8 +121,9 @@ public class SupplierListItem
     public string Name { get; init; } = "";
     public string Phone { get; init; } = "";
     public string Notes { get; init; } = "";
-    public decimal OpeningBalance { get; init; }
-    public decimal TotalPurchases { get; init; }
-    public decimal TotalPayments { get; init; }
-    public decimal OutstandingBalance { get; init; }
+    // Null for roles without Permission.ViewSupplierBalance.
+    public decimal? OpeningBalance { get; init; }
+    public decimal? TotalPurchases { get; init; }
+    public decimal? TotalPayments { get; init; }
+    public decimal? OutstandingBalance { get; init; }
 }

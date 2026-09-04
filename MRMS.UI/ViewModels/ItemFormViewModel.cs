@@ -59,7 +59,7 @@ public partial class ItemFormViewModel : ObservableObject
         Name = item.Name;
         SelectedType = item.Type;
         Unit = item.Unit;
-        CostPrice = item.CostPrice;
+        CostPrice = item.CostPrice ?? 0m;
         SellingPrice = item.SellingPrice;
         ReorderLevel = item.ReorderLevel;
     }

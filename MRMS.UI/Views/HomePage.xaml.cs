@@ -1,6 +1,9 @@
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
+using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.UI.Controls;
 using MRMS.UI.Services;
 
@@ -22,6 +25,13 @@ public partial class HomePage : Page
 
         App.ServiceProvider!.GetRequiredService<BackupSchedulerService>().Start();
 
+        var permissions = App.ServiceProvider!.GetRequiredService<IPermissionService>();
+        var canManageUsers = permissions.Can(Permission.ManageUsers);
+        var canViewAudit = permissions.Can(Permission.ViewAuditLog);
+        UsersNavButton.Visibility = canManageUsers ? Visibility.Visible : Visibility.Collapsed;
+        AuditLogNavButton.Visibility = canViewAudit ? Visibility.Visible : Visibility.Collapsed;
+        AdminSectionHeader.Visibility = (canManageUsers || canViewAudit) ? Visibility.Visible : Visibility.Collapsed;
+
         Loaded += (_, _) => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DashboardPage>());
     }
 
@@ -36,6 +46,12 @@ public partial class HomePage : Page
 
     private void Dashboard_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<DashboardPage>());
+
+    private void Users_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<UsersPage>());
+
+    private void AuditLog_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<AuditLogPage>());
 
     private void Customers_Click(object sender, System.Windows.RoutedEventArgs e)
         => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<CustomerListPage>());

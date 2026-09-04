@@ -13,6 +13,10 @@ public partial class ItemsPage : Page
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+
+        if (!vm.CanViewCost)
+            CostColumn.Visibility = System.Windows.Visibility.Collapsed;
+
         Loaded += async (_, _) => await _vm.LoadCommand.ExecuteAsync(null);
     }
 

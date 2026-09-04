@@ -87,6 +87,13 @@
                         <Button Content="التقرير الشهري" Style="{StaticResource NavButton}"
                                 Click="MonthlyReport_Click"/>
 
+                        <!-- ===== الإدارة (المالك فقط) ===== -->
+                        <TextBlock x:Name="AdminSectionHeader" Text="الإدارة" Style="{StaticResource NavSectionHeader}"/>
+                        <Button x:Name="UsersNavButton" Content="المستخدمون" Style="{StaticResource NavButton}"
+                                Click="Users_Click"/>
+                        <Button x:Name="AuditLogNavButton" Content="سجل التدقيق" Style="{StaticResource NavButton}"
+                                Click="AuditLog_Click"/>
+
                         <!-- ===== النظام ===== -->
                         <TextBlock Text="النظام" Style="{StaticResource NavSectionHeader}"/>
                         <Button Content="بحث" Style="{StaticResource NavButton}"

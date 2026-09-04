@@ -51,7 +51,7 @@
                         <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="النوع" Binding="{Binding Type}" Width="100"/>
                         <DataGridTextColumn Header="الوحدة" Binding="{Binding Unit}" Width="80"/>
-                        <DataGridTextColumn Header="تكلفة الشراء" Binding="{Binding CostPrice, StringFormat={}{0:N0}}" Width="110"/>
+                        <DataGridTextColumn x:Name="CostColumn" Header="تكلفة الشراء" Binding="{Binding CostPrice, StringFormat={}{0:N0}}" Width="110"/>
                         <DataGridTextColumn Header="سعر البيع" Binding="{Binding SellingPrice, StringFormat={}{0:N0}}" Width="110"/>
                         <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock}" Width="80"/>
                         <DataGridTextColumn Header="حد الطلب" Binding="{Binding ReorderLevel}" Width="80"/>

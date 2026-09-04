@@ -17,6 +17,9 @@ public partial class SalesPage : Page
         _navigationService = navigationService;
         DataContext = vm;
 
+        if (!vm.CanViewProfit)
+            ProfitColumn.Visibility = System.Windows.Visibility.Collapsed;
+
         Loaded += async (_, _) => await vm.LoadCommand.ExecuteAsync(null);
     }
 

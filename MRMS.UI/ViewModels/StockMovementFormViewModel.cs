@@ -58,7 +58,7 @@ public partial class StockMovementFormViewModel : ObservableObject
     {
         var item = Items.FirstOrDefault(i => i.Id == value);
         if (item is not null)
-            Value = item.CostPrice;
+            Value = item.CostPrice ?? 0m;
     }
 
     [RelayCommand]

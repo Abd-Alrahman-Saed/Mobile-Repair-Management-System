@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Enums;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
@@ -15,6 +16,8 @@ public partial class SalesViewModel : ObservableObject
     private readonly NotificationService _notificationService;
     private List<SaleDto> _allSales = [];
     private const int PageSize = 20;
+
+    public bool CanViewProfit { get; }
 
     [ObservableProperty]
     private ObservableCollection<SaleDto> _sales = [];
@@ -30,11 +33,13 @@ public partial class SalesViewModel : ObservableObject
     public bool HasNext => CurrentPage < TotalPages;
     public string PageInfo => $"صفحة {CurrentPage} من {TotalPages}";
 
-    public SalesViewModel(ISaleService saleService, AppNavigationService navigationService, NotificationService notificationService)
+    public SalesViewModel(ISaleService saleService, AppNavigationService navigationService,
+        NotificationService notificationService, IPermissionService permissions)
     {
         _saleService = saleService;
         _navigationService = navigationService;
         _notificationService = notificationService;
+        CanViewProfit = permissions.Can(Permission.ViewProfit);
     }
 
     [RelayCommand]

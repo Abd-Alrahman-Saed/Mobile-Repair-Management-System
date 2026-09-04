@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditService, AuditService>();
 
         services.AddTransient<IAuthService, AuthService>();
+        services.AddTransient<IUserService, UserService>();
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<IDeviceService, DeviceService>();
         services.AddTransient<IRepairTicketService, RepairTicketService>();

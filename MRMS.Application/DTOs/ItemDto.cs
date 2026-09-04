@@ -9,7 +9,9 @@ public class ItemDto
     public string Name { get; init; } = "";
     public ItemType Type { get; init; }
     public string Unit { get; init; } = "";
-    public decimal CostPrice { get; set; }
+    /// <summary>Null when the current user lacks <c>Permission.ViewCostPrice</c> (hidden at the DTO,
+    /// not just the column).</summary>
+    public decimal? CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
     public int ReorderLevel { get; init; }
     public int CurrentStock { get; set; }

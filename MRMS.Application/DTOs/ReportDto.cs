@@ -28,7 +28,8 @@ public record CashbookReportDto(
 public record PayableItemDto(
     int SupplierId,
     string SupplierName,
-    decimal OpeningBalance,
-    decimal TotalPurchases,
-    decimal TotalPayments,
-    decimal OutstandingBalance);
+    // Financial figures are null when the current user lacks Permission.ViewSupplierBalance.
+    decimal? OpeningBalance,
+    decimal? TotalPurchases,
+    decimal? TotalPayments,
+    decimal? OutstandingBalance);

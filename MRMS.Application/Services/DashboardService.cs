@@ -30,6 +30,12 @@ public class DashboardService : IDashboardService
     {
         var repairStats = await _repairTicketService.GetDashboardStatsAsync();
 
+        // The whole "financial indicators" block (revenue, expenses, net profit, cash, stock value,
+        // payables) is owner/manager-only. For everyone else return the operational counts only and
+        // leave the money at zero - the dashboard hides that section for those roles.
+        if (!_permissions.Can(Permission.ViewReports))
+            return repairStats;
+
         var currentToEnd = currentPeriodTo.Date.AddDays(1).AddTicks(-1);
         var periodSpan = currentPeriodTo - currentPeriodFrom;
         var previousPeriodTo = currentPeriodFrom.AddTicks(-1);

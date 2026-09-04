@@ -71,7 +71,7 @@ public partial class PurchaseFormViewModel : ObservableObject
         var item = Items.FirstOrDefault(i => i.Id == value);
         if (item is not null)
         {
-            SelectedUnitCost = item.CostPrice;
+            SelectedUnitCost = item.CostPrice ?? 0m;
             SelectedItemCurrentStock = item.CurrentStock;
         }
         else
@@ -159,7 +159,7 @@ public partial class PurchaseFormViewModel : ObservableObject
             ItemId = item.Id,
             ItemName = item.Name,
             Quantity = SelectedQuantity,
-            UnitCost = SelectedUnitCost > 0 ? SelectedUnitCost : item.CostPrice
+            UnitCost = SelectedUnitCost > 0 ? SelectedUnitCost : (item.CostPrice ?? 0m)
         });
 
         OnPropertyChanged(nameof(TotalCost));

@@ -18,6 +18,8 @@
             <converters:LessThanZeroConverter x:Key="LessThanZero"/>
             <converters:FileSizeConverter x:Key="FileSize"/>
             <converters:BoolToResultTextConverter x:Key="BoolToResultText"/>
+            <converters:ActiveStatusConverter x:Key="ActiveStatus"/>
+            <converters:UserRoleConverter x:Key="UserRole"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

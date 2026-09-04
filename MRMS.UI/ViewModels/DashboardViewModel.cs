@@ -12,10 +12,14 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IRepairTicketService _repairTicketService;
     private readonly IDashboardService _dashboardService;
 
-    public DashboardViewModel(IRepairTicketService repairTicketService, IDashboardService dashboardService)
+    public bool CanViewFinancials { get; }
+
+    public DashboardViewModel(IRepairTicketService repairTicketService, IDashboardService dashboardService,
+        IPermissionService permissions)
     {
         _repairTicketService = repairTicketService;
         _dashboardService = dashboardService;
+        CanViewFinancials = permissions.Can(Permission.ViewReports);
     }
 
     [ObservableProperty]

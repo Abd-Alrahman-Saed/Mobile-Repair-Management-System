@@ -23,7 +23,7 @@ public partial class QuickPriceEditWindow : Window
     {
         _item = item;
         ItemInfoText.Text = $"{item.Name} ({item.Code})";
-        CostPriceBox.Text = item.CostPrice.ToString("0.##");
+        CostPriceBox.Text = (item.CostPrice ?? 0m).ToString("0.##");
         SellingPriceBox.Text = item.SellingPrice.ToString("0.##");
     }
 

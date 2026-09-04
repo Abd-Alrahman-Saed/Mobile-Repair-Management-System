@@ -97,6 +97,9 @@
                 </Border>
             </WrapPanel>
 
+            <!-- Financial section (period selector + KPI cards) - owner/manager only -->
+            <StackPanel Visibility="{Binding CanViewFinancials, Converter={StaticResource BoolToVis}}">
+
             <!-- ===== Period Selector ===== -->
             <Border Style="{StaticResource CardBorder}" Padding="16,12" Margin="0,0,0,16"
                     Effect="{StaticResource CardShadow}">
@@ -206,6 +209,8 @@
                     </StackPanel>
                 </Border>
             </WrapPanel>
+
+            </StackPanel>
 
             <!-- ===== Recent Tickets ===== -->
             <TextBlock Text="آخر التذاكر" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>

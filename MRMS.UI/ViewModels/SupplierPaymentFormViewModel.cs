@@ -31,7 +31,7 @@ public partial class SupplierPaymentFormViewModel : ObservableObject
     partial void OnSelectedSupplierIdChanged(int value)
     {
         if (value > 0 && _payablesBySupplier.TryGetValue(value, out var payable))
-            OutstandingBalance = payable.OutstandingBalance;
+            OutstandingBalance = payable.OutstandingBalance ?? 0m;
         else
             OutstandingBalance = 0;
     }

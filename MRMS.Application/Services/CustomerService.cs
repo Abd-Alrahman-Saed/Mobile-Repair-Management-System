@@ -1,6 +1,7 @@
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -8,10 +9,12 @@ namespace MRMS.Application.Services;
 public class CustomerService : ICustomerService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IPermissionService _permissions;
 
-    public CustomerService(IUnitOfWork uow)
+    public CustomerService(IUnitOfWork uow, IPermissionService permissions)
     {
         _uow = uow;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<CustomerDto>> GetAllAsync()
@@ -54,6 +57,7 @@ public class CustomerService : ICustomerService
 
     public async Task<bool> DeleteAsync(int id)
     {
+        _permissions.Require(Permission.DeleteEntities);
         var customer = await _uow.Customers.GetByIdAsync(id);
         if (customer is null) return false;
 
