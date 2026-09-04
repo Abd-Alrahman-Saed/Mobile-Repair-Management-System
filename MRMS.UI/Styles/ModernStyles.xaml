@@ -28,6 +28,7 @@
     <Color x:Key="SuccessLightColor">#DCFCE7</Color>
     <Color x:Key="WarningLightColor">#FEF3C7</Color>
     <Color x:Key="SecondaryLightColor">#F3E8FF</Color>
+    <Color x:Key="InfoLightColor">#BFDCF0</Color>
 
     <!-- ===== Brushes ===== -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
@@ -53,6 +54,7 @@
     <SolidColorBrush x:Key="SuccessLightBrush" Color="{StaticResource SuccessLightColor}"/>
     <SolidColorBrush x:Key="WarningLightBrush" Color="{StaticResource WarningLightColor}"/>
     <SolidColorBrush x:Key="SecondaryLightBrush" Color="{StaticResource SecondaryLightColor}"/>
+    <SolidColorBrush x:Key="InfoLightBrush" Color="{StaticResource InfoLightColor}"/>
 
     <!-- Sidebar: vertical gradient #131D3A -> #0A1226 -->
     <LinearGradientBrush x:Key="SidebarBrush" StartPoint="0,0" EndPoint="0,1">

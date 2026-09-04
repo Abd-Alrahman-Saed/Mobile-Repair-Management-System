@@ -21,6 +21,9 @@ public partial class DashboardPage : Page
         Loaded += async (_, _) => await _vm.LoadCommand.ExecuteAsync(null);
     }
 
+    private void ViewAllTickets_Click(object sender, System.Windows.RoutedEventArgs e)
+        => _navigationService.NavigateTo(App.ServiceProvider!.GetRequiredService<RepairTicketListPage>());
+
     private void RecentTicketsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (RecentTicketsGrid.SelectedItem is RepairTicketDto ticket && ticket.Id > 0)

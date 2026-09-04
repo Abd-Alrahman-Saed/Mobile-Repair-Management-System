@@ -28,11 +28,14 @@ public class DashboardService : IDashboardService
 
     public async Task<DashboardStatsDto> GetDashboardStatsAsync(DateTime currentPeriodFrom, DateTime currentPeriodTo)
     {
-        var repairStats = await _repairTicketService.GetDashboardStatsAsync();
+        var repairStats = await _repairTicketService.GetDashboardStatsAsync() with
+        {
+            LowStockCount = await CountLowStockItemsAsync()
+        };
 
-        // The whole "financial indicators" block (revenue, expenses, net profit, cash, stock value,
-        // payables) is owner/manager-only. For everyone else return the operational counts only and
-        // leave the money at zero - the dashboard hides that section for those roles.
+        // The financial block (revenue, expenses, net profit, cash, stock value, payables) is
+        // owner/manager-only. For everyone else return the operational counts only and leave the
+        // money at zero - the dashboard hides that section for those roles.
         if (!_permissions.Can(Permission.ViewReports))
             return repairStats;
 
@@ -48,7 +51,6 @@ public class DashboardService : IDashboardService
         var cashBalance = await CalculateCashBalanceAsync();
         var stockValue = await CalculateStockValueAsync();
         var payablesTotal = await CalculatePayablesTotalAsync();
-        var lowStockCount = await CountLowStockItemsAsync();
         var overduePayablesCount = await CountOverduePayablesAsync();
 
         return repairStats with
@@ -65,7 +67,6 @@ public class DashboardService : IDashboardService
             CashBalance = cashBalance,
             StockValue = stockValue,
             PayablesTotal = payablesTotal,
-            LowStockCount = lowStockCount,
             OverduePayablesCount = overduePayablesCount
         };
     }

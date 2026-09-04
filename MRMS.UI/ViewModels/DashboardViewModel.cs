@@ -61,7 +61,7 @@ public partial class DashboardViewModel : ObservableObject
         var allTickets = (await _repairTicketService.GetAllAsync()).ToList();
 
         RecentTickets = new ObservableCollection<RepairTicketDto>(
-            allTickets.OrderByDescending(t => t.ReceiveDate).ThenByDescending(t => t.ReceiveTime).Take(5));
+            allTickets.OrderByDescending(t => t.ReceiveDate).ThenByDescending(t => t.ReceiveTime).Take(6));
 
         ReceivedCount = allTickets.Count(t => t.Status == TicketStatus.Received);
         InRepairCount = allTickets.Count(t => t.Status is TicketStatus.UnderInspection or TicketStatus.WaitingForParts or TicketStatus.InRepair);
