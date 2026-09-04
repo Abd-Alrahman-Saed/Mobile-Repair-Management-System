@@ -16,6 +16,7 @@ public static class DependencyInjection
 
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<IAlertService, AlertService>();
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<IDeviceService, DeviceService>();
         services.AddTransient<IRepairTicketService, RepairTicketService>();

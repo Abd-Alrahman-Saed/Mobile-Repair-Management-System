@@ -4,32 +4,17 @@
       Title="الرئيسية" FlowDirection="RightToLeft"
       KeyDown="Page_KeyDown">
 
-    <Page.Resources>
-        <Style x:Key="NavButton" TargetType="Button">
-            <Setter Property="Padding" Value="14,11"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="HorizontalContentAlignment" Value="Right"/>
-            <Setter Property="FontSize" Value="15"/>
-        </Style>
-        <Style x:Key="NavSectionHeader" TargetType="TextBlock">
-            <Setter Property="Text" Value=""/>
-            <Setter Property="FontSize" Value="18"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource SidebarTextBrush}"/>
-            <Setter Property="Margin" Value="14,18,14,4"/>
-        </Style>
-    </Page.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="264"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
+        <!-- ===== Sidebar ===== -->
         <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="28" ShadowDepth="10" Direction="180" Opacity="0.35" Color="#0A1226"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -37,113 +22,168 @@
                 </Grid.RowDefinitions>
 
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <TextBlock Text="KMG" FontSize="26" FontWeight="Bold"
-                                   Foreground="White" HorizontalAlignment="Center"
-                                   Margin="0,16,0,20"/>
+                    <StackPanel Margin="0,18,0,12">
+                        <!-- Brand -->
+                        <StackPanel Orientation="Horizontal" Margin="16,0,16,12">
+                            <Border Width="36" Height="36" CornerRadius="10" Background="{StaticResource PrimaryBrush}">
+                                <TextBlock Text="KMG" Foreground="White" FontWeight="Bold" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="مركز الصيانة" Foreground="White" FontWeight="SemiBold" FontSize="15"/>
+                                <TextBlock Text="نظام إدارة الأجهزة المحمولة" Foreground="{StaticResource SidebarTextBrush}" FontSize="10"/>
+                            </StackPanel>
+                        </StackPanel>
 
-                        <Button Content="لوحة التحكم" Style="{StaticResource NavButton}"
-                                Click="Dashboard_Click"/>
-
-                        <!-- ===== العملاء والأجهزة ===== -->
-                        <TextBlock Text="العملاء والأجهزة" Style="{StaticResource NavSectionHeader}"/>
-                        <Button Content="العملاء" Style="{StaticResource NavButton}"
-                                Click="Customers_Click"/>
-                        <Button Content="تسجيل جهاز" Style="{StaticResource NavButton}"
-                                Click="RegisterDevice_Click"/>
-                        <Button Content="تذاكر الصيانة" Style="{StaticResource NavButton}"
-                                Click="RepairTickets_Click"/>
-                        <Button Content="نقل ملكية جهاز" Style="{StaticResource NavButton}"
-                                Click="TransferDevice_Click"/>
-
-                        <!-- ===== المخزون ===== -->
-                        <TextBlock Text="المخزون" Style="{StaticResource NavSectionHeader}"/>
-                        <Button Content="الأصناف" Style="{StaticResource NavButton}"
-                                Click="Items_Click"/>
-                        <Button Content="الحركات المخزنية" Style="{StaticResource NavButton}"
-                                Click="StockMovements_Click"/>
-                        <Button Content="كشف الرصيد المخزني" Style="{StaticResource NavButton}"
-                                Click="StockBalance_Click"/>
-
-                        <!-- ===== المبيعات والمشتريات ===== -->
-                        <TextBlock Text="المبيعات والمشتريات" Style="{StaticResource NavSectionHeader}"/>
-                        <Button Content="المبيعات" Style="{StaticResource NavButton}"
-                                Click="Sales_Click"/>
-                        <Button Content="المشتريات" Style="{StaticResource NavButton}"
-                                Click="Purchases_Click"/>
-                        <Button Content="الموردون" Style="{StaticResource NavButton}"
-                                Click="Suppliers_Click"/>
-                        <Button Content="دفعات الموردين" Style="{StaticResource NavButton}"
-                                Click="SupplierPayments_Click"/>
-                        <Button Content="المصروفات" Style="{StaticResource NavButton}"
-                                Click="Expenses_Click"/>
-
-                        <!-- ===== التقارير المالية ===== -->
-                        <TextBlock Text="التقارير المالية" Style="{StaticResource NavSectionHeader}"/>
-                        <Button Content="كشف حساب النقدية" Style="{StaticResource NavButton}"
-                                Click="Cashbook_Click"/>
-                        <Button Content="قائمة الدخل" Style="{StaticResource NavButton}"
-                                Click="IncomeStatement_Click"/>
-                        <Button Content="التقرير الشهري" Style="{StaticResource NavButton}"
-                                Click="MonthlyReport_Click"/>
-
-                        <!-- ===== الإدارة (المالك فقط) ===== -->
-                        <TextBlock x:Name="AdminSectionHeader" Text="الإدارة" Style="{StaticResource NavSectionHeader}"/>
-                        <Button x:Name="UsersNavButton" Content="المستخدمون" Style="{StaticResource NavButton}"
-                                Click="Users_Click"/>
-                        <Button x:Name="AuditLogNavButton" Content="سجل التدقيق" Style="{StaticResource NavButton}"
-                                Click="AuditLog_Click"/>
-
-                        <!-- ===== النظام ===== -->
-                        <TextBlock Text="النظام" Style="{StaticResource NavSectionHeader}"/>
-                        <Button Content="بحث" Style="{StaticResource NavButton}"
-                                Click="Search_Click"/>
-                        <Button Content="الإعدادات" Style="{StaticResource NavButton}"
-                                Click="Settings_Click"/>
+                        <ItemsControl ItemsSource="{Binding NavGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Header}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource NavSectionHeader}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Header}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="{Binding Title}" Style="{StaticResource NavItemButton}"
+                                                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                            CommandParameter="{Binding}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
 
-                <StackPanel Grid.Row="1" Margin="10,0,10,10">
-                    <Rectangle Height="1" Fill="{StaticResource OnDarkSubtleBrush}" Margin="4,0,4,8"/>
-                    <Button Content="تسجيل خروج" Style="{StaticResource NavButton}"
-                            Foreground="{StaticResource DangerBrush}"
-                            Click="Logout_Click"/>
-                </StackPanel>
+                <!-- User card -->
+                <Border Grid.Row="1" Background="{StaticResource OnDarkSubtleBrush}" CornerRadius="12"
+                        Margin="10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="{StaticResource PrimaryBrush}">
+                            <TextBlock Text="{Binding UserInitial}" Foreground="White" FontWeight="Bold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding UserName}" Foreground="White" FontWeight="SemiBold" FontSize="13"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding UserRoleText}" Foreground="{StaticResource SidebarTextBrush}" FontSize="11"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="خروج" Style="{StaticResource NavItemButton}"
+                                Padding="10,6" FontSize="12" Foreground="{StaticResource OnDarkDangerBrush}"
+                                Command="{Binding LogoutCommand}"/>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
 
+        <!-- ===== Content area ===== -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource SurfaceMutedBrush}" Padding="10,8"
+            <!-- Topbar -->
+            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="16,10"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" x:Name="PageTitle"
-                               FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center" Margin="5,0,0,0"/>
-                    <Button Grid.Column="1" x:Name="BackButton"
-                            Content="← رجوع" Padding="12,6"
-                            Background="{StaticResource SidebarBrush}" Foreground="White"
-                            BorderThickness="0" Cursor="Hand"
-                            FontSize="13" Click="Back_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}"
-                                        CornerRadius="6"
-                                        Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                      Content="{TemplateBinding Content}"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+
+                    <Button Grid.Column="0" Content="← رجوع" Style="{StaticResource GhostButton}"
+                            Padding="12,6" FontSize="13" Click="Back_Click"/>
+
+                    <Grid Grid.Column="1" HorizontalAlignment="Center" Width="440" Margin="12,0">
+                        <TextBox x:Name="SearchBox" Style="{StaticResource SearchTextBox}"
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="🔍  بحث برقم تذكرة أو اسم عميل أو IMEI" IsHitTestVisible="False"
+                                   Foreground="{StaticResource TextMutedBrush}" FontSize="13"
+                                   VerticalAlignment="Center" Margin="16,0,0,0"
+                                   Visibility="{Binding SearchQuery, Converter={StaticResource EmptyStringToVis}}"/>
+                        <Popup x:Name="SearchResultsPopup" IsOpen="{Binding IsSearchOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=SearchBox}"
+                               Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                            <Border Background="{StaticResource SurfaceBrush}" CornerRadius="12" Width="440"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,4,0,0">
+                                <Border.Effect><StaticResource ResourceKey="ElevatedShadow"/></Border.Effect>
+                                <ItemsControl ItemsSource="{Binding SearchResults}" Margin="6">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Click="SearchResult_Click" Style="{StaticResource GhostButton}"
+                                                    HorizontalContentAlignment="Stretch" Padding="10,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding DisplayText}" FontWeight="SemiBold" FontSize="13"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                    <TextBlock Text="{Binding AdditionalInfo}" FontSize="11"
+                                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <Grid Grid.Column="2">
+                        <Button x:Name="BellButton" Content="🔔" Style="{StaticResource GhostButton}"
+                                FontSize="16" Padding="10,6" Command="{Binding ToggleAlertsCommand}"/>
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource DangerBrush}"
+                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,6,0,0"
+                                 Visibility="{Binding HasAlerts, Converter={StaticResource BoolToVis}}"/>
+                        <Popup IsOpen="{Binding IsAlertsOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=BellButton}"
+                               Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                            <Border Background="{StaticResource SurfaceBrush}" CornerRadius="14" Width="320"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,4,0,0">
+                                <Border.Effect><StaticResource ResourceKey="ElevatedShadow"/></Border.Effect>
+                                <StackPanel Margin="8">
+                                    <TextBlock Text="التنبيهات" FontWeight="SemiBold" FontSize="13" Margin="8,6"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="لا توجد تنبيهات جديدة" FontSize="12" Margin="8,10"
+                                               Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"
+                                               Visibility="{Binding HasAlerts, Converter={StaticResource InverseBoolToVis}}"/>
+                                    <ItemsControl ItemsSource="{Binding Alerts}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="8,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Top" Margin="0,5,0,0"
+                                                             Fill="{Binding Severity, Converter={StaticResource AlertSeverity}}"/>
+                                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="Medium"
+                                                                   Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                                                        <TextBlock Text="{Binding Subtitle}" FontSize="11"
+                                                                   Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -151,7 +191,6 @@
                    NavigationUIVisibility="Hidden"
                    Navigated="ContentFrame_Navigated"/>
 
-            <!-- ===== Notification Overlay (added in code-behind) ===== -->
             <Grid x:Name="NotificationLayer" Grid.Row="1"
                   Panel.ZIndex="1000" IsHitTestVisible="True"/>
         </Grid>

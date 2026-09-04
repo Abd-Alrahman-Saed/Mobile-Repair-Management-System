@@ -50,6 +50,7 @@ public class SeedService
         // Discount ceilings by role (percent). Added idempotently so existing installs pick them up too.
         await EnsureSettingAsync("Discount.MaxPercent.Receptionist", "0");
         await EnsureSettingAsync("Discount.MaxPercent.Manager", "15");
+        await EnsureSettingAsync("Alerts.StaleTicketDays", "3");
     }
 
     private async Task EnsureSettingAsync(string key, string value)

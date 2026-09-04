@@ -50,6 +50,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<UserFormViewModel>();
         services.AddTransient<AuditLogViewModel>();
         services.AddTransient<OwnerApprovalViewModel>();
+        services.AddTransient<ShellViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<CustomerListViewModel>();
         services.AddTransient<CustomerFormViewModel>();

@@ -20,6 +20,8 @@
             <converters:BoolToResultTextConverter x:Key="BoolToResultText"/>
             <converters:ActiveStatusConverter x:Key="ActiveStatus"/>
             <converters:UserRoleConverter x:Key="UserRole"/>
+            <converters:AlertSeverityConverter x:Key="AlertSeverity"/>
+            <converters:EmptyStringToVisibilityConverter x:Key="EmptyStringToVis"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
