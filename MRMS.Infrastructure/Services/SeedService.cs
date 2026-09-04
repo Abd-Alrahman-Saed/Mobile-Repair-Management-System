@@ -46,6 +46,19 @@ public class SeedService
             );
             await _context.SaveChangesAsync();
         }
+
+        // Discount ceilings by role (percent). Added idempotently so existing installs pick them up too.
+        await EnsureSettingAsync("Discount.MaxPercent.Receptionist", "0");
+        await EnsureSettingAsync("Discount.MaxPercent.Manager", "15");
+    }
+
+    private async Task EnsureSettingAsync(string key, string value)
+    {
+        if (!await _context.SystemSettings.AnyAsync(s => s.Key == key))
+        {
+            _context.SystemSettings.Add(new SystemSetting { Key = key, Value = value });
+            await _context.SaveChangesAsync();
+        }
     }
 
     /// <summary>

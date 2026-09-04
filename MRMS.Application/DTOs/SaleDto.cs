@@ -13,7 +13,9 @@ public record SaleDto(
     decimal? Profit,
     string CustomerName,
     string Notes,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsVoided = false,
+    string? VoidReason = null);
 
 public record CreateSaleDto(
     DateTime Date,
@@ -22,7 +24,9 @@ public record CreateSaleDto(
     decimal UnitPrice,
     decimal CostPrice,
     string CustomerName,
-    string Notes);
+    string Notes,
+    // Set when an over-limit discount or below-cost price was approved live by an owner/manager.
+    int? ApprovedByUserId = null);
 
 public record UpdateSaleDto(
     int Id,

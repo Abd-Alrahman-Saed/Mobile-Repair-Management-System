@@ -43,8 +43,11 @@ public sealed class AccountingIntegrationTests : IDisposable
     private static IPermissionService Perms => TestServices.Permissions(Owner);
     private static IAuditService Audit(IUnitOfWork uow) => new AuditService(uow, Owner, Perms);
     private static JournalService Journal(IUnitOfWork uow) => new(uow, Perms);
-    private static SaleService Sale(IUnitOfWork uow) => new(uow, Journal(uow), Audit(uow), Perms);
-    private static SaleService Sale(IUnitOfWork uow, IJournalService journal) => new(uow, journal, Audit(uow), Perms);
+    private static SystemSettingService Settings(IUnitOfWork uow) => new(uow, Perms);
+    private static SaleService Sale(IUnitOfWork uow) =>
+        new(uow, Journal(uow), Audit(uow), Perms, Owner, Settings(uow));
+    private static SaleService Sale(IUnitOfWork uow, IJournalService journal) =>
+        new(uow, journal, Audit(uow), Perms, Owner, Settings(uow));
 
     [Fact]
     public async Task SeedService_brings_up_a_usable_schema_and_baseline_on_a_fresh_database()
@@ -194,6 +197,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         public Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal totalCost, decimal partsCost, int ticketId) => Task.CompletedTask;
         public Task PostSupplierPaymentAsync(DateTime date, string supplierName, decimal amount, int paymentId) => Task.CompletedTask;
         public Task PostDamagedAsync(DateTime date, string itemName, int quantity, decimal value, int movementId) => Task.CompletedTask;
+        public Task PostReversalAsync(string referenceType, int referenceId, DateTime date, string reason) => Task.CompletedTask;
         public Task<IEnumerable<JournalEntryDto>> GetAllEntriesAsync() => Task.FromResult(Enumerable.Empty<JournalEntryDto>());
         public Task<JournalEntryDto?> GetEntryByIdAsync(int id) => Task.FromResult<JournalEntryDto?>(null);
         public Task<TrialBalanceDto> GetTrialBalanceAsync(DateTime? asOf = null)

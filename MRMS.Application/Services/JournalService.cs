@@ -132,6 +132,31 @@ public class JournalService : IJournalService
         });
     }
 
+    public async Task PostReversalAsync(string referenceType, int referenceId, DateTime date, string reason)
+    {
+        var originals = await _uow.JournalEntries.Query()
+            .Include(je => je.Lines)
+            .Where(je => je.ReferenceType == referenceType && je.ReferenceId == referenceId)
+            .ToListAsync();
+
+        foreach (var original in originals)
+        {
+            await _uow.JournalEntries.AddAsync(new JournalEntry
+            {
+                Date = date,
+                Description = $"إلغاء: {reason}",
+                ReferenceType = referenceType + ".Reversal",
+                ReferenceId = referenceId,
+                Lines = original.Lines.Select(l => new JournalEntryLine
+                {
+                    AccountName = l.AccountName,
+                    DebitAmount = l.CreditAmount,
+                    CreditAmount = l.DebitAmount
+                }).ToList()
+            });
+        }
+    }
+
     // ========== Query methods ==========
 
     public async Task<IEnumerable<JournalEntryDto>> GetAllEntriesAsync()

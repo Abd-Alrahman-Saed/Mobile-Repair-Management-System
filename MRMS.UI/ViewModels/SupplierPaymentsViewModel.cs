@@ -39,16 +39,16 @@ public partial class SupplierPaymentsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeletePaymentAsync(int id)
+    private async Task VoidPaymentAsync(int id)
     {
-        var confirm = System.Windows.MessageBox.Show(
-            "هل أنت متأكد من حذف هذه الدفعة؟", "تأكيد الحذف",
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
-        if (confirm != System.Windows.MessageBoxResult.Yes)
-            return;
+        var reason = Views.VoidReasonWindow.Ask(System.Windows.Application.Current.MainWindow,
+            "سبب إلغاء الدفعة");
+        if (reason is null) return;
 
-        await _paymentService.DeleteAsync(id);
-        _notificationService.Show("تم حذف الدفعة بنجاح", NotificationType.Success);
+        try { await _paymentService.VoidAsync(id, reason); }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "إلغاء الدفعة"), NotificationType.Error); return; }
+
+        _notificationService.Show("تم إلغاء الدفعة", NotificationType.Success);
         await LoadAsync();
     }
 

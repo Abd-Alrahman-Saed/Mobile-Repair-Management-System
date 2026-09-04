@@ -8,7 +8,9 @@ public record SupplierPaymentDto(
     decimal Amount,
     string Reference,
     string Notes,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsVoided = false,
+    string? VoidReason = null);
 
 public record CreateSupplierPaymentDto(
     DateTime Date,

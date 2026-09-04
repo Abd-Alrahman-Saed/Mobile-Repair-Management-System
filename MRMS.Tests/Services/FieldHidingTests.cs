@@ -39,7 +39,8 @@ public sealed class FieldHidingTests : IDisposable
         var uow = new UnitOfWork(new AppDbContext(_options));
         var current = FakeCurrentUserService.As(role);
         var perms = new PermissionService(current);
-        return new SaleService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms), perms);
+        return new SaleService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms),
+            perms, current, new SystemSettingService(uow, perms));
     }
 
     [Fact]

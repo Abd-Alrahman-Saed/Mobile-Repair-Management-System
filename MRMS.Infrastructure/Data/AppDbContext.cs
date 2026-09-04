@@ -151,6 +151,8 @@ public class AppDbContext : DbContext
             e.Property(p => p.Notes).HasMaxLength(500);
             e.Property(p => p.PaidAmount).HasColumnType("decimal(18,2)");
             e.Property(p => p.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+            e.Property(p => p.VoidReason).HasMaxLength(300);
+            e.HasQueryFilter(p => !p.IsVoided);
             e.HasOne(p => p.Supplier)
                 .WithMany(s => s.Purchases)
                 .HasForeignKey(p => p.SupplierId)
@@ -160,6 +162,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PurchaseItem>(e =>
         {
             e.Property(i => i.UnitCost).HasColumnType("decimal(18,2)");
+            e.HasQueryFilter(i => !i.Purchase.IsVoided);
             e.HasOne(i => i.Purchase)
                 .WithMany(p => p.PurchaseItems)
                 .HasForeignKey(i => i.PurchaseId)
@@ -176,6 +179,10 @@ public class AppDbContext : DbContext
             e.Property(s => s.CostPrice).HasColumnType("decimal(18,2)");
             e.Property(s => s.CustomerName).HasMaxLength(100);
             e.Property(s => s.Notes).HasMaxLength(500);
+            e.Property(s => s.VoidReason).HasMaxLength(300);
+            // Voided rows are kept for audit but excluded from every normal query (reports, dashboards,
+            // lists). Screens that show voided rows to the owner call IgnoreQueryFilters().
+            e.HasQueryFilter(s => !s.IsVoided);
             e.HasOne(s => s.Item)
                 .WithMany(i => i.Sales)
                 .HasForeignKey(s => s.ItemId)
@@ -189,6 +196,8 @@ public class AppDbContext : DbContext
             e.Property(ex => ex.Amount).HasColumnType("decimal(18,2)");
             e.Property(ex => ex.Notes).HasMaxLength(500);
             e.Property(ex => ex.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+            e.Property(ex => ex.VoidReason).HasMaxLength(300);
+            e.HasQueryFilter(ex => !ex.IsVoided);
         });
 
         modelBuilder.Entity<SupplierPayment>(e =>
@@ -196,6 +205,8 @@ public class AppDbContext : DbContext
             e.Property(sp => sp.Amount).HasColumnType("decimal(18,2)");
             e.Property(sp => sp.Reference).HasMaxLength(100);
             e.Property(sp => sp.Notes).HasMaxLength(500);
+            e.Property(sp => sp.VoidReason).HasMaxLength(300);
+            e.HasQueryFilter(sp => !sp.IsVoided);
             e.HasOne(sp => sp.Supplier)
                 .WithMany(s => s.SupplierPayments)
                 .HasForeignKey(sp => sp.SupplierId)

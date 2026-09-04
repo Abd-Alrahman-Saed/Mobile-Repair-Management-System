@@ -71,15 +71,16 @@ public partial class PurchasesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeletePurchaseAsync(int id)
+    private async Task VoidPurchaseAsync(int id)
     {
-        var confirmed = await _notificationService.ConfirmAsync("هل أنت متأكد من حذف هذه الفاتورة؟");
-        if (!confirmed) return;
+        var reason = Views.VoidReasonWindow.Ask(System.Windows.Application.Current.MainWindow,
+            "سبب إلغاء فاتورة المشتريات");
+        if (reason is null) return;
 
-        try { await _purchaseService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف فاتورة المشتريات"), NotificationType.Error); return; }
+        try { await _purchaseService.VoidAsync(id, reason); }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "إلغاء فاتورة المشتريات"), NotificationType.Error); return; }
 
-        _notificationService.Show("تم حذف فاتورة المشتريات بنجاح", NotificationType.Success);
+        _notificationService.Show("تم إلغاء فاتورة المشتريات", NotificationType.Success);
         await LoadAsync();
     }
 

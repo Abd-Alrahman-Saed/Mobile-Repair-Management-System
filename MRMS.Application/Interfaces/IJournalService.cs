@@ -12,6 +12,13 @@ public interface IJournalService
     Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal totalCost, decimal partsCost, int ticketId);
     Task PostSupplierPaymentAsync(DateTime date, string supplierName, decimal amount, int paymentId);
     Task PostDamagedAsync(DateTime date, string itemName, int quantity, decimal value, int movementId);
+
+    /// <summary>
+    /// Posts a mirror (debit/credit swapped) of every journal entry that references
+    /// (<paramref name="referenceType"/>, <paramref name="referenceId"/>), so a voided transaction nets
+    /// to zero in the ledger without deleting the original entries.
+    /// </summary>
+    Task PostReversalAsync(string referenceType, int referenceId, DateTime date, string reason);
     Task<IEnumerable<JournalEntryDto>> GetAllEntriesAsync();
     Task<JournalEntryDto?> GetEntryByIdAsync(int id);
     Task<TrialBalanceDto> GetTrialBalanceAsync(DateTime? asOf = null);

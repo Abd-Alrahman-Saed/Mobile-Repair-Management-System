@@ -13,21 +13,26 @@ public class SupplierPaymentService : ISupplierPaymentService
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
     private readonly IPermissionService _permissions;
+    private readonly ICurrentUserService _currentUser;
 
     public SupplierPaymentService(IUnitOfWork unitOfWork, IJournalService journalService,
-        IAuditService audit, IPermissionService permissions)
+        IAuditService audit, IPermissionService permissions, ICurrentUserService currentUser)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
         _permissions = permissions;
+        _currentUser = currentUser;
     }
 
     public async Task<IEnumerable<SupplierPaymentDto>> GetAllAsync()
     {
         _permissions.Require(Permission.ManageSuppliers);
-        var payments = await _unitOfWork.SupplierPayments
-            .Query()
+        var query = _unitOfWork.SupplierPayments.Query();
+        if (_permissions.Can(Permission.VoidTransaction))
+            query = query.IgnoreQueryFilters();
+
+        var payments = await query
             .Include(p => p.Supplier)
             .OrderByDescending(p => p.Date).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
@@ -81,16 +86,33 @@ public class SupplierPaymentService : ISupplierPaymentService
         return MapToDto(saved);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task VoidAsync(int id, string reason)
     {
-        _permissions.Require(Permission.ManageSuppliers);
-        var payment = await _unitOfWork.SupplierPayments.GetByIdAsync(id);
-        if (payment is null) return;
+        _permissions.Require(Permission.VoidTransaction);
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new InvalidOperationException("سبب الإلغاء مطلوب");
 
-        _unitOfWork.SupplierPayments.Delete(payment);
-        await _unitOfWork.CompleteAsync();
+        var payment = await _unitOfWork.SupplierPayments.Query()
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(p => p.Id == id)
+            ?? throw new InvalidOperationException("الدفعة غير موجودة");
+        if (payment.IsVoided)
+            throw new InvalidOperationException("الدفعة ملغاة بالفعل");
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            payment.IsVoided = true;
+            payment.VoidedByUserId = _currentUser.User?.Id;
+            payment.VoidReason = reason.Trim();
+            payment.VoidedAt = DateTime.UtcNow;
+
+            await _journalService.PostReversalAsync(nameof(SupplierPayment), payment.Id, DateTime.UtcNow.Date, reason.Trim());
+            await _audit.LogAsync("SupplierPayment.Void", nameof(SupplierPayment), payment.Id, reason.Trim());
+            await _unitOfWork.CompleteAsync();
+        });
     }
 
     private static SupplierPaymentDto MapToDto(SupplierPayment p) => new(
-        p.Id, p.Date, p.SupplierId, p.Supplier.Name, p.Amount, p.Reference, p.Notes, p.CreatedAt);
+        p.Id, p.Date, p.SupplierId, p.Supplier.Name, p.Amount, p.Reference, p.Notes, p.CreatedAt,
+        p.IsVoided, p.VoidReason);
 }

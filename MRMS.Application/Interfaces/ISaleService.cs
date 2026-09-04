@@ -8,5 +8,5 @@ public interface ISaleService
     Task<SaleDto?> GetByIdAsync(int id);
     Task<SaleDto> CreateAsync(CreateSaleDto dto);
     Task UpdateAsync(UpdateSaleDto dto);
-    Task DeleteAsync(int id);
+    Task VoidAsync(int id, string reason);
 }

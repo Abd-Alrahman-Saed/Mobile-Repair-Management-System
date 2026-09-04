@@ -76,15 +76,16 @@ public partial class SalesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteSaleAsync(int id)
+    private async Task VoidSaleAsync(int id)
     {
-        var confirmed = await _notificationService.ConfirmAsync("هل أنت متأكد من حذف عملية البيع هذه؟");
-        if (!confirmed) return;
+        var reason = Views.VoidReasonWindow.Ask(System.Windows.Application.Current.MainWindow,
+            "سبب إلغاء عملية البيع");
+        if (reason is null) return;
 
-        try { await _saleService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف عملية البيع"), NotificationType.Error); return; }
+        try { await _saleService.VoidAsync(id, reason); }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "إلغاء عملية البيع"), NotificationType.Error); return; }
 
-        _notificationService.Show("تم حذف عملية البيع بنجاح", NotificationType.Success);
+        _notificationService.Show("تم إلغاء عملية البيع", NotificationType.Success);
         await LoadAsync();
     }
 

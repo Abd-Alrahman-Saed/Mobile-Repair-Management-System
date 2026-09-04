@@ -12,7 +12,9 @@ public record PurchaseDto(
     decimal TotalCost,
     string Notes,
     DateTime CreatedAt,
-    List<PurchaseItemDto> Items);
+    List<PurchaseItemDto> Items,
+    bool IsVoided = false,
+    string? VoidReason = null);
 
 public record PurchaseItemDto(
     int Id,

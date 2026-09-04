@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core.Authorization;
 using MRMS.Core.Entities;
 using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
@@ -13,20 +14,29 @@ public class SaleService : ISaleService
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
     private readonly IPermissionService _permissions;
+    private readonly ICurrentUserService _currentUser;
+    private readonly ISystemSettingService _settings;
 
-    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService,
-        IAuditService audit, IPermissionService permissions)
+    public SaleService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit,
+        IPermissionService permissions, ICurrentUserService currentUser, ISystemSettingService settings)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
         _permissions = permissions;
+        _currentUser = currentUser;
+        _settings = settings;
     }
 
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
     {
-        var sales = await _unitOfWork.Sales
-            .Query()
+        var query = _unitOfWork.Sales.Query();
+        // Only a user who can void transactions is shown the voided rows (struck through) - everyone
+        // else, and every report, sees the global filter's already-clean list.
+        if (_permissions.Can(Permission.VoidTransaction))
+            query = query.IgnoreQueryFilters();
+
+        var sales = await query
             .Include(s => s.Item)
             .OrderByDescending(s => s.Date).ThenByDescending(s => s.CreatedAt)
             .ToListAsync();
@@ -55,6 +65,9 @@ public class SaleService : ISaleService
         var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
             ?? throw new InvalidOperationException("الصنف غير موجود");
 
+        var approver = await ResolvePricingApproverAsync(dto.ApprovedByUserId);
+        await EnforcePricingRulesAsync(dto.UnitPrice, item, approver);
+
         var sale = new Sale
         {
             Date = dto.Date,
@@ -81,10 +94,82 @@ public class SaleService : ISaleService
             await _journalService.PostSaleAsync(sale.Date, $"بيع: {item.Name} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
             await _audit.LogAsync("Sale.Create", nameof(Sale), sale.Id,
                 $"{item.Name} x{sale.Quantity} = {sale.TotalPrice:N0}");
+            if (approver is not null)
+                await _audit.LogAsync("Sale.OverrideApproved", nameof(Sale), sale.Id,
+                    $"سعر {sale.UnitPrice:N0} بموافقة {approver.FullName}");
             await _unitOfWork.CompleteAsync();
         });
 
         return (await GetByIdAsync(sale.Id))!;
+    }
+
+    public async Task VoidAsync(int id, string reason)
+    {
+        _permissions.Require(Permission.VoidTransaction);
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new InvalidOperationException("سبب الإلغاء مطلوب");
+
+        var sale = await _unitOfWork.Sales.Query()
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(s => s.Id == id)
+            ?? throw new InvalidOperationException("عملية البيع غير موجودة");
+        if (sale.IsVoided)
+            throw new InvalidOperationException("العملية ملغاة بالفعل");
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            sale.IsVoided = true;
+            sale.VoidedByUserId = _currentUser.User?.Id;
+            sale.VoidReason = reason.Trim();
+            sale.VoidedAt = DateTime.UtcNow;
+
+            var item = await _unitOfWork.Items.GetByIdAsync(sale.ItemId);
+            if (item is not null)
+                item.CurrentStock += sale.Quantity;
+
+            await _journalService.PostReversalAsync(nameof(Sale), sale.Id, DateTime.UtcNow.Date, reason.Trim());
+            await _audit.LogAsync("Sale.Void", nameof(Sale), sale.Id, reason.Trim());
+            await _unitOfWork.CompleteAsync();
+        });
+    }
+
+    private async Task<CurrentUser?> ResolvePricingApproverAsync(int? approverId)
+    {
+        if (approverId is not { } aid) return null;
+        var user = await _unitOfWork.Users.GetByIdAsync(aid);
+        if (user is null || !user.IsActive || !RolePermissions.Has(user.Role, Permission.ApplyDiscountBeyondLimit))
+            return null;
+        return new CurrentUser(user.Id, user.Username, user.FullName, user.Role);
+    }
+
+    private async Task EnforcePricingRulesAsync(decimal unitPrice, Item item, CurrentUser? approver)
+    {
+        // An owner (or a live owner/manager approval) overrides both checks.
+        if (_permissions.Can(Permission.ApplyDiscountBeyondLimit) || approver is not null)
+            return;
+
+        if (unitPrice < item.CostPrice && !_permissions.Can(Permission.SellBelowCost))
+            throw new InvalidOperationException("سعر البيع أقل من التكلفة ويتطلب موافقة المالك");
+
+        if (item.SellingPrice > 0)
+        {
+            var discountPct = (item.SellingPrice - unitPrice) / item.SellingPrice * 100m;
+            if (discountPct > await MaxDiscountPercentAsync())
+                throw new InvalidOperationException("هذا الخصم يتجاوز الحد المسموح لك ويتطلب موافقة المالك");
+        }
+    }
+
+    private async Task<decimal> MaxDiscountPercentAsync()
+    {
+        var key = _currentUser.Role switch
+        {
+            UserRole.Manager => "Discount.MaxPercent.Manager",
+            UserRole.Receptionist => "Discount.MaxPercent.Receptionist",
+            _ => null
+        };
+        if (key is null) return 0m;
+        var setting = await _settings.GetByKeyAsync(key);
+        return decimal.TryParse(setting?.Value, out var pct) ? pct : 0m;
     }
 
     public async Task UpdateAsync(UpdateSaleDto dto)
@@ -118,19 +203,6 @@ public class SaleService : ISaleService
         await _unitOfWork.CompleteAsync();
     }
 
-    public async Task DeleteAsync(int id)
-    {
-        var sale = await _unitOfWork.Sales.GetByIdAsync(id);
-        if (sale is null) return;
-
-        var item = await _unitOfWork.Items.GetByIdAsync(sale.ItemId);
-        if (item is not null)
-            item.CurrentStock += sale.Quantity;
-
-        _unitOfWork.Sales.Delete(sale);
-        await _unitOfWork.CompleteAsync();
-    }
-
     private SaleDto MapToDto(Sale s)
     {
         var canSeeProfit = _permissions.Can(Permission.ViewProfit);
@@ -139,6 +211,7 @@ public class SaleService : ISaleService
             s.Quantity, s.UnitPrice, s.TotalPrice,
             canSeeProfit ? s.CostPrice : null,
             canSeeProfit ? s.Profit : null,
-            s.CustomerName, s.Notes, s.CreatedAt);
+            s.CustomerName, s.Notes, s.CreatedAt,
+            s.IsVoided, s.VoidReason);
     }
 }

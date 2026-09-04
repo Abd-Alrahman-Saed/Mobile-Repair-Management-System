@@ -152,6 +152,31 @@
                 </StackPanel>
             </Border>
 
+            <!-- ===== Discount limits ===== -->
+            <TextBlock Text="حدود الخصم" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="أقصى نسبة خصم مسموحة لكل دور (٪). أي خصم فوق الحد يتطلب موافقة المالك لحظياً."
+                               FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,14" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="موظف الاستقبال" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding MaxDiscountReceptionist, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="120" Height="36" FontSize="14"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="المدير" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding MaxDiscountManager, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="120" Height="36" FontSize="14"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Content="حفظ حدود الخصم" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveDiscountLimitsCommand}"
+                            HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Border>
+
             <!-- ===== Backup & Restore ===== -->
             <TextBlock Text="النسخ الاحتياطي والاسترجاع" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
             <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"

@@ -45,13 +45,22 @@
                         <DataGridTextColumn Header="المبلغ" Binding="{Binding Amount, StringFormat={}{0:N0}}" Width="100"/>
                         <DataGridTextColumn Header="المرجع" Binding="{Binding Reference}" Width="120"/>
                         <DataGridTextColumn Header="ملاحظات" Binding="{Binding Notes}" Width="150"/>
-                        <DataGridTemplateColumn Header="الإجراءات" Width="80">
+                        <DataGridTemplateColumn Header="الإجراءات" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="حذف" Style="{StaticResource DangerActionButton}"
-                                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                                            Command="{Binding DataContext.DeletePaymentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                            CommandParameter="{Binding Id}"/>
+                                    <Grid>
+                                        <Button Content="إلغاء" Style="{StaticResource DangerActionButton}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                Visibility="{Binding IsVoided, Converter={StaticResource InverseBoolToVis}}"
+                                                Command="{Binding DataContext.VoidPaymentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                CommandParameter="{Binding Id}"/>
+                                        <Border Style="{StaticResource StatusTag}" Background="{StaticResource DangerLightBrush}"
+                                                Visibility="{Binding IsVoided, Converter={StaticResource BoolToVis}}"
+                                                ToolTip="{Binding VoidReason}">
+                                            <TextBlock Text="ملغاة" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DangerBrush}"/>
+                                        </Border>
+                                    </Grid>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

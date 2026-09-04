@@ -49,6 +49,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<UsersViewModel>();
         services.AddTransient<UserFormViewModel>();
         services.AddTransient<AuditLogViewModel>();
+        services.AddTransient<OwnerApprovalViewModel>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<CustomerListViewModel>();
         services.AddTransient<CustomerFormViewModel>();
@@ -84,6 +85,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<UsersPage>();
         services.AddTransient<UserFormPage>();
         services.AddTransient<AuditLogPage>();
+        services.AddTransient<OwnerApprovalWindow>();
         services.AddTransient<MainWindow>();
         services.AddTransient<HomePage>();
         services.AddTransient<DashboardPage>();

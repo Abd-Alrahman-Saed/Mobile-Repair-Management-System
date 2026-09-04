@@ -74,6 +74,24 @@ public class AuthServiceTests
     }
 
     [Fact]
+    public async Task VerifyCredentialsAsync_checks_without_touching_the_current_user()
+    {
+        var (hash, salt) = MRMS.Application.Security.PasswordHasher.Hash("owner-pw");
+        var (uow, _) = MockUow(new User
+        {
+            Id = 3, Username = "owner", FullName = "المالك", Role = UserRole.Owner,
+            IsActive = true, PasswordHash = hash, PasswordSalt = salt
+        });
+        var service = NewService(uow, out var current);
+
+        (await service.VerifyCredentialsAsync("owner", "wrong")).Should().BeNull();
+
+        var ok = await service.VerifyCredentialsAsync("owner", "owner-pw");
+        ok!.Role.Should().Be(UserRole.Owner);
+        current.IsAuthenticated.Should().BeFalse("verifying an approver must not sign them in");
+    }
+
+    [Fact]
     public async Task LoginAsync_legacy_sha256_hash_verifies_then_upgrades_to_pbkdf2()
     {
         var legacy = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("admin123")));

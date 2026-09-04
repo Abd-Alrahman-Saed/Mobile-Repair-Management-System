@@ -8,5 +8,5 @@ public interface IExpenseService
     Task<ExpenseDto?> GetByIdAsync(int id);
     Task<ExpenseDto> CreateAsync(CreateExpenseDto dto);
     Task UpdateAsync(UpdateExpenseDto dto);
-    Task DeleteAsync(int id);
+    Task VoidAsync(int id, string reason);
 }

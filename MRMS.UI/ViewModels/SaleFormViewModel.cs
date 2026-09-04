@@ -17,6 +17,10 @@ public partial class SaleFormViewModel : ObservableObject
 
     public bool CanViewProfit { get; }
 
+    /// <summary>Set by the view: show the owner-approval dialog for the given message; return the
+    /// approver's user id, or null if cancelled.</summary>
+    public Func<string, int?> RequestApproval { get; set; } = _ => null;
+
     [ObservableProperty]
     private DateTime _date = DateTime.Today;
 
@@ -155,10 +159,7 @@ public partial class SaleFormViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            var dto = new CreateSaleDto(Date, SelectedItemId, Quantity, UnitPrice, CostPrice, CustomerName, Notes);
-            await _saleService.CreateAsync(dto);
-            _notificationService.Show("تم تسجيل عملية البيع بنجاح", NotificationType.Success);
-            _navigationService.GoBack();
+            await CreateSaleWithApprovalAsync(approvedByUserId: null);
         }
         catch (Exception ex)
         {
@@ -167,6 +168,28 @@ public partial class SaleFormViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task CreateSaleWithApprovalAsync(int? approvedByUserId)
+    {
+        try
+        {
+            var dto = new CreateSaleDto(Date, SelectedItemId, Quantity, UnitPrice, CostPrice,
+                CustomerName, Notes, approvedByUserId);
+            await _saleService.CreateAsync(dto);
+            _notificationService.Show("تم تسجيل عملية البيع بنجاح", NotificationType.Success);
+            _navigationService.GoBack();
+        }
+        catch (InvalidOperationException ex) when (approvedByUserId is null && ex.Message.Contains("موافقة المالك"))
+        {
+            var approverId = RequestApproval(ex.Message);
+            if (approverId is null)
+            {
+                ErrorMessage = ex.Message;
+                return;
+            }
+            await CreateSaleWithApprovalAsync(approverId);
         }
     }
 

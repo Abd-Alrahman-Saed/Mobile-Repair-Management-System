@@ -10,7 +10,9 @@ public record ExpenseDto(
     decimal Amount,
     PaymentMethod PaymentMethod,
     string Notes,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsVoided = false,
+    string? VoidReason = null);
 
 public record CreateExpenseDto(
     DateTime Date,

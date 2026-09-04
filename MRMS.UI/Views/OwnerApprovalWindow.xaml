@@ -1,0 +1,41 @@
+<Window x:Class="MRMS.UI.Views.OwnerApprovalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="موافقة المالك"
+        Height="300" Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FlowDirection="RightToLeft">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{Binding Message}" TextWrapping="Wrap" FontSize="13"
+                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,14"/>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="اسم مستخدم المالك/المدير" Margin="0,0,0,5"/>
+            <TextBox x:Name="UsernameBox" Height="32" FontSize="14" Padding="6,0"
+                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="كلمة المرور" Margin="0,0,0,5"/>
+            <PasswordBox x:Name="PasswordBox" Height="32" FontSize="14" Padding="6,0"
+                         KeyDown="PasswordBox_KeyDown"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}"
+                   TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"/>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Content="اعتماد" Style="{StaticResource PrimaryButton}" Padding="16,8" Click="Approve_Click"/>
+            <Button Content="إلغاء" Style="{StaticResource SecondaryButton}" Padding="14,8" Margin="8,0,0,0" Click="Cancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core.Entities;
+using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
 
 namespace MRMS.Application.Services;
@@ -11,18 +12,26 @@ public class PurchaseService : IPurchaseService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
+    private readonly IPermissionService _permissions;
+    private readonly ICurrentUserService _currentUser;
 
-    public PurchaseService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
+    public PurchaseService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit,
+        IPermissionService permissions, ICurrentUserService currentUser)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
+        _permissions = permissions;
+        _currentUser = currentUser;
     }
 
     public async Task<IEnumerable<PurchaseDto>> GetAllAsync()
     {
-        var purchases = await _unitOfWork.Purchases
-            .Query()
+        var query = _unitOfWork.Purchases.Query();
+        if (_permissions.Can(Permission.VoidTransaction))
+            query = query.IgnoreQueryFilters();
+
+        var purchases = await query
             .Include(p => p.Supplier)
             .Include(p => p.PurchaseItems).ThenInclude(pi => pi.Item)
             .OrderByDescending(p => p.Date).ThenByDescending(p => p.CreatedAt)
@@ -97,24 +106,38 @@ public class PurchaseService : IPurchaseService
         await _unitOfWork.CompleteAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task VoidAsync(int id, string reason)
     {
-        var purchase = await _unitOfWork.Purchases
-            .Query()
+        _permissions.Require(Permission.VoidTransaction);
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new InvalidOperationException("سبب الإلغاء مطلوب");
+
+        var purchase = await _unitOfWork.Purchases.Query()
+            .IgnoreQueryFilters()
             .Include(p => p.PurchaseItems)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(p => p.Id == id)
+            ?? throw new InvalidOperationException("فاتورة المشتريات غير موجودة");
+        if (purchase.IsVoided)
+            throw new InvalidOperationException("الفاتورة ملغاة بالفعل");
 
-        if (purchase is null) return;
-
-        foreach (var item in purchase.PurchaseItems)
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var stockItem = await _unitOfWork.Items.GetByIdAsync(item.ItemId);
-            if (stockItem is not null)
-                stockItem.CurrentStock -= item.Quantity;
-        }
+            purchase.IsVoided = true;
+            purchase.VoidedByUserId = _currentUser.User?.Id;
+            purchase.VoidReason = reason.Trim();
+            purchase.VoidedAt = DateTime.UtcNow;
 
-        _unitOfWork.Purchases.Delete(purchase);
-        await _unitOfWork.CompleteAsync();
+            foreach (var line in purchase.PurchaseItems)
+            {
+                var stockItem = await _unitOfWork.Items.GetByIdAsync(line.ItemId);
+                if (stockItem is not null)
+                    stockItem.CurrentStock -= line.Quantity;
+            }
+
+            await _journalService.PostReversalAsync(nameof(Purchase), purchase.Id, DateTime.UtcNow.Date, reason.Trim());
+            await _audit.LogAsync("Purchase.Void", nameof(Purchase), purchase.Id, reason.Trim());
+            await _unitOfWork.CompleteAsync();
+        });
     }
 
     private static PurchaseDto MapToDto(Purchase p) => new(
@@ -123,5 +146,6 @@ public class PurchaseService : IPurchaseService
         p.PurchaseItems.Sum(pi => pi.TotalCost),
         p.Notes, p.CreatedAt,
         p.PurchaseItems.Select(pi => new PurchaseItemDto(
-            pi.Id, pi.ItemId, pi.Item.Name, pi.Quantity, pi.UnitCost, pi.TotalCost)).ToList());
+            pi.Id, pi.ItemId, pi.Item.Name, pi.Quantity, pi.UnitCost, pi.TotalCost)).ToList(),
+        p.IsVoided, p.VoidReason);
 }

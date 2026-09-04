@@ -125,15 +125,16 @@ public partial class ExpensesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteExpenseAsync(int id)
+    private async Task VoidExpenseAsync(int id)
     {
-        var confirmed = await _notificationService.ConfirmAsync("هل أنت متأكد من حذف هذا المصروف؟");
-        if (!confirmed) return;
+        var reason = Views.VoidReasonWindow.Ask(System.Windows.Application.Current.MainWindow,
+            "سبب إلغاء المصروف");
+        if (reason is null) return;
 
-        try { await _expenseService.DeleteAsync(id); }
-        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "حذف المصروف"), NotificationType.Error); return; }
+        try { await _expenseService.VoidAsync(id, reason); }
+        catch (Exception ex) { _notificationService.Show(UiError.Describe(ex, "إلغاء المصروف"), NotificationType.Error); return; }
 
-        _notificationService.Show("تم حذف المصروف بنجاح", NotificationType.Success);
+        _notificationService.Show("تم إلغاء المصروف", NotificationType.Success);
         await LoadAsync();
     }
 

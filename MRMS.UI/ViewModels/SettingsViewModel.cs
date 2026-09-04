@@ -105,6 +105,9 @@ public partial class SettingsViewModel : ObservableObject
         var expenseSetting = _allSettings.FirstOrDefault(s => s.Key == "ExpenseCategories");
         ExpenseCategoriesList = new ObservableCollection<string>(ParseList(expenseSetting?.Value));
 
+        MaxDiscountReceptionist = ReadDecimal("Discount.MaxPercent.Receptionist");
+        MaxDiscountManager = ReadDecimal("Discount.MaxPercent.Manager");
+
         LoadBackupSettings();
         await RefreshBackupListsAsync();
 
@@ -115,6 +118,37 @@ public partial class SettingsViewModel : ObservableObject
         string.IsNullOrWhiteSpace(value)
             ? []
             : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    [ObservableProperty] private decimal _maxDiscountReceptionist;
+    [ObservableProperty] private decimal _maxDiscountManager;
+
+    private decimal ReadDecimal(string key) =>
+        decimal.TryParse(_allSettings.FirstOrDefault(s => s.Key == key)?.Value, out var v) ? v : 0m;
+
+    [RelayCommand]
+    private async Task SaveDiscountLimitsAsync()
+    {
+        try
+        {
+            await UpsertSettingAsync("Discount.MaxPercent.Receptionist",
+                Math.Clamp(MaxDiscountReceptionist, 0, 100).ToString("0.##"));
+            await UpsertSettingAsync("Discount.MaxPercent.Manager",
+                Math.Clamp(MaxDiscountManager, 0, 100).ToString("0.##"));
+            _notificationService.Show("تم حفظ حدود الخصم", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            _notificationService.Show(UiError.Describe(ex, "حفظ حدود الخصم"), NotificationType.Error);
+        }
+    }
+
+    private async Task UpsertSettingAsync(string key, string value)
+    {
+        var existing = _allSettings.FirstOrDefault(s => s.Key == key);
+        if (existing is not null)
+            await _settingService.UpdateAsync(new UpdateSystemSettingDto(existing.Id, value));
+        _allSettings = (await _settingService.GetAllAsync()).ToList();
+    }
 
     [RelayCommand]
     private void AddPaymentMethod()

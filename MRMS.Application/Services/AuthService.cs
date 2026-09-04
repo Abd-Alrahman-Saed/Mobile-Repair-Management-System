@@ -52,6 +52,20 @@ public class AuthService : IAuthService
         return new LoginResult(true, null, user.MustChangePassword);
     }
 
+    public async Task<CurrentUser?> VerifyCredentialsAsync(string username, string password)
+    {
+        var name = username.Trim();
+        var user = (await _uow.Users.FindAsync(u => u.Username == name)).FirstOrDefault();
+        if (user is null || !user.IsActive)
+            return null;
+
+        var ok = user.PasswordSalt is null
+            ? PasswordHasher.VerifyLegacySha256(password, user.PasswordHash)
+            : PasswordHasher.VerifyPbkdf2(password, user.PasswordHash, user.PasswordSalt);
+
+        return ok ? new CurrentUser(user.Id, user.Username, user.FullName, user.Role) : null;
+    }
+
     public async Task<LoginResult> ChangePasswordAsync(ChangePasswordDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Length < 4)
