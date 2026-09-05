@@ -78,6 +78,7 @@ public class AppDbContext : DbContext
             e.Property(t => t.ReceptionNotes).HasMaxLength(1000);
             e.Property(t => t.RepairDescription).HasMaxLength(1000);
             e.Property(t => t.Cost).HasColumnType("decimal(18,2)");
+            e.Property(t => t.PaidAmount).HasColumnType("decimal(18,2)");
             e.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
             e.HasIndex(t => t.TicketNumber).IsUnique();
             e.HasOne(t => t.Device)

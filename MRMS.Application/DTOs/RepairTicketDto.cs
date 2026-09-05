@@ -21,7 +21,15 @@ public record RepairTicketDto(
     List<RepairTicketPartDto>? Parts = null,
     decimal PartsCost = 0,
     int? AssignedTechnicianId = null,
-    string? AssignedTechnicianName = null);
+    string? AssignedTechnicianName = null,
+    string? CustomerPhone = null,
+    DateTime? NotifiedAt = null,
+    decimal PaidAmount = 0)
+{
+    /// <summary>What's still owed by the customer. Can be negative if a deposit exceeds the
+    /// (not yet finalized) cost - that's expected, not an error.</summary>
+    public decimal RemainingAmount => Cost - PaidAmount;
+}
 
 public record RepairTicketPartDto(
     int Id,
@@ -42,9 +50,11 @@ public record CreateRepairTicketDto(
     string ProblemDescription,
     string ReceptionNotes);
 
-public record UpdateRepairTicketStatusDto(int TicketId, TicketStatus NewStatus);
+public record UpdateRepairTicketStatusDto(int TicketId, TicketStatus NewStatus, int? ApprovedByUserId = null);
 
 public record UpdateRepairInfoDto(
     int TicketId,
     string RepairDescription,
     decimal Cost);
+
+public record CollectPaymentDto(int TicketId, decimal Amount);

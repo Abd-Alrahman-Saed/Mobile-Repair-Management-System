@@ -33,6 +33,7 @@ public partial class RepairTicketDetailPage : Page
         _warrantyService = warrantyService;
         _notificationService = notificationService;
         DataContext = vm;
+        _vm.RequestApproval = RequestOwnerApproval;
         Loaded += async (_, _) =>
         {
             var ticketId = _navigationService.GetParameter<int?>("TicketId");
@@ -44,12 +45,32 @@ public partial class RepairTicketDetailPage : Page
                 await LoadPhotosAndWarrantyAsync(ticketId.Value);
                 await _vm.LoadItemsCommand.ExecuteAsync(null);
                 await _vm.LoadTechniciansCommand.ExecuteAsync(null);
+                await LoadNotifyTemplateAsync();
             }
         };
     }
 
     private IRepairTicketService _repairTicketService =>
         App.ServiceProvider!.GetRequiredService<IRepairTicketService>();
+
+    private ISystemSettingService _settingService =>
+        App.ServiceProvider!.GetRequiredService<ISystemSettingService>();
+
+    private async Task LoadNotifyTemplateAsync()
+    {
+        var settings = await _settingService.GetAllAsync();
+        var template = settings.FirstOrDefault(s => s.Key == "Notify.MessageTemplate")?.Value;
+        if (!string.IsNullOrWhiteSpace(template))
+            _vm.NotifyMessageTemplate = template;
+    }
+
+    private int? RequestOwnerApproval(string message)
+    {
+        var dialog = App.ServiceProvider!.GetRequiredService<OwnerApprovalWindow>();
+        dialog.Owner = Window.GetWindow(this);
+        dialog.SetMessage(message);
+        return dialog.ShowDialog() == true ? dialog.ApproverUserId : null;
+    }
 
     private async Task LoadPhotosAndWarrantyAsync(int ticketId)
     {

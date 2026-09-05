@@ -177,6 +177,22 @@
                 </StackPanel>
             </Border>
 
+            <!-- ===== Notify customer message template ===== -->
+            <TextBlock Text="رسالة إبلاغ العميل" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+            <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"
+                    Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="نص رسالة الواتساب المرسلة للعميل عند تجهيز جهازه. المتغيرات المتاحة: {TicketNumber} رقم التذكرة، {Device} الجهاز، {Amount} المبلغ."
+                               FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,14" TextWrapping="Wrap"/>
+                    <TextBox Text="{Binding NotifyMessageTemplate, UpdateSourceTrigger=PropertyChanged}"
+                             Height="70" FontSize="14" AcceptsReturn="True" TextWrapping="Wrap"
+                             HorizontalAlignment="Stretch"/>
+                    <Button Content="حفظ رسالة الإبلاغ" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveNotifyTemplateCommand}"
+                            HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Border>
+
             <!-- ===== Backup & Restore ===== -->
             <TextBlock Text="النسخ الاحتياطي والاسترجاع" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
             <Border Style="{StaticResource CardBorder}" Padding="24" Margin="0,0,0,28"

@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
@@ -47,7 +49,11 @@ public partial class RepairTicketViewModel : ObservableObject
     /// </summary>
     public decimal ExpectedProfit => Cost - PartsTotalCost;
 
-    partial void OnCostChanged(decimal value) => OnPropertyChanged(nameof(ExpectedProfit));
+    partial void OnCostChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(ExpectedProfit));
+        OnPropertyChanged(nameof(RemainingAmount));
+    }
 
     /// <summary>The status the user wants to move the ticket TO next - null when the ticket is in a
     /// terminal state (Delivered/Cancelled) and there is nothing left to pick.</summary>
@@ -72,6 +78,10 @@ public partial class RepairTicketViewModel : ObservableObject
     [ObservableProperty]
     private RepairTicketDto? _selectedTicket;
 
+    /// <summary>Set by the view: show the owner-approval dialog for the given message; return the
+    /// approver's user id, or null if cancelled. Same pattern as SaleFormViewModel.</summary>
+    public Func<string, int?> RequestApproval { get; set; } = _ => null;
+
     partial void OnSelectedTicketChanged(RepairTicketDto? value)
     {
         if (value is not null)
@@ -88,6 +98,10 @@ public partial class RepairTicketViewModel : ObservableObject
 
             RepairDescription = value.RepairDescription;
             Cost = value.Cost;
+            PaidAmount = value.PaidAmount;
+            IsNotified = value.NotifiedAt.HasValue;
+            CanNotifyCustomer = value.Status == TicketStatus.Repaired && !string.IsNullOrWhiteSpace(value.CustomerPhone);
+            CollectPaymentAmount = 0;
 
             if (value.Parts is not null)
                 Parts = new ObservableCollection<RepairTicketPartDto>(value.Parts);
@@ -96,6 +110,7 @@ public partial class RepairTicketViewModel : ObservableObject
 
             OnPropertyChanged(nameof(PartsTotalCost));
             OnPropertyChanged(nameof(ExpectedProfit));
+            OnPropertyChanged(nameof(RemainingAmount));
         }
     }
 
@@ -181,6 +196,26 @@ public partial class RepairTicketViewModel : ObservableObject
     private decimal _partUnitCost;
 
     public decimal PartsTotalCost => Parts.Sum(p => p.TotalCost);
+
+    // ===== Payment (4.9) =====
+
+    [ObservableProperty]
+    private decimal _paidAmount;
+
+    public decimal RemainingAmount => Cost - PaidAmount;
+
+    partial void OnPaidAmountChanged(decimal value) => OnPropertyChanged(nameof(RemainingAmount));
+
+    [ObservableProperty]
+    private decimal _collectPaymentAmount;
+
+    // ===== Notify customer (4.8) =====
+
+    [ObservableProperty]
+    private bool _isNotified;
+
+    [ObservableProperty]
+    private bool _canNotifyCustomer;
 
     public event Action? TicketCreated;
 
@@ -319,11 +354,24 @@ public partial class RepairTicketViewModel : ObservableObject
         if (SelectedTicket is null || SelectedStatus is not { } newStatus)
             return;
         IsLoading = true;
+        try
+        {
+            await UpdateStatusWithApprovalAsync(newStatus, approvedByUserId: null);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task UpdateStatusWithApprovalAsync(TicketStatus newStatus, int? approvedByUserId)
+    {
+        if (SelectedTicket is null) return;
 
         try
         {
             var result = await _repairTicketService.UpdateStatusAsync(
-                new UpdateRepairTicketStatusDto(SelectedTicket.Id, newStatus));
+                new UpdateRepairTicketStatusDto(SelectedTicket.Id, newStatus, approvedByUserId));
             if (!result)
                 ErrorMessage = "لا يمكن تغيير الحالة - هذا الانتقال غير مسموح من الحالة الحالية";
             else
@@ -333,14 +381,96 @@ public partial class RepairTicketViewModel : ObservableObject
                     $"تم تحديث الحالة إلى: {TicketStatusPalette.Label(newStatus)}", NotificationType.Success);
             }
         }
+        catch (InvalidOperationException ex) when (approvedByUserId is null && ex.Message.Contains("موافقة المالك"))
+        {
+            var approverId = RequestApproval(ex.Message);
+            if (approverId is null)
+            {
+                ErrorMessage = ex.Message;
+                return;
+            }
+            await UpdateStatusWithApprovalAsync(newStatus, approverId);
+        }
         catch (Exception ex)
         {
             ErrorMessage = UiError.Describe(ex, "عملية على تذكرة الصيانة");
+        }
+    }
+
+    [RelayCommand]
+    private async Task CollectPaymentAsync()
+    {
+        if (SelectedTicket is null) return;
+        if (CollectPaymentAmount <= 0)
+        {
+            ErrorMessage = "يرجى إدخال مبلغ أكبر من صفر";
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            var updated = await _repairTicketService.CollectPaymentAsync(
+                new CollectPaymentDto(SelectedTicket.Id, CollectPaymentAmount));
+            SelectedTicket = updated;
+            _notificationService.Show("تم تسجيل الدفعة بنجاح", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = UiError.Describe(ex, "تحصيل دفعة");
         }
         finally
         {
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task NotifyCustomerAsync()
+    {
+        if (SelectedTicket is null) return;
+
+        try
+        {
+            var url = BuildWhatsAppUrl(SelectedTicket, NotifyMessageTemplate);
+            if (url is null)
+            {
+                ErrorMessage = "لا يوجد رقم هاتف مسجّل لهذا العميل";
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+
+            await _repairTicketService.MarkNotifiedAsync(SelectedTicket.Id);
+            SelectedTicket = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
+            _notificationService.Show("تم إبلاغ العميل", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = UiError.Describe(ex, "إبلاغ العميل");
+        }
+    }
+
+    /// <summary>The editable-in-Settings message template. Set by the view after loading it from
+    /// <c>ISystemSettingService</c> - defaults to a reasonable Arabic message if never loaded.</summary>
+    public string NotifyMessageTemplate { get; set; } =
+        "مرحباً، تذكرة الصيانة رقم {TicketNumber} الخاصة بجهاز {Device} أصبحت جاهزة للاستلام. المبلغ المستحق: {Amount} جنيه. شكراً لثقتكم.";
+
+    private static string? BuildWhatsAppUrl(RepairTicketDto ticket, string template)
+    {
+        if (string.IsNullOrWhiteSpace(ticket.CustomerPhone)) return null;
+
+        var digits = new string(ticket.CustomerPhone.Where(char.IsDigit).ToArray());
+        if (digits.Length == 0) return null;
+        if (digits.StartsWith('0'))
+            digits = "20" + digits[1..];
+
+        var message = template
+            .Replace("{TicketNumber}", ticket.TicketNumber)
+            .Replace("{Device}", ticket.DeviceInfo)
+            .Replace("{Amount}", ticket.Cost.ToString("N0"));
+
+        return $"https://wa.me/{digits}?text={WebUtility.UrlEncode(message)}";
     }
 
     [RelayCommand]

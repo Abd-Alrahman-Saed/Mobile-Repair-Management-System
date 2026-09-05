@@ -171,6 +171,10 @@ public sealed class AccountingIntegrationTests : IDisposable
             var uow = new UnitOfWork(ctx);
             var service = new RepairTicketService(uow, Journal(uow), Audit(uow), Perms);
 
+            // Cash-basis revenue is recognized as payments are actually collected, not at delivery -
+            // so the full amount must be collected first for the remaining balance to reach zero.
+            await service.CollectPaymentAsync(new CollectPaymentDto(ticketId, 200m));
+
             var ok = await service.UpdateStatusAsync(
                 new UpdateRepairTicketStatusDto(ticketId, TicketStatus.Delivered));
             ok.Should().BeTrue();
@@ -181,10 +185,50 @@ public sealed class AccountingIntegrationTests : IDisposable
             var ticket = await assert.RepairTickets.FindAsync(ticketId);
             ticket!.DeliveryDate.Should().Be(DateTime.UtcNow.Date);
             ticket.DeliveryTime.Should().NotBeNull();
+            ticket.PaidAmount.Should().Be(200m);
 
             var lines = await assert.JournalEntryLines.ToListAsync();
             lines.Should().NotBeEmpty();
             lines.Sum(l => l.DebitAmount).Should().Be(lines.Sum(l => l.CreditAmount));
+        }
+    }
+
+    [Fact]
+    public async Task Collecting_a_payment_posts_only_the_amount_paid_not_the_full_cost()
+    {
+        int ticketId;
+        await using (var seed = NewContext())
+        {
+            var customer = new Customer { FullName = "عميل", PhoneNumber = "0100" };
+            var device = new Device { Brand = "Samsung", Model = "A10", Customer = customer };
+            var ticket = new RepairTicket
+            {
+                TicketNumber = "RPR-00002",
+                Device = device,
+                Status = TicketStatus.Repaired,
+                ReceiveDate = DateTime.UtcNow.Date,
+                ReceiveTime = TimeSpan.Zero,
+                Cost = 500m,
+            };
+            seed.RepairTickets.Add(ticket);
+            await seed.SaveChangesAsync();
+            ticketId = ticket.Id;
+        }
+
+        await using (var ctx = NewContext())
+        {
+            var uow = new UnitOfWork(ctx);
+            var service = new RepairTicketService(uow, Journal(uow), Audit(uow), Perms);
+            var dto = await service.CollectPaymentAsync(new CollectPaymentDto(ticketId, 150m));
+            dto.PaidAmount.Should().Be(150m);
+            dto.RemainingAmount.Should().Be(350m);
+        }
+
+        await using (var assert = NewContext())
+        {
+            var lines = await assert.JournalEntryLines.ToListAsync();
+            lines.Sum(l => l.DebitAmount).Should().Be(150m, "only the amount actually collected is posted, not the full 500 cost");
+            lines.Sum(l => l.CreditAmount).Should().Be(150m);
         }
     }
 
@@ -194,7 +238,8 @@ public sealed class AccountingIntegrationTests : IDisposable
             => throw new InvalidOperationException("boom");
         public Task PostPurchaseAsync(DateTime date, string description, decimal amount, int purchaseId) => Task.CompletedTask;
         public Task PostExpenseAsync(DateTime date, string category, string description, decimal amount, int expenseId) => Task.CompletedTask;
-        public Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal totalCost, decimal partsCost, int ticketId) => Task.CompletedTask;
+        public Task PostRepairPaymentAsync(DateTime date, string ticketNumber, decimal amount, int ticketId) => Task.CompletedTask;
+        public Task PostRepairPartsCostAsync(DateTime date, string ticketNumber, decimal partsCost, int ticketId) => Task.CompletedTask;
         public Task PostSupplierPaymentAsync(DateTime date, string supplierName, decimal amount, int paymentId) => Task.CompletedTask;
         public Task PostDamagedAsync(DateTime date, string itemName, int quantity, decimal value, int movementId) => Task.CompletedTask;
         public Task PostReversalAsync(string referenceType, int referenceId, DateTime date, string reason) => Task.CompletedTask;

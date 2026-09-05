@@ -442,6 +442,12 @@ namespace MRMS.Infrastructure.Migrations
                     b.Property<int>("DeviceId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("NotifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("ProblemDescription")
                         .IsRequired()
                         .HasMaxLength(1000)

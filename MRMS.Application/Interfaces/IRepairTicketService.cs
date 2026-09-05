@@ -19,4 +19,13 @@ public interface IRepairTicketService
     /// <summary>Assigns (or, with <paramref name="technicianId"/> null, unassigns) the technician
     /// responsible for a ticket. Requires <c>Permission.UpdateTicketStatus</c>.</summary>
     Task AssignTechnicianAsync(int ticketId, int? technicianId);
+
+    /// <summary>Marks the ticket as notified (WhatsApp) that it's ready for pickup. Requires
+    /// <c>Permission.UpdateTicketStatus</c>.</summary>
+    Task MarkNotifiedAsync(int ticketId);
+
+    /// <summary>Records a payment (deposit or partial/final) collected from the customer. Requires
+    /// <c>Permission.CollectPayment</c>. No upper bound against Cost - a deposit can legitimately be
+    /// collected before the final cost is known.</summary>
+    Task<RepairTicketDto> CollectPaymentAsync(CollectPaymentDto dto);
 }

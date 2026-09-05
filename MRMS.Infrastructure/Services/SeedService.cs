@@ -51,6 +51,8 @@ public class SeedService
         await EnsureSettingAsync("Discount.MaxPercent.Receptionist", "0");
         await EnsureSettingAsync("Discount.MaxPercent.Manager", "15");
         await EnsureSettingAsync("Alerts.StaleTicketDays", "3");
+        await EnsureSettingAsync("Notify.MessageTemplate",
+            "مرحباً، تذكرة الصيانة رقم {TicketNumber} الخاصة بجهاز {Device} أصبحت جاهزة للاستلام. المبلغ المستحق: {Amount} جنيه. شكراً لثقتكم.");
     }
 
     private async Task EnsureSettingAsync(string key, string value)

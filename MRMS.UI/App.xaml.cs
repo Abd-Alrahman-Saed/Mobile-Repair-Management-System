@@ -57,7 +57,6 @@ public partial class App : System.Windows.Application
         services.AddTransient<DeviceRegistrationViewModel>();
         services.AddTransient<DeviceTransferViewModel>();
         services.AddTransient<RepairTicketViewModel>();
-        services.AddTransient<RepairTicketCreateViewModel>();
         services.AddTransient<RepairTicketListViewModel>();
         services.AddTransient<CustomerProfileViewModel>();
         services.AddTransient<SearchViewModel>();
@@ -94,7 +93,6 @@ public partial class App : System.Windows.Application
         services.AddTransient<CustomerFormPage>();
         services.AddTransient<DeviceRegistrationPage>();
         services.AddTransient<DeviceTransferPage>();
-        services.AddTransient<RepairTicketCreatePage>();
         services.AddTransient<RepairTicketDetailPage>();
         services.AddTransient<RepairTicketListPage>();
         services.AddTransient<CustomerProfilePage>();

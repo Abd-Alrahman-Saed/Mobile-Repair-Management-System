@@ -107,6 +107,7 @@ public partial class SettingsViewModel : ObservableObject
 
         MaxDiscountReceptionist = ReadDecimal("Discount.MaxPercent.Receptionist");
         MaxDiscountManager = ReadDecimal("Discount.MaxPercent.Manager");
+        NotifyMessageTemplate = _allSettings.FirstOrDefault(s => s.Key == "Notify.MessageTemplate")?.Value ?? "";
 
         LoadBackupSettings();
         await RefreshBackupListsAsync();
@@ -121,6 +122,7 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private decimal _maxDiscountReceptionist;
     [ObservableProperty] private decimal _maxDiscountManager;
+    [ObservableProperty] private string _notifyMessageTemplate = "";
 
     private decimal ReadDecimal(string key) =>
         decimal.TryParse(_allSettings.FirstOrDefault(s => s.Key == key)?.Value, out var v) ? v : 0m;
@@ -139,6 +141,25 @@ public partial class SettingsViewModel : ObservableObject
         catch (Exception ex)
         {
             _notificationService.Show(UiError.Describe(ex, "حفظ حدود الخصم"), NotificationType.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task SaveNotifyTemplateAsync()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(NotifyMessageTemplate))
+            {
+                _notificationService.Show("نص الرسالة لا يمكن أن يكون فارغاً", NotificationType.Error);
+                return;
+            }
+            await UpsertSettingAsync("Notify.MessageTemplate", NotifyMessageTemplate);
+            _notificationService.Show("تم حفظ رسالة إبلاغ العميل", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            _notificationService.Show(UiError.Describe(ex, "حفظ رسالة إبلاغ العميل"), NotificationType.Error);
         }
     }
 

@@ -66,38 +66,40 @@ public class JournalService : IJournalService
         });
     }
 
-    public async Task PostRepairDeliveryAsync(DateTime date, string ticketNumber, decimal totalCost, decimal partsCost, int ticketId)
+    public async Task PostRepairPaymentAsync(DateTime date, string ticketNumber, decimal amount, int ticketId)
     {
-        // totalCost is the full amount charged to the customer (parts + labor already combined) -
-        // it is the revenue for this line; partsCost is posted separately below as COGS, not added here.
+        // amount is a single payment (deposit or partial/final) actually collected - not the ticket's
+        // full Cost. Revenue is recognized cash-basis, one entry per payment.
         await _uow.JournalEntries.AddAsync(new JournalEntry
         {
             Date = date,
-            Description = $"صيانة: {ticketNumber} - {totalCost:N2}",
-            ReferenceType = "RepairDelivery",
+            Description = $"صيانة: {ticketNumber} - {amount:N2}",
+            ReferenceType = "RepairPayment",
             ReferenceId = ticketId,
             Lines =
             [
-                new() { AccountName = "الصندوق", DebitAmount = totalCost },
-                new() { AccountName = "إيرادات الصيانة", CreditAmount = totalCost }
+                new() { AccountName = "الصندوق", DebitAmount = amount },
+                new() { AccountName = "إيرادات الصيانة", CreditAmount = amount }
             ]
         });
+    }
 
-        if (partsCost > 0)
+    public async Task PostRepairPartsCostAsync(DateTime date, string ticketNumber, decimal partsCost, int ticketId)
+    {
+        if (partsCost <= 0) return;
+
+        await _uow.JournalEntries.AddAsync(new JournalEntry
         {
-            await _uow.JournalEntries.AddAsync(new JournalEntry
-            {
-                Date = date,
-                Description = $"تكلفة قطع صيانة: {ticketNumber}",
-                ReferenceType = "RepairParts",
-                ReferenceId = ticketId,
-                Lines =
-                [
-                    new() { AccountName = "تكلفة الصيانة", DebitAmount = partsCost },
-                    new() { AccountName = "المخزون", CreditAmount = partsCost }
-                ]
-            });
-        }
+            Date = date,
+            Description = $"تكلفة قطع صيانة: {ticketNumber}",
+            ReferenceType = "RepairParts",
+            ReferenceId = ticketId,
+            Lines =
+            [
+                new() { AccountName = "تكلفة الصيانة", DebitAmount = partsCost },
+                new() { AccountName = "المخزون", CreditAmount = partsCost }
+            ]
+        });
     }
 
     public async Task PostSupplierPaymentAsync(DateTime date, string supplierName, decimal amount, int paymentId)

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Core;
+using MRMS.Core.Authorization;
 using MRMS.Core.Entities;
 using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
@@ -54,6 +55,7 @@ public class RepairTicketService : IRepairTicketService
         {
             DeviceInfo = $"{ticket.Device?.Brand} {ticket.Device?.Model}",
             CustomerName = ticket.Device?.Customer?.FullName,
+            CustomerPhone = ticket.Device?.Customer?.PhoneNumber,
             Parts = parts.ToList(),
             PartsCost = parts.Sum(p => p.TotalCost)
         };
@@ -74,6 +76,14 @@ public class RepairTicketService : IRepairTicketService
         if (!TicketStateMachine.CanTransition(oldStatus, dto.NewStatus))
             return false;
 
+        if (dto.NewStatus == TicketStatus.Delivered && ticket.Cost - ticket.PaidAmount > 0)
+        {
+            var approver = await ResolveOwnerApproverAsync(dto.ApprovedByUserId);
+            if (approver is null)
+                throw new InvalidOperationException(
+                    "لا يمكن تسليم التذكرة والمبلغ المتبقي أكبر من صفر - يتطلب موافقة المالك");
+        }
+
         await _uow.ExecuteInTransactionAsync(async () =>
         {
             ticket.Status = dto.NewStatus;
@@ -91,14 +101,28 @@ public class RepairTicketService : IRepairTicketService
 
             if (dto.NewStatus == TicketStatus.Delivered)
             {
+                // Revenue was already recognized incrementally as payments came in via
+                // CollectPaymentAsync - only the parts COGS entry belongs here.
                 var parts = await GetPartsAsync(dto.TicketId);
                 var partsCost = parts.Sum(p => p.TotalCost);
-                await _journalService.PostRepairDeliveryAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, ticket.Cost, partsCost, ticket.Id);
+                await _journalService.PostRepairPartsCostAsync(ticket.DeliveryDate!.Value, ticket.TicketNumber, partsCost, ticket.Id);
                 await _uow.CompleteAsync();
             }
         });
 
         return true;
+    }
+
+    /// <summary>Validates a live owner-approval id the same way <c>SaleService</c> does: the approver
+    /// must be an active user whose role holds <c>ApplyDiscountBeyondLimit</c> (the owner-only
+    /// permission reused as the general "override with owner approval" gate).</summary>
+    private async Task<User?> ResolveOwnerApproverAsync(int? approverId)
+    {
+        if (approverId is not { } id) return null;
+        var user = await _uow.Users.GetByIdAsync(id);
+        if (user is null || !user.IsActive || !RolePermissions.Has(user.Role, Permission.ApplyDiscountBeyondLimit))
+            return null;
+        return user;
     }
 
     public async Task<bool> UpdateRepairInfoAsync(UpdateRepairInfoDto dto)
@@ -139,7 +163,8 @@ public class RepairTicketService : IRepairTicketService
             return dto with
             {
                 DeviceInfo = $"{t.Device?.Brand} {t.Device?.Model}",
-                CustomerName = t.Device?.Customer?.FullName
+                CustomerName = t.Device?.Customer?.FullName,
+                CustomerPhone = t.Device?.Customer?.PhoneNumber
             };
         });
     }
@@ -270,11 +295,51 @@ public class RepairTicketService : IRepairTicketService
         await _uow.CompleteAsync();
     }
 
+    public async Task MarkNotifiedAsync(int ticketId)
+    {
+        _permissions.Require(Permission.UpdateTicketStatus);
+
+        var ticket = await _uow.RepairTickets.GetByIdAsync(ticketId)
+            ?? throw new InvalidOperationException("التذكرة غير موجودة");
+
+        ticket.NotifiedAt = DateTime.UtcNow;
+        _uow.RepairTickets.Update(ticket);
+        await _audit.LogAsync("RepairTicket.CustomerNotified", nameof(RepairTicket), ticket.Id, ticket.TicketNumber);
+        await _uow.CompleteAsync();
+    }
+
+    public async Task<RepairTicketDto> CollectPaymentAsync(CollectPaymentDto dto)
+    {
+        _permissions.Require(Permission.CollectPayment);
+
+        if (dto.Amount <= 0)
+            throw new InvalidOperationException("المبلغ يجب أن يكون أكبر من صفر");
+
+        var ticket = await _uow.RepairTickets.GetByIdAsync(dto.TicketId)
+            ?? throw new InvalidOperationException("التذكرة غير موجودة");
+
+        await _uow.ExecuteInTransactionAsync(async () =>
+        {
+            ticket.PaidAmount += dto.Amount;
+            _uow.RepairTickets.Update(ticket);
+            await _audit.LogAsync("RepairTicket.PaymentCollected", nameof(RepairTicket), ticket.Id,
+                $"{ticket.TicketNumber}: {dto.Amount:N2}");
+            await _uow.CompleteAsync();
+
+            await _journalService.PostRepairPaymentAsync(DateTime.UtcNow.Date, ticket.TicketNumber, dto.Amount, ticket.Id);
+            await _uow.CompleteAsync();
+        });
+
+        return (await GetByIdAsync(ticket.Id))!;
+    }
+
     private static RepairTicketDto MapToDto(RepairTicket t) =>
         new(t.Id, t.TicketNumber, t.DeviceId, null, null,
             t.ProblemDescription, t.ReceptionNotes, t.Status,
             t.ReceiveDate, t.ReceiveTime, t.RepairDescription, t.Cost,
             t.DeliveryDate, t.DeliveryTime, t.CreatedAt,
             AssignedTechnicianId: t.AssignedTechnicianId,
-            AssignedTechnicianName: t.AssignedTechnician?.FullName);
+            AssignedTechnicianName: t.AssignedTechnician?.FullName,
+            NotifiedAt: t.NotifiedAt,
+            PaidAmount: t.PaidAmount);
 }
