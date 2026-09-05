@@ -84,6 +84,10 @@ public class AppDbContext : DbContext
                 .WithMany(d => d.RepairTickets)
                 .HasForeignKey(t => t.DeviceId)
                 .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(t => t.AssignedTechnician)
+                .WithMany()
+                .HasForeignKey(t => t.AssignedTechnicianId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<DevicePhoto>(e =>

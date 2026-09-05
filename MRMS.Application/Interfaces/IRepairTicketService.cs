@@ -15,4 +15,8 @@ public interface IRepairTicketService
     Task<IEnumerable<RepairTicketPartDto>> GetPartsAsync(int ticketId);
     Task<RepairTicketPartDto> AddPartAsync(AddPartToTicketDto dto);
     Task RemovePartAsync(int ticketItemId);
+
+    /// <summary>Assigns (or, with <paramref name="technicianId"/> null, unassigns) the technician
+    /// responsible for a ticket. Requires <c>Permission.UpdateTicketStatus</c>.</summary>
+    Task AssignTechnicianAsync(int ticketId, int? technicianId);
 }

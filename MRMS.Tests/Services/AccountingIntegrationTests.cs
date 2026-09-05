@@ -169,7 +169,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var service = new RepairTicketService(uow, Journal(uow), Audit(uow));
+            var service = new RepairTicketService(uow, Journal(uow), Audit(uow), Perms);
 
             var ok = await service.UpdateStatusAsync(
                 new UpdateRepairTicketStatusDto(ticketId, TicketStatus.Delivered));

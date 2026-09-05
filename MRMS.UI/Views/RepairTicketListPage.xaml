@@ -6,13 +6,23 @@
     <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="تذاكر الصيانة" FontSize="22"
                    FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource TextPrimaryBrush}"/>
 
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="الفني:" VerticalAlignment="Center" Margin="0,0,8,0"
+                       Foreground="{StaticResource TextSecondaryBrush}"/>
+            <ComboBox Width="180" Height="30" FontSize="13"
+                      ItemsSource="{Binding TechnicianFilterOptions}"
+                      DisplayMemberPath="Name" SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedTechnicianFilterId}"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding StatusGroups}">
                 <ItemsControl.ItemsPanel>
@@ -52,6 +62,10 @@
                                                                FontSize="11" Foreground="{StaticResource TextMutedBrush}"
                                                                TextTrimming="CharacterEllipsis"
                                                                MaxHeight="28" Margin="0,2,0,2"/>
+                                                    <TextBlock Text="{Binding AssignedTechnicianName, StringFormat='🔧 {0}'}"
+                                                               FontSize="10" Foreground="{StaticResource PrimaryBrush}"
+                                                               Visibility="{Binding AssignedTechnicianName, Converter={StaticResource NonEmptyStringToVis}}"
+                                                               Margin="0,0,0,2"/>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
@@ -86,7 +100,7 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <ProgressBar Grid.Row="1" IsIndeterminate="True"
+        <ProgressBar Grid.Row="2" IsIndeterminate="True"
                      Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
                      Height="4" VerticalAlignment="Top"/>
     </Grid>

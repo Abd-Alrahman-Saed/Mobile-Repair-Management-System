@@ -424,6 +424,9 @@ namespace MRMS.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AssignedTechnicianId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Cost")
                         .HasColumnType("decimal(18,2)");
 
@@ -471,6 +474,8 @@ namespace MRMS.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedTechnicianId");
 
                     b.HasIndex("DeviceId");
 
@@ -868,11 +873,18 @@ namespace MRMS.Infrastructure.Migrations
 
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicket", b =>
                 {
+                    b.HasOne("MRMS.Core.Entities.User", "AssignedTechnician")
+                        .WithMany()
+                        .HasForeignKey("AssignedTechnicianId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MRMS.Core.Entities.Device", "Device")
                         .WithMany("RepairTickets")
                         .HasForeignKey("DeviceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("AssignedTechnician");
 
                     b.Navigation("Device");
                 });

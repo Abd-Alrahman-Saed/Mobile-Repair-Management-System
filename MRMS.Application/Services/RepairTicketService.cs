@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core;
 using MRMS.Core.Entities;
 using MRMS.Core.Enums;
 using MRMS.Core.Interfaces;
@@ -12,12 +13,15 @@ public class RepairTicketService : IRepairTicketService
     private readonly IUnitOfWork _uow;
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
+    private readonly IPermissionService _permissions;
 
-    public RepairTicketService(IUnitOfWork uow, IJournalService journalService, IAuditService audit)
+    public RepairTicketService(IUnitOfWork uow, IJournalService journalService, IAuditService audit,
+        IPermissionService permissions)
     {
         _uow = uow;
         _journalService = journalService;
         _audit = audit;
+        _permissions = permissions;
     }
 
     public async Task<RepairTicketDto> CreateAsync(CreateRepairTicketDto dto)
@@ -40,7 +44,8 @@ public class RepairTicketService : IRepairTicketService
 
     public async Task<RepairTicketDto?> GetByIdAsync(int id)
     {
-        var tickets = await _uow.RepairTickets.FindAsync(t => t.Id == id, t => t.Device, t => t.Device.Customer);
+        var tickets = await _uow.RepairTickets.FindAsync(t => t.Id == id,
+            t => t.Device, t => t.Device.Customer, t => t.AssignedTechnician!);
         var ticket = tickets.FirstOrDefault();
         if (ticket is null) return null;
         var dto = MapToDto(ticket);
@@ -65,10 +70,9 @@ public class RepairTicketService : IRepairTicketService
         var ticket = await _uow.RepairTickets.GetByIdAsync(dto.TicketId);
         if (ticket is null) return false;
 
-        if (ticket.Status == TicketStatus.Delivered || ticket.Status == TicketStatus.Cancelled)
-            return false;
-
         var oldStatus = ticket.Status;
+        if (!TicketStateMachine.CanTransition(oldStatus, dto.NewStatus))
+            return false;
 
         await _uow.ExecuteInTransactionAsync(async () =>
         {
@@ -79,9 +83,6 @@ public class RepairTicketService : IRepairTicketService
                 ticket.DeliveryDate = DateTime.UtcNow.Date;
                 ticket.DeliveryTime = DateTime.UtcNow.TimeOfDay;
             }
-
-            if (dto.NewStatus == TicketStatus.InRepair && oldStatus != TicketStatus.InRepair)
-                await DeductPartsStockAsync(dto.TicketId);
 
             _uow.RepairTickets.Update(ticket);
             await _audit.LogAsync("RepairTicket.StatusChange", nameof(RepairTicket), ticket.Id,
@@ -117,7 +118,7 @@ public class RepairTicketService : IRepairTicketService
         var tickets = await _uow.RepairTickets.FindAsync(
             t => t.Status != TicketStatus.Delivered
               && t.Status != TicketStatus.Cancelled,
-            t => t.Device);
+            t => t.Device, t => t.AssignedTechnician!);
         return tickets.Select(t =>
         {
             var dto = MapToDto(t);
@@ -130,7 +131,8 @@ public class RepairTicketService : IRepairTicketService
 
     public async Task<IEnumerable<RepairTicketDto>> GetAllAsync()
     {
-        var tickets = await _uow.RepairTickets.FindAsync(_ => true, t => t.Device, t => t.Device.Customer);
+        var tickets = await _uow.RepairTickets.FindAsync(_ => true,
+            t => t.Device, t => t.Device.Customer, t => t.AssignedTechnician!);
         return tickets.Select(t =>
         {
             var dto = MapToDto(t);
@@ -178,6 +180,13 @@ public class RepairTicketService : IRepairTicketService
 
     public async Task<RepairTicketPartDto> AddPartAsync(AddPartToTicketDto dto)
     {
+        _permissions.Require(Permission.DeductParts);
+
+        var item = await _uow.Items.GetByIdAsync(dto.ItemId)
+            ?? throw new InvalidOperationException("الصنف غير موجود");
+        if (item.CurrentStock < dto.Quantity)
+            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
+
         var part = new RepairTicketItem
         {
             RepairTicketId = dto.TicketId,
@@ -186,16 +195,18 @@ public class RepairTicketService : IRepairTicketService
             UnitCost = dto.UnitCost
         };
 
-        var ticket = await _uow.RepairTickets.GetByIdAsync(dto.TicketId);
-        if (ticket is not null && ticket.Status == TicketStatus.InRepair)
+        // Stock leaves the moment the part is attached to the ticket - regardless of the ticket's
+        // current status - and only ever moves once. It used to be tied to the ticket entering
+        // InRepair, which meant a part added before that point was never deducted, and a ticket that
+        // cycled back into InRepair had every part deducted a second time.
+        await _uow.ExecuteInTransactionAsync(async () =>
         {
-            var item = await _uow.Items.GetByIdAsync(dto.ItemId);
-            if (item is not null)
-                item.CurrentStock -= dto.Quantity;
-        }
-
-        await _uow.RepairTicketItems.AddAsync(part);
-        await _uow.CompleteAsync();
+            item.CurrentStock -= dto.Quantity;
+            await _uow.RepairTicketItems.AddAsync(part);
+            await _audit.LogAsync("RepairTicket.PartAdded", nameof(RepairTicketItem), part.Id,
+                $"{item.Name} x{dto.Quantity}");
+            await _uow.CompleteAsync();
+        });
 
         var saved = await _uow.RepairTicketItems
             .Query()
@@ -208,37 +219,26 @@ public class RepairTicketService : IRepairTicketService
 
     public async Task RemovePartAsync(int ticketItemId)
     {
+        _permissions.Require(Permission.DeductParts);
+
         var part = await _uow.RepairTicketItems
             .Query()
-            .Include(i => i.RepairTicket)
+            .Include(i => i.Item)
             .FirstOrDefaultAsync(i => i.Id == ticketItemId);
 
         if (part is null) return;
 
-        if (part.RepairTicket.Status == TicketStatus.InRepair)
+        await _uow.ExecuteInTransactionAsync(async () =>
         {
             var item = await _uow.Items.GetByIdAsync(part.ItemId);
             if (item is not null)
                 item.CurrentStock += part.Quantity;
-        }
 
-        _uow.RepairTicketItems.Delete(part);
-        await _uow.CompleteAsync();
-    }
-
-    private async Task DeductPartsStockAsync(int ticketId)
-    {
-        var parts = await _uow.RepairTicketItems
-            .Query()
-            .Where(i => i.RepairTicketId == ticketId)
-            .ToListAsync();
-
-        foreach (var part in parts)
-        {
-            var item = await _uow.Items.GetByIdAsync(part.ItemId);
-            if (item is not null)
-                item.CurrentStock -= part.Quantity;
-        }
+            _uow.RepairTicketItems.Delete(part);
+            await _audit.LogAsync("RepairTicket.PartRemoved", nameof(RepairTicketItem), part.Id,
+                $"{part.Item.Name} x{part.Quantity}");
+            await _uow.CompleteAsync();
+        });
     }
 
     private async Task<string> GenerateTicketNumberAsync()
@@ -247,9 +247,34 @@ public class RepairTicketService : IRepairTicketService
         return $"RPR-{count:D5}";
     }
 
+    public async Task AssignTechnicianAsync(int ticketId, int? technicianId)
+    {
+        _permissions.Require(Permission.UpdateTicketStatus);
+
+        var ticket = await _uow.RepairTickets.GetByIdAsync(ticketId)
+            ?? throw new InvalidOperationException("التذكرة غير موجودة");
+
+        string? technicianName = null;
+        if (technicianId is { } id)
+        {
+            var technician = await _uow.Users.GetByIdAsync(id);
+            if (technician is null || !technician.IsActive || technician.Role != UserRole.Technician)
+                throw new InvalidOperationException("المستخدم المحدد ليس فنياً نشطاً");
+            technicianName = technician.FullName;
+        }
+
+        ticket.AssignedTechnicianId = technicianId;
+        _uow.RepairTickets.Update(ticket);
+        await _audit.LogAsync("RepairTicket.TechnicianAssigned", nameof(RepairTicket), ticket.Id,
+            technicianId is null ? "إلغاء التخصيص" : technicianName ?? "");
+        await _uow.CompleteAsync();
+    }
+
     private static RepairTicketDto MapToDto(RepairTicket t) =>
         new(t.Id, t.TicketNumber, t.DeviceId, null, null,
             t.ProblemDescription, t.ReceptionNotes, t.Status,
             t.ReceiveDate, t.ReceiveTime, t.RepairDescription, t.Cost,
-            t.DeliveryDate, t.DeliveryTime, t.CreatedAt);
+            t.DeliveryDate, t.DeliveryTime, t.CreatedAt,
+            AssignedTechnicianId: t.AssignedTechnicianId,
+            AssignedTechnicianName: t.AssignedTechnician?.FullName);
 }

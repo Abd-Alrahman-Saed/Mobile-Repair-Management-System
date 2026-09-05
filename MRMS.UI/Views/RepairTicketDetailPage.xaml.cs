@@ -43,6 +43,7 @@ public partial class RepairTicketDetailPage : Page
                     _vm.SelectedTicket = ticket;
                 await LoadPhotosAndWarrantyAsync(ticketId.Value);
                 await _vm.LoadItemsCommand.ExecuteAsync(null);
+                await _vm.LoadTechniciansCommand.ExecuteAsync(null);
             }
         };
     }

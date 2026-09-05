@@ -18,7 +18,10 @@ public class RepairTicket
     public TimeSpan? DeliveryTime { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public int? AssignedTechnicianId { get; set; }
+
     public Device Device { get; set; } = null!;
+    public User? AssignedTechnician { get; set; }
     public ICollection<DevicePhoto> Photos { get; set; } = new List<DevicePhoto>();
     public Warranty? Warranty { get; set; }
     public ICollection<RepairTicketItem> RepairTicketItems { get; set; } = new List<RepairTicketItem>();

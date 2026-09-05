@@ -19,7 +19,9 @@ public record RepairTicketDto(
     TimeSpan? DeliveryTime,
     DateTime CreatedAt,
     List<RepairTicketPartDto>? Parts = null,
-    decimal PartsCost = 0);
+    decimal PartsCost = 0,
+    int? AssignedTechnicianId = null,
+    string? AssignedTechnicianName = null);
 
 public record RepairTicketPartDto(
     int Id,

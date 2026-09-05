@@ -3,11 +3,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
+using MRMS.Core;
 using MRMS.Core.Enums;
 using MRMS.UI.Resources;
 using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
+
+/// <summary>One dot on the status timeline in the ticket detail screen.</summary>
+public record TimelineStepVm(TicketStatus Status, string Label, bool IsPast);
 
 public partial class RepairTicketViewModel : ObservableObject
 {
@@ -15,7 +19,9 @@ public partial class RepairTicketViewModel : ObservableObject
     private readonly IDeviceService _deviceService;
     private readonly ICustomerService _customerService;
     private readonly IItemService _itemService;
+    private readonly IUserService _userService;
     private readonly NotificationService _notificationService;
+    private bool _suppressTechnicianChange;
 
     [ObservableProperty]
     private ObservableCollection<RepairTicketDto> _tickets = [];
@@ -43,11 +49,25 @@ public partial class RepairTicketViewModel : ObservableObject
 
     partial void OnCostChanged(decimal value) => OnPropertyChanged(nameof(ExpectedProfit));
 
+    /// <summary>The status the user wants to move the ticket TO next - null when the ticket is in a
+    /// terminal state (Delivered/Cancelled) and there is nothing left to pick.</summary>
     [ObservableProperty]
-    private TicketStatus _selectedStatus = TicketStatus.Received;
+    private TicketStatus? _selectedStatus;
 
     [ObservableProperty]
-    private int _selectedStatusIndex;
+    private ObservableCollection<TicketStatus> _allowedNextStatuses = [];
+
+    [ObservableProperty]
+    private ObservableCollection<TimelineStepVm> _timelineSteps = [];
+
+    [ObservableProperty]
+    private bool _isCancelled;
+
+    [ObservableProperty]
+    private ObservableCollection<UserDto> _availableTechnicians = [];
+
+    [ObservableProperty]
+    private int? _selectedTechnicianId;
 
     [ObservableProperty]
     private RepairTicketDto? _selectedTicket;
@@ -56,7 +76,16 @@ public partial class RepairTicketViewModel : ObservableObject
     {
         if (value is not null)
         {
-            SelectedStatus = value.Status;
+            AllowedNextStatuses = new ObservableCollection<TicketStatus>(TicketStateMachine.AllowedNext(value.Status));
+            SelectedStatus = AllowedNextStatuses.FirstOrDefault();
+
+            IsCancelled = value.Status == TicketStatus.Cancelled;
+            TimelineSteps = BuildTimeline(value.Status);
+
+            _suppressTechnicianChange = true;
+            SelectedTechnicianId = value.AssignedTechnicianId;
+            _suppressTechnicianChange = false;
+
             RepairDescription = value.RepairDescription;
             Cost = value.Cost;
 
@@ -70,19 +99,50 @@ public partial class RepairTicketViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedStatusChanged(TicketStatus value)
+    private static ObservableCollection<TimelineStepVm> BuildTimeline(TicketStatus current)
     {
-        var index = (int)value;
-        if (SelectedStatusIndex != index)
-            SelectedStatusIndex = index;
+        var order = TicketStatusPalette.Ordered.Where(s => s != TicketStatus.Cancelled).ToList();
+        var currentIndex = order.IndexOf(current);
+        return new ObservableCollection<TimelineStepVm>(order.Select((s, i) =>
+            new TimelineStepVm(s, TicketStatusPalette.Label(s), currentIndex >= 0 && i <= currentIndex)));
     }
 
-    partial void OnSelectedStatusIndexChanged(int value)
+    partial void OnSelectedTechnicianIdChanged(int? value)
     {
-        var status = (TicketStatus)value;
-        if (SelectedStatus != status)
-            SelectedStatus = status;
+        if (_suppressTechnicianChange) return;
+        _ = AssignTechnicianAsync(value);
     }
+
+    private async Task AssignTechnicianAsync(int? technicianId)
+    {
+        if (SelectedTicket is null) return;
+        try
+        {
+            await _repairTicketService.AssignTechnicianAsync(SelectedTicket.Id, technicianId);
+            var updated = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
+            if (updated is not null)
+                SelectedTicket = updated;
+            _notificationService.Show("تم تحديث الفني المسؤول", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = UiError.Describe(ex, "تخصيص فني");
+            // Roll the picker back to what the ticket actually has, since the assignment didn't take.
+            _suppressTechnicianChange = true;
+            SelectedTechnicianId = SelectedTicket.AssignedTechnicianId;
+            _suppressTechnicianChange = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoadTechniciansAsync()
+    {
+        var techs = await _userService.GetTechniciansAsync();
+        AvailableTechnicians = new ObservableCollection<UserDto>(techs);
+    }
+
+    [RelayCommand]
+    private void UnassignTechnician() => SelectedTechnicianId = null;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -129,12 +189,14 @@ public partial class RepairTicketViewModel : ObservableObject
         IDeviceService deviceService,
         ICustomerService customerService,
         IItemService itemService,
+        IUserService userService,
         NotificationService notificationService)
     {
         _repairTicketService = repairTicketService;
         _deviceService = deviceService;
         _customerService = customerService;
         _itemService = itemService;
+        _userService = userService;
         _notificationService = notificationService;
     }
 
@@ -254,20 +316,21 @@ public partial class RepairTicketViewModel : ObservableObject
     [RelayCommand]
     private async Task UpdateStatusAsync()
     {
-        if (SelectedTicket is null) return;
+        if (SelectedTicket is null || SelectedStatus is not { } newStatus)
+            return;
         IsLoading = true;
 
         try
         {
             var result = await _repairTicketService.UpdateStatusAsync(
-                new UpdateRepairTicketStatusDto(SelectedTicket.Id, SelectedStatus));
+                new UpdateRepairTicketStatusDto(SelectedTicket.Id, newStatus));
             if (!result)
-                ErrorMessage = "لا يمكن تغيير الحالة - التذكرة في حالة نهائية";
+                ErrorMessage = "لا يمكن تغيير الحالة - هذا الانتقال غير مسموح من الحالة الحالية";
             else
             {
                 SelectedTicket = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
                 _notificationService.Show(
-                    $"تم تحديث الحالة إلى: {TicketStatusPalette.Label(SelectedStatus)}", NotificationType.Success);
+                    $"تم تحديث الحالة إلى: {TicketStatusPalette.Label(newStatus)}", NotificationType.Success);
             }
         }
         catch (Exception ex)
@@ -292,12 +355,8 @@ public partial class RepairTicketViewModel : ObservableObject
                 new UpdateRepairInfoDto(SelectedTicket.Id, RepairDescription, Cost));
             if (result)
             {
-                if (SelectedStatus != TicketStatus.Repaired)
-                {
-                    SelectedStatus = TicketStatus.Repaired;
-                    await _repairTicketService.UpdateStatusAsync(
-                        new UpdateRepairTicketStatusDto(SelectedTicket.Id, TicketStatus.Repaired));
-                }
+                // Saving repair notes/cost never changes the ticket's status by itself - that's a
+                // separate, explicit action from the "تحديث الحالة" control below.
                 SelectedTicket = await _repairTicketService.GetByIdAsync(SelectedTicket.Id);
                 _notificationService.Show("تم حفظ بيانات الصيانة بنجاح", NotificationType.Success);
             }

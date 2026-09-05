@@ -30,6 +30,12 @@ public class UserService : IUserService
         return users.OrderBy(u => u.Id).Select(MapToDto).ToList();
     }
 
+    public async Task<IReadOnlyList<UserDto>> GetTechniciansAsync()
+    {
+        var users = await _uow.Users.FindAsync(u => u.Role == UserRole.Technician && u.IsActive);
+        return users.OrderBy(u => u.FullName).Select(MapToDto).ToList();
+    }
+
     public async Task<UserDto?> GetByIdAsync(int id)
     {
         _permissions.Require(Permission.ManageUsers);

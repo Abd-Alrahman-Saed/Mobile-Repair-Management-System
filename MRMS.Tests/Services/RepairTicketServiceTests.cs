@@ -22,7 +22,7 @@ public class RepairTicketServiceTests
             .ReturnsAsync(tickets);
         mockUow.Setup(u => u.CompleteAsync()).ReturnsAsync(1);
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
         var result = await service.CreateAsync(
             new CreateRepairTicketDto(1, "الشاشة مكسورة", "يرجى الفحص"));
 
@@ -53,11 +53,35 @@ public class RepairTicketServiceTests
         var mockUow = new Mock<IUnitOfWork>();
         mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
         var result = await service.UpdateStatusAsync(
             new UpdateRepairTicketStatusDto(1, TicketStatus.InRepair));
 
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_SkippingInspectionAndRepair_IsRejected()
+    {
+        var ticket = new RepairTicket
+        {
+            Id = 1,
+            Status = TicketStatus.Received,
+            DeviceId = 1,
+            TicketNumber = "RPR-00001",
+            ReceiveDate = DateTime.UtcNow.Date,
+            ReceiveTime = TimeSpan.Zero
+        };
+
+        var mockUow = new Mock<IUnitOfWork>();
+        mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
+
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
+        var result = await service.UpdateStatusAsync(
+            new UpdateRepairTicketStatusDto(1, TicketStatus.Delivered));
+
+        result.Should().BeFalse("Received can only move to UnderInspection or Cancelled");
+        ticket.Status.Should().Be(TicketStatus.Received, "a rejected transition must not mutate the ticket");
     }
 
     [Fact]
@@ -77,7 +101,7 @@ public class RepairTicketServiceTests
         mockUow.Setup(u => u.Customers.GetAllAsync()).ReturnsAsync(new List<Customer>());
         mockUow.Setup(u => u.Devices.GetAllAsync()).ReturnsAsync(new List<Device>());
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
         var stats = await service.GetDashboardStatsAsync();
 
         stats.TodayReceived.Should().Be(2);
