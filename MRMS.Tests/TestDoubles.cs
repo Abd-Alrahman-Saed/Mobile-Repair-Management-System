@@ -1,3 +1,4 @@
+using MRMS.Application.DTOs;
 using MRMS.Application.Interfaces;
 using MRMS.Application.Services;
 using MRMS.Core.Enums;
@@ -19,6 +20,18 @@ public sealed class FakeCurrentUserService : ICurrentUserService
         new() { User = new CurrentUser(1, role.ToString().ToLowerInvariant(), role.ToString(), role) };
 }
 
+/// <summary>No cash session ever open, nothing ever locked. For service tests that aren't about the
+/// cash drawer. Cash-drawer behaviour is covered against the real service in CashSessionTests.</summary>
+public sealed class FakeCashSessionService : ICashSessionService
+{
+    public Task<CashSessionDto?> GetCurrentAsync() => Task.FromResult<CashSessionDto?>(null);
+    public Task<int?> GetCurrentSessionIdAsync() => Task.FromResult<int?>(null);
+    public Task EnsureNotLockedAsync(DateTime businessDate) => Task.CompletedTask;
+    public Task<CashSessionDto> OpenAsync(decimal openingBalance) => throw new NotSupportedException();
+    public Task<CashSessionDto> CloseAsync(decimal countedAmount, string notes) => throw new NotSupportedException();
+    public Task<IEnumerable<CashSessionDto>> GetHistoryAsync() => throw new NotSupportedException();
+}
+
 public static class TestServices
 {
     public static IPermissionService Permissions(UserRole role = UserRole.Owner) =>
@@ -26,4 +39,6 @@ public static class TestServices
 
     public static IPermissionService Permissions(ICurrentUserService currentUser) =>
         new PermissionService(currentUser);
+
+    public static ICashSessionService CashSessions() => new FakeCashSessionService();
 }

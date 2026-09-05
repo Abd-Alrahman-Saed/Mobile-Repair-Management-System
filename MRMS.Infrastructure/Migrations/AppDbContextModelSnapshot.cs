@@ -68,6 +68,62 @@ namespace MRMS.Infrastructure.Migrations
                     b.ToTable("AuditLogs");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.CashSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("BusinessDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ClosedByName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ClosedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("CountedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Difference")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ExpectedAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("OpenedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OpenedByName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("OpenedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OpeningBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessDate");
+
+                    b.ToTable("CashSessions");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -181,6 +237,9 @@ namespace MRMS.Infrastructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("CashSessionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -221,6 +280,8 @@ namespace MRMS.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CashSessionId");
 
                     b.ToTable("Expenses");
                 });
@@ -520,6 +581,43 @@ namespace MRMS.Infrastructure.Migrations
                     b.ToTable("RepairTicketItems");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.RepairTicketPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CashSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CollectedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CollectedByName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("CollectedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RepairTicketId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashSessionId");
+
+                    b.HasIndex("RepairTicketId");
+
+                    b.ToTable("RepairTicketPayments");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Sale", b =>
                 {
                     b.Property<int>("Id")
@@ -527,6 +625,9 @@ namespace MRMS.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CashSessionId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)");
@@ -570,6 +671,8 @@ namespace MRMS.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CashSessionId");
 
                     b.HasIndex("ItemId");
 
@@ -836,6 +939,14 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTicket");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.Expense", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.CashSession", null)
+                        .WithMany()
+                        .HasForeignKey("CashSessionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.JournalEntryLine", b =>
                 {
                     b.HasOne("MRMS.Core.Entities.JournalEntry", "JournalEntry")
@@ -914,8 +1025,29 @@ namespace MRMS.Infrastructure.Migrations
                     b.Navigation("RepairTicket");
                 });
 
+            modelBuilder.Entity("MRMS.Core.Entities.RepairTicketPayment", b =>
+                {
+                    b.HasOne("MRMS.Core.Entities.CashSession", null)
+                        .WithMany()
+                        .HasForeignKey("CashSessionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MRMS.Core.Entities.RepairTicket", "RepairTicket")
+                        .WithMany("Payments")
+                        .HasForeignKey("RepairTicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RepairTicket");
+                });
+
             modelBuilder.Entity("MRMS.Core.Entities.Sale", b =>
                 {
+                    b.HasOne("MRMS.Core.Entities.CashSession", null)
+                        .WithMany()
+                        .HasForeignKey("CashSessionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MRMS.Core.Entities.Item", "Item")
                         .WithMany("Sales")
                         .HasForeignKey("ItemId")
@@ -991,6 +1123,8 @@ namespace MRMS.Infrastructure.Migrations
 
             modelBuilder.Entity("MRMS.Core.Entities.RepairTicket", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("Photos");
 
                     b.Navigation("RepairTicketItems");

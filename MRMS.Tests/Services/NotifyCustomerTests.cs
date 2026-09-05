@@ -45,7 +45,7 @@ public sealed class NotifyCustomerTests : IDisposable
         var uow = new UnitOfWork(new AppDbContext(_options));
         var perms = TestServices.Permissions(role);
         var current = FakeCurrentUserService.As(role);
-        return new RepairTicketService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms), perms);
+        return new RepairTicketService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms), perms, new FakeCashSessionService(), current);
     }
 
     [Fact]

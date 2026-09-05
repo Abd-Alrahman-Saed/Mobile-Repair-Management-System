@@ -19,5 +19,8 @@ public class Sale
     public string? VoidReason { get; set; }
     public DateTime? VoidedAt { get; set; }
 
+    /// <summary>The cash session open when this sale was recorded - null if none was open.</summary>
+    public int? CashSessionId { get; set; }
+
     public Item Item { get; set; } = null!;
 }

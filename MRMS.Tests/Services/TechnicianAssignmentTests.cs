@@ -53,7 +53,7 @@ public sealed class TechnicianAssignmentTests : IDisposable
         var uow = new UnitOfWork(new AppDbContext(_options));
         var current = FakeCurrentUserService.As(role);
         var perms = new PermissionService(current);
-        return new RepairTicketService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms), perms);
+        return new RepairTicketService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms), perms, new FakeCashSessionService(), current);
     }
 
     private UserService NewUserService()

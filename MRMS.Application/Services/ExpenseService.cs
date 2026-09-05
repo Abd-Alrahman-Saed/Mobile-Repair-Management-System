@@ -14,15 +14,18 @@ public class ExpenseService : IExpenseService
     private readonly IAuditService _audit;
     private readonly IPermissionService _permissions;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICashSessionService _cashSessions;
 
     public ExpenseService(IUnitOfWork unitOfWork, IJournalService journalService,
-        IAuditService audit, IPermissionService permissions, ICurrentUserService currentUser)
+        IAuditService audit, IPermissionService permissions, ICurrentUserService currentUser,
+        ICashSessionService cashSessions)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
         _permissions = permissions;
         _currentUser = currentUser;
+        _cashSessions = cashSessions;
     }
 
     public async Task<IEnumerable<ExpenseDto>> GetAllAsync()
@@ -53,6 +56,8 @@ public class ExpenseService : IExpenseService
         if (string.IsNullOrWhiteSpace(dto.Category))
             throw new InvalidOperationException("التصنيف مطلوب");
 
+        await _cashSessions.EnsureNotLockedAsync(dto.Date);
+
         var expense = new Expense
         {
             Date = dto.Date,
@@ -60,7 +65,8 @@ public class ExpenseService : IExpenseService
             Description = dto.Description,
             Amount = dto.Amount,
             PaymentMethod = dto.PaymentMethod,
-            Notes = dto.Notes
+            Notes = dto.Notes,
+            CashSessionId = await _cashSessions.GetCurrentSessionIdAsync()
         };
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -88,6 +94,9 @@ public class ExpenseService : IExpenseService
 
         var expense = await _unitOfWork.Expenses.GetByIdAsync(dto.Id);
         if (expense is null) return;
+
+        await _cashSessions.EnsureNotLockedAsync(expense.Date);
+        await _cashSessions.EnsureNotLockedAsync(dto.Date);
 
         expense.Date = dto.Date;
         expense.Category = dto.Category;

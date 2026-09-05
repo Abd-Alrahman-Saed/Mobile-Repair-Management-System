@@ -48,6 +48,7 @@ public partial class ShellViewModel : ObservableObject
         new("المبيعات والمشتريات", "دفعات الموردين", typeof(SupplierPaymentsPage), Permission.ManageSuppliers),
         new("المبيعات والمشتريات", "المصروفات", typeof(ExpensesPage), Permission.ManageExpenses),
 
+        new("التقارير المالية", "درج النقدية", typeof(CashRegisterPage), Permission.ViewCashRegister),
         new("التقارير المالية", "كشف حساب النقدية", typeof(CashbookPage), Permission.ViewReports),
         new("التقارير المالية", "قائمة الدخل", typeof(IncomeStatementPage), Permission.ViewReports),
         new("التقارير المالية", "التقرير الشهري", typeof(MonthlyReportPage), Permission.ViewReports),

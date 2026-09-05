@@ -77,6 +77,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<StockMovementFormViewModel>();
         services.AddTransient<StockBalanceViewModel>();
         services.AddTransient<CashbookViewModel>();
+        services.AddTransient<CashRegisterViewModel>();
         services.AddTransient<IncomeStatementViewModel>();
         services.AddTransient<MonthlyReportViewModel>();
 
@@ -116,6 +117,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<StockMovementFormPage>();
         services.AddTransient<StockBalancePage>();
         services.AddTransient<CashbookPage>();
+        services.AddTransient<CashRegisterPage>();
         services.AddTransient<IncomeStatementPage>();
         services.AddTransient<MonthlyReportPage>();
 

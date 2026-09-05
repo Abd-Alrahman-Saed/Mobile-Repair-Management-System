@@ -26,6 +26,8 @@ public class AppDbContext : DbContext
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<CashSession> CashSessions => Set<CashSession>();
+    public DbSet<RepairTicketPayment> RepairTicketPayments => Set<RepairTicketPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -228,6 +230,45 @@ public class AppDbContext : DbContext
                 .HasForeignKey(sm => sm.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<CashSession>(e =>
+        {
+            e.Property(c => c.OpenedByName).HasMaxLength(100);
+            e.Property(c => c.ClosedByName).HasMaxLength(100);
+            e.Property(c => c.OpeningBalance).HasColumnType("decimal(18,2)");
+            e.Property(c => c.ExpectedAmount).HasColumnType("decimal(18,2)");
+            e.Property(c => c.CountedAmount).HasColumnType("decimal(18,2)");
+            e.Property(c => c.Difference).HasColumnType("decimal(18,2)");
+            e.Property(c => c.Notes).HasMaxLength(500);
+            e.HasIndex(c => c.BusinessDate);
+        });
+
+        modelBuilder.Entity<RepairTicketPayment>(e =>
+        {
+            e.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+            e.Property(p => p.CollectedByName).HasMaxLength(100);
+            e.HasIndex(p => p.CashSessionId);
+            e.HasOne(p => p.RepairTicket)
+                .WithMany(t => t.Payments)
+                .HasForeignKey(p => p.RepairTicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<CashSession>()
+                .WithMany()
+                .HasForeignKey(p => p.CashSessionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Sale>()
+            .HasOne<CashSession>()
+            .WithMany()
+            .HasForeignKey(s => s.CashSessionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Expense>()
+            .HasOne<CashSession>()
+            .WithMany()
+            .HasForeignKey(ex => ex.CashSessionId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<JournalEntry>(e =>
         {

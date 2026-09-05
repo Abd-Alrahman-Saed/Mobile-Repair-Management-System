@@ -16,9 +16,11 @@ public class SaleService : ISaleService
     private readonly IPermissionService _permissions;
     private readonly ICurrentUserService _currentUser;
     private readonly ISystemSettingService _settings;
+    private readonly ICashSessionService _cashSessions;
 
     public SaleService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit,
-        IPermissionService permissions, ICurrentUserService currentUser, ISystemSettingService settings)
+        IPermissionService permissions, ICurrentUserService currentUser, ISystemSettingService settings,
+        ICashSessionService cashSessions)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
@@ -26,6 +28,7 @@ public class SaleService : ISaleService
         _permissions = permissions;
         _currentUser = currentUser;
         _settings = settings;
+        _cashSessions = cashSessions;
     }
 
     public async Task<IEnumerable<SaleDto>> GetAllAsync()
@@ -62,6 +65,8 @@ public class SaleService : ISaleService
         if (dto.UnitPrice <= 0)
             throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
 
+        await _cashSessions.EnsureNotLockedAsync(dto.Date);
+
         var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
             ?? throw new InvalidOperationException("الصنف غير موجود");
 
@@ -78,7 +83,8 @@ public class SaleService : ISaleService
             // so a receptionist's form (which can't see cost) can't zero out the profit calculation.
             CostPrice = item.CostPrice,
             CustomerName = dto.CustomerName,
-            Notes = dto.Notes
+            Notes = dto.Notes,
+            CashSessionId = await _cashSessions.GetCurrentSessionIdAsync()
         };
 
         if (item.CurrentStock < dto.Quantity)
@@ -176,6 +182,9 @@ public class SaleService : ISaleService
     {
         var existing = await _unitOfWork.Sales.GetByIdAsync(dto.Id);
         if (existing is null) return;
+
+        await _cashSessions.EnsureNotLockedAsync(existing.Date);
+        await _cashSessions.EnsureNotLockedAsync(dto.Date);
 
         var oldQty = existing.Quantity;
         var diff = dto.Quantity - oldQty;

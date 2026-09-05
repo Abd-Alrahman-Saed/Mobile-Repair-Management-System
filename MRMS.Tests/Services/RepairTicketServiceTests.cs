@@ -22,7 +22,7 @@ public class RepairTicketServiceTests
             .ReturnsAsync(tickets);
         mockUow.Setup(u => u.CompleteAsync()).ReturnsAsync(1);
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>(), Mock.Of<ICashSessionService>(), Mock.Of<ICurrentUserService>());
         var result = await service.CreateAsync(
             new CreateRepairTicketDto(1, "الشاشة مكسورة", "يرجى الفحص"));
 
@@ -53,7 +53,7 @@ public class RepairTicketServiceTests
         var mockUow = new Mock<IUnitOfWork>();
         mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>(), Mock.Of<ICashSessionService>(), Mock.Of<ICurrentUserService>());
         var result = await service.UpdateStatusAsync(
             new UpdateRepairTicketStatusDto(1, TicketStatus.InRepair));
 
@@ -76,7 +76,7 @@ public class RepairTicketServiceTests
         var mockUow = new Mock<IUnitOfWork>();
         mockUow.Setup(u => u.RepairTickets.GetByIdAsync(1)).ReturnsAsync(ticket);
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>(), Mock.Of<ICashSessionService>(), Mock.Of<ICurrentUserService>());
         var result = await service.UpdateStatusAsync(
             new UpdateRepairTicketStatusDto(1, TicketStatus.Delivered));
 
@@ -101,7 +101,7 @@ public class RepairTicketServiceTests
         mockUow.Setup(u => u.Customers.GetAllAsync()).ReturnsAsync(new List<Customer>());
         mockUow.Setup(u => u.Devices.GetAllAsync()).ReturnsAsync(new List<Device>());
 
-        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>());
+        var service = new RepairTicketService(mockUow.Object, Mock.Of<IJournalService>(), Mock.Of<IAuditService>(), Mock.Of<IPermissionService>(), Mock.Of<ICashSessionService>(), Mock.Of<ICurrentUserService>());
         var stats = await service.GetDashboardStatsAsync();
 
         stats.TodayReceived.Should().Be(2);

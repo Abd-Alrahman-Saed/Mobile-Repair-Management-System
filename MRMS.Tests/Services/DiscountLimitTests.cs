@@ -44,7 +44,7 @@ public sealed class DiscountLimitTests : IDisposable
         var current = FakeCurrentUserService.As(role);
         var perms = new PermissionService(current);
         return new SaleService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms),
-            perms, current, new SystemSettingService(uow, perms));
+            perms, current, new SystemSettingService(uow, perms), new FakeCashSessionService());
     }
 
     private CreateSaleDto Dto(decimal unitPrice, int? approvedBy = null) =>

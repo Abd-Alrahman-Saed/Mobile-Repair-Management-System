@@ -33,4 +33,5 @@ public class RepairTicket
     public ICollection<DevicePhoto> Photos { get; set; } = new List<DevicePhoto>();
     public Warranty? Warranty { get; set; }
     public ICollection<RepairTicketItem> RepairTicketItems { get; set; } = new List<RepairTicketItem>();
+    public ICollection<RepairTicketPayment> Payments { get; set; } = new List<RepairTicketPayment>();
 }

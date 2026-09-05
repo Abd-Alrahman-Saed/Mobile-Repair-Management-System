@@ -17,4 +17,8 @@ public class Expense
     public int? VoidedByUserId { get; set; }
     public string? VoidReason { get; set; }
     public DateTime? VoidedAt { get; set; }
+
+    /// <summary>The cash session open when this expense was recorded - null if none was open. Only
+    /// counts against the drawer when <see cref="PaymentMethod"/> is <c>Cash</c>.</summary>
+    public int? CashSessionId { get; set; }
 }

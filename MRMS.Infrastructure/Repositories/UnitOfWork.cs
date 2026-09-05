@@ -27,6 +27,8 @@ public class UnitOfWork : IUnitOfWork
     private Repository<JournalEntry>? _journalEntries;
     private Repository<JournalEntryLine>? _journalEntryLines;
     private Repository<AuditLog>? _auditLogs;
+    private Repository<CashSession>? _cashSessions;
+    private Repository<RepairTicketPayment>? _repairTicketPayments;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -52,6 +54,8 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<JournalEntry> JournalEntries => _journalEntries ??= new Repository<JournalEntry>(_context);
     public IRepository<JournalEntryLine> JournalEntryLines => _journalEntryLines ??= new Repository<JournalEntryLine>(_context);
     public IRepository<AuditLog> AuditLogs => _auditLogs ??= new Repository<AuditLog>(_context);
+    public IRepository<CashSession> CashSessions => _cashSessions ??= new Repository<CashSession>(_context);
+    public IRepository<RepairTicketPayment> RepairTicketPayments => _repairTicketPayments ??= new Repository<RepairTicketPayment>(_context);
 
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
 

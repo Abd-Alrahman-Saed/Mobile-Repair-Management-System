@@ -15,14 +15,18 @@ public class RepairTicketService : IRepairTicketService
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
     private readonly IPermissionService _permissions;
+    private readonly ICashSessionService _cashSessions;
+    private readonly ICurrentUserService _currentUser;
 
     public RepairTicketService(IUnitOfWork uow, IJournalService journalService, IAuditService audit,
-        IPermissionService permissions)
+        IPermissionService permissions, ICashSessionService cashSessions, ICurrentUserService currentUser)
     {
         _uow = uow;
         _journalService = journalService;
         _audit = audit;
         _permissions = permissions;
+        _cashSessions = cashSessions;
+        _currentUser = currentUser;
     }
 
     public async Task<RepairTicketDto> CreateAsync(CreateRepairTicketDto dto)
@@ -318,10 +322,25 @@ public class RepairTicketService : IRepairTicketService
         var ticket = await _uow.RepairTickets.GetByIdAsync(dto.TicketId)
             ?? throw new InvalidOperationException("التذكرة غير موجودة");
 
+        await _cashSessions.EnsureNotLockedAsync(DateTime.Today);
+        var sessionId = await _cashSessions.GetCurrentSessionIdAsync();
+        var user = _currentUser.User;
+
         await _uow.ExecuteInTransactionAsync(async () =>
         {
             ticket.PaidAmount += dto.Amount;
             _uow.RepairTickets.Update(ticket);
+
+            await _uow.RepairTicketPayments.AddAsync(new RepairTicketPayment
+            {
+                RepairTicketId = ticket.Id,
+                Amount = dto.Amount,
+                CollectedAt = DateTime.UtcNow,
+                CollectedByUserId = user?.Id ?? 0,
+                CollectedByName = user?.FullName ?? user?.Username ?? "",
+                CashSessionId = sessionId
+            });
+
             await _audit.LogAsync("RepairTicket.PaymentCollected", nameof(RepairTicket), ticket.Id,
                 $"{ticket.TicketNumber}: {dto.Amount:N2}");
             await _uow.CompleteAsync();

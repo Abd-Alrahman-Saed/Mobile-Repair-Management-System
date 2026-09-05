@@ -40,7 +40,7 @@ public sealed class VoidTests : IDisposable
         var current = FakeCurrentUserService.As(role);
         var perms = new PermissionService(current);
         return new SaleService(uow, new JournalService(uow, perms), new AuditService(uow, current, perms),
-            perms, current, new SystemSettingService(uow, perms));
+            perms, current, new SystemSettingService(uow, perms), new FakeCashSessionService());
     }
 
     private async Task<int> CreateSaleAsync()

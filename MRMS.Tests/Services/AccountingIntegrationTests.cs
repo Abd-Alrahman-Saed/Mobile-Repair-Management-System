@@ -45,9 +45,11 @@ public sealed class AccountingIntegrationTests : IDisposable
     private static JournalService Journal(IUnitOfWork uow) => new(uow, Perms);
     private static SystemSettingService Settings(IUnitOfWork uow) => new(uow, Perms);
     private static SaleService Sale(IUnitOfWork uow) =>
-        new(uow, Journal(uow), Audit(uow), Perms, Owner, Settings(uow));
+        new(uow, Journal(uow), Audit(uow), Perms, Owner, Settings(uow), TestServices.CashSessions());
     private static SaleService Sale(IUnitOfWork uow, IJournalService journal) =>
-        new(uow, journal, Audit(uow), Perms, Owner, Settings(uow));
+        new(uow, journal, Audit(uow), Perms, Owner, Settings(uow), TestServices.CashSessions());
+    private static RepairTicketService Repair(IUnitOfWork uow) =>
+        new(uow, Journal(uow), Audit(uow), Perms, TestServices.CashSessions(), Owner);
 
     [Fact]
     public async Task SeedService_brings_up_a_usable_schema_and_baseline_on_a_fresh_database()
@@ -169,7 +171,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var service = new RepairTicketService(uow, Journal(uow), Audit(uow), Perms);
+            var service = Repair(uow);
 
             // Cash-basis revenue is recognized as payments are actually collected, not at delivery -
             // so the full amount must be collected first for the remaining balance to reach zero.
@@ -218,7 +220,7 @@ public sealed class AccountingIntegrationTests : IDisposable
         await using (var ctx = NewContext())
         {
             var uow = new UnitOfWork(ctx);
-            var service = new RepairTicketService(uow, Journal(uow), Audit(uow), Perms);
+            var service = Repair(uow);
             var dto = await service.CollectPaymentAsync(new CollectPaymentDto(ticketId, 150m));
             dto.PaidAmount.Should().Be(150m);
             dto.RemainingAmount.Should().Be(350m);
