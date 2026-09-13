@@ -11,12 +11,13 @@ namespace MRMS.UI.ViewModels;
 public partial class CustomerListViewModel : ObservableObject
 {
     private readonly ICustomerService _customerService;
+    private readonly IReportService _reportService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
-    private List<CustomerDto> _allCustomers = [];
+    private List<CustomerListItem> _allCustomers = [];
 
     [ObservableProperty]
-    private ObservableCollection<CustomerDto> _customers = [];
+    private ObservableCollection<CustomerListItem> _customers = [];
 
     [ObservableProperty]
     private bool _isLoading;
@@ -27,17 +28,19 @@ public partial class CustomerListViewModel : ObservableObject
     partial void OnSearchQueryChanged(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            Customers = new ObservableCollection<CustomerDto>(_allCustomers);
+            Customers = new ObservableCollection<CustomerListItem>(_allCustomers);
         else
-            Customers = new ObservableCollection<CustomerDto>(
+            Customers = new ObservableCollection<CustomerListItem>(
                 _allCustomers.Where(c =>
                     c.FullName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
                     c.PhoneNumber.Contains(value)));
     }
 
-    public CustomerListViewModel(ICustomerService customerService, AppNavigationService navigationService, NotificationService notificationService)
+    public CustomerListViewModel(ICustomerService customerService, IReportService reportService,
+        AppNavigationService navigationService, NotificationService notificationService)
     {
         _customerService = customerService;
+        _reportService = reportService;
         _navigationService = navigationService;
         _notificationService = notificationService;
     }
@@ -47,8 +50,22 @@ public partial class CustomerListViewModel : ObservableObject
     {
         IsLoading = true;
         var items = await _customerService.GetAllAsync();
-        _allCustomers = items.ToList();
-        Customers = new ObservableCollection<CustomerDto>(_allCustomers);
+        var receivables = (await _reportService.GetReceivablesAsync()).ToDictionary(r => r.CustomerId);
+
+        _allCustomers = items.Select(c =>
+        {
+            receivables.TryGetValue(c.Id, out var r);
+            return new CustomerListItem
+            {
+                Id = c.Id,
+                FullName = c.FullName,
+                PhoneNumber = c.PhoneNumber,
+                CreatedAt = c.CreatedAt,
+                OutstandingBalance = r?.OutstandingBalance ?? 0m
+            };
+        }).ToList();
+
+        Customers = new ObservableCollection<CustomerListItem>(_allCustomers);
         IsLoading = false;
     }
 
@@ -95,4 +112,14 @@ public partial class CustomerListViewModel : ObservableObject
         var page = App.ServiceProvider!.GetRequiredService<Views.CustomerProfilePage>();
         _navigationService.NavigateTo(page, "CustomerId", id);
     }
+}
+
+public class CustomerListItem
+{
+    public int Id { get; init; }
+    public string FullName { get; init; } = "";
+    public string PhoneNumber { get; init; } = "";
+    public DateTime CreatedAt { get; init; }
+    /// <summary>Visible to everyone - no permission gate (unlike supplier balances).</summary>
+    public decimal OutstandingBalance { get; init; }
 }

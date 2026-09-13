@@ -33,12 +33,21 @@ public class ReportService : IReportService
         _permissions.Require(Permission.ViewReports);
         var entries = new List<CashbookEntryDto>();
 
-        var sales = await _uow.Sales.Query()
-            .Include(s => s.Item)
-            .Where(s => s.Date >= from && s.Date <= to)
+        // Sale cash is what was actually collected (PaidAmount at the invoice's own creation, plus
+        // any later CustomerPayment) - not the invoice's full Total, since a credit sale's unpaid
+        // balance isn't cash yet.
+        var invoices = await _uow.SalesInvoices.Query()
+            .Where(i => i.Date >= from && i.Date <= to && i.PaidAmount > 0)
             .ToListAsync();
-        foreach (var s in sales)
-            entries.Add(new CashbookEntryDto(s.Date, $"بيع: {s.Item.Name} x{s.Quantity}", "وارد", s.TotalPrice, 0, s.CreatedAt));
+        foreach (var i in invoices)
+            entries.Add(new CashbookEntryDto(i.Date, $"بيع: {i.InvoiceNumber}", "وارد", i.PaidAmount, 0, i.CreatedAt));
+
+        var customerPayments = await _uow.CustomerPayments.Query()
+            .Include(cp => cp.Customer)
+            .Where(cp => cp.Date >= from && cp.Date <= to)
+            .ToListAsync();
+        foreach (var cp in customerPayments)
+            entries.Add(new CashbookEntryDto(cp.Date, $"تحصيل من عميل: {cp.Customer.FullName}", "وارد", cp.Amount, 0, cp.CreatedAt));
 
         // Repair cash comes from the actual payments collected on tickets (deposits + partials + final),
         // not the ticket's full Cost at delivery - so a deposit taken this week and the balance next week
@@ -124,15 +133,17 @@ public class ReportService : IReportService
 
     private async Task<decimal> CalculateOpeningCashBalanceAsync(DateTime from)
     {
-        var allSales = await _uow.Sales.GetAllAsync();
+        var allInvoices = await _uow.SalesInvoices.GetAllAsync();
+        var allCustomerPayments = await _uow.CustomerPayments.GetAllAsync();
         var allRepairPayments = await _uow.RepairTicketPayments.GetAllAsync();
         var allPurchases = await _uow.Purchases.GetAllAsync();
         var allExpenses = await _uow.Expenses.GetAllAsync();
         var allPayments = await _uow.SupplierPayments.GetAllAsync();
 
-        // Repair cash is the sum of payments actually collected before the window, not delivered tickets'
-        // Cost. Repair parts cost is not an additional cash inflow (paid for via the parts' Purchase).
-        var inflows = allSales.Where(s => s.Date < from).Sum(s => s.TotalPrice)
+        // Cash in is what was actually collected before the window (invoice PaidAmount + later
+        // CustomerPayment + repair payments), not accrual revenue.
+        var inflows = allInvoices.Where(i => i.Date < from).Sum(i => i.PaidAmount)
+                    + allCustomerPayments.Where(p => p.Date < from).Sum(p => p.Amount)
                     + allRepairPayments.Where(p => p.BusinessDate < from).Sum(p => p.Amount);
 
         var outflows = allPurchases.Where(p => p.Date < from).Sum(p => p.PaidAmount)
@@ -140,5 +151,28 @@ public class ReportService : IReportService
                      + allPayments.Where(p => p.Date < from).Sum(p => p.Amount);
 
         return inflows - outflows;
+    }
+
+    public async Task<IEnumerable<ReceivableItemDto>> GetReceivablesAsync()
+    {
+        // Visible to everyone (no permission gate) - front-desk staff need to see a customer's debt
+        // before deciding whether to extend more credit, unlike supplier balances.
+        var customers = await _uow.Customers
+            .Query()
+            .Include(c => c.SalesInvoices)
+            .Include(c => c.CustomerPayments)
+            .ToListAsync();
+
+        return customers.Select(c =>
+        {
+            var totalInvoiced = c.SalesInvoices.Sum(i => i.Total);
+            // Unlike GetPayablesAsync (which only nets SupplierPayments against Purchase totals),
+            // this also nets out what was already paid at the moment of sale - so a fully-paid cash
+            // invoice never shows as outstanding just because no separate CustomerPayment was logged.
+            var totalCollected = c.SalesInvoices.Sum(i => i.PaidAmount) + c.CustomerPayments.Sum(p => p.Amount);
+            var outstanding = totalInvoiced - totalCollected;
+
+            return new ReceivableItemDto(c.Id, c.FullName, totalInvoiced, totalCollected, outstanding);
+        });
     }
 }

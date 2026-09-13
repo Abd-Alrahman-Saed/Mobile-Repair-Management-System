@@ -8,16 +8,35 @@ using MRMS.UI.Services;
 
 namespace MRMS.UI.ViewModels;
 
+/// <summary>One row in the customer's account statement - either an invoice (increases the balance
+/// owed by its RemainingAmount, since any PaidAmount at sale time is already netted out) or a later
+/// collection (decreases it). Newest first, like the cashbook.</summary>
+public record CustomerStatementEntryVm(DateTime Date, string Description, decimal Delta, decimal RunningBalance);
+
 public partial class CustomerProfileViewModel : ObservableObject
 {
     private readonly ICustomerService _customerService;
     private readonly IDeviceService _deviceService;
     private readonly IRepairTicketService _repairTicketService;
+    private readonly ISaleService _saleService;
+    private readonly ICustomerPaymentService _customerPaymentService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
 
     [ObservableProperty]
     private CustomerDto? _customer;
+
+    [ObservableProperty]
+    private ObservableCollection<CustomerStatementEntryVm> _statement = [];
+
+    [ObservableProperty]
+    private decimal _outstandingBalance;
+
+    [ObservableProperty]
+    private decimal _collectAmount;
+
+    [ObservableProperty]
+    private string _collectReference = "";
 
     [ObservableProperty]
     private ObservableCollection<DeviceDto> _devices = [];
@@ -49,12 +68,16 @@ public partial class CustomerProfileViewModel : ObservableObject
         ICustomerService customerService,
         IDeviceService deviceService,
         IRepairTicketService repairTicketService,
+        ISaleService saleService,
+        ICustomerPaymentService customerPaymentService,
         AppNavigationService navigationService,
         NotificationService notificationService)
     {
         _customerService = customerService;
         _deviceService = deviceService;
         _repairTicketService = repairTicketService;
+        _saleService = saleService;
+        _customerPaymentService = customerPaymentService;
         _navigationService = navigationService;
         _notificationService = notificationService;
     }
@@ -81,6 +104,63 @@ public partial class CustomerProfileViewModel : ObservableObject
 
             var devices = await _deviceService.GetByCustomerIdAsync(customerId);
             Devices = new ObservableCollection<DeviceDto>(devices);
+
+            await LoadStatementAsync(customerId);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadStatementAsync(int customerId)
+    {
+        var invoices = await _saleService.GetByCustomerIdAsync(customerId);
+        var payments = await _customerPaymentService.GetByCustomerIdAsync(customerId);
+
+        var raw = new List<(DateTime Date, string Description, decimal Delta, DateTime CreatedAt)>();
+        foreach (var i in invoices)
+            raw.Add((i.Date, $"فاتورة: {i.InvoiceNumber} (إجمالي {i.Total:N0}، مدفوع {i.PaidAmount:N0})", i.RemainingAmount, i.CreatedAt));
+        foreach (var p in payments)
+            raw.Add((p.Date, $"تحصيل: {p.Reference}".TrimEnd(':', ' '), -p.Amount, p.CreatedAt));
+
+        var chronological = raw.OrderBy(e => e.Date).ThenBy(e => e.CreatedAt).ToList();
+        decimal running = 0;
+        var entries = new List<CustomerStatementEntryVm>();
+        foreach (var e in chronological)
+        {
+            running += e.Delta;
+            entries.Add(new CustomerStatementEntryVm(e.Date, e.Description, e.Delta, running));
+        }
+        entries.Reverse();
+
+        Statement = new ObservableCollection<CustomerStatementEntryVm>(entries);
+        OutstandingBalance = running;
+    }
+
+    [RelayCommand]
+    private async Task CollectPaymentAsync()
+    {
+        if (Customer is null) return;
+        if (CollectAmount <= 0)
+        {
+            ErrorMessage = "يرجى إدخال مبلغ أكبر من صفر";
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            await _customerPaymentService.CreateAsync(
+                new CreateCustomerPaymentDto(DateTime.Today, Customer.Id, CollectAmount, CollectReference, ""));
+            CollectAmount = 0;
+            CollectReference = "";
+            _notificationService.Show("تم تسجيل التحصيل بنجاح", NotificationType.Success);
+            await LoadStatementAsync(Customer.Id);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = UiError.Describe(ex, "تحصيل من العميل");
         }
         finally
         {

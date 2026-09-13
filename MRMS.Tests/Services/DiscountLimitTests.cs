@@ -47,8 +47,10 @@ public sealed class DiscountLimitTests : IDisposable
             perms, current, new SystemSettingService(uow, perms), new FakeCashSessionService());
     }
 
-    private CreateSaleDto Dto(decimal unitPrice, int? approvedBy = null) =>
-        new(DateTime.Today, _itemId, Quantity: 1, UnitPrice: unitPrice, CostPrice: 0, CustomerName: "x", Notes: "", ApprovedByUserId: approvedBy);
+    private CreateSalesInvoiceDto Dto(decimal unitPrice, int? approvedBy = null) =>
+        new(DateTime.Today, CustomerId: null, CustomerName: "x", PaymentMethod.Cash,
+            Lines: [new CreateSalesInvoiceLineDto(_itemId, 1, unitPrice)],
+            DiscountAmount: 0, PaidAmount: unitPrice, Notes: "", ApprovedByUserId: approvedBy);
 
     [Fact]
     public async Task Receptionist_within_the_ceiling_is_allowed()
@@ -85,7 +87,7 @@ public sealed class DiscountLimitTests : IDisposable
         sale.Id.Should().BeGreaterThan(0);
 
         await using var ctx = new AppDbContext(_options);
-        (await ctx.AuditLogs.AnyAsync(a => a.Action == "Sale.OverrideApproved")).Should().BeTrue();
+        (await ctx.AuditLogs.AnyAsync(a => a.Action == "SalesInvoice.OverrideApproved")).Should().BeTrue();
     }
 
     [Fact]

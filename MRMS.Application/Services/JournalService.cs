@@ -18,18 +18,39 @@ public class JournalService : IJournalService
         _permissions = permissions;
     }
 
-    public async Task PostSaleAsync(DateTime date, string description, decimal amount, int saleId)
+    public async Task PostSalesInvoicePaymentAsync(DateTime date, string invoiceNumber, decimal amount, int invoiceId)
     {
+        // amount is what was actually collected at the moment of sale, not the invoice's full Total -
+        // a credit sale's unpaid balance is not posted here (mirrors PostPurchaseAsync, which only
+        // posts Purchase.PaidAmount, never the unpaid remainder of a credit purchase).
+        if (amount <= 0) return;
+
         await _uow.JournalEntries.AddAsync(new JournalEntry
         {
             Date = date,
-            Description = description,
-            ReferenceType = "Sale",
-            ReferenceId = saleId,
+            Description = $"بيع: {invoiceNumber} - {amount:N2}",
+            ReferenceType = nameof(SalesInvoice),
+            ReferenceId = invoiceId,
             Lines =
             [
                 new() { AccountName = "الصندوق", DebitAmount = amount },
                 new() { AccountName = "إيرادات المبيعات", CreditAmount = amount }
+            ]
+        });
+    }
+
+    public async Task PostCustomerPaymentAsync(DateTime date, string customerName, decimal amount, int paymentId)
+    {
+        await _uow.JournalEntries.AddAsync(new JournalEntry
+        {
+            Date = date,
+            Description = $"تحصيل من عميل: {customerName} - {amount:N2}",
+            ReferenceType = nameof(CustomerPayment),
+            ReferenceId = paymentId,
+            Lines =
+            [
+                new() { AccountName = "الصندوق", DebitAmount = amount },
+                new() { AccountName = "حسابات القبض", CreditAmount = amount }
             ]
         });
     }

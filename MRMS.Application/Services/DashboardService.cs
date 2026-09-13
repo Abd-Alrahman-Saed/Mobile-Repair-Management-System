@@ -73,14 +73,15 @@ public class DashboardService : IDashboardService
 
     private async Task<(decimal current, decimal previous)> GetPeriodRevenuesAsync(DateTime curFrom, DateTime curTo, DateTime prevFrom, DateTime prevTo)
     {
-        var sales = await _uow.Sales.GetAllAsync();
+        var invoices = await _uow.SalesInvoices.GetAllAsync();
         var tickets = await _uow.RepairTickets.Query()
             .Where(t => t.Status == TicketStatus.Delivered && t.DeliveryDate != null)
             .ToListAsync();
 
         decimal Revenue(DateTime from, DateTime to)
         {
-            var s = sales.Where(x => x.Date >= from && x.Date <= to).Sum(x => x.TotalPrice);
+            // Accrual-basis revenue (invoice Total, not cash collected) - consistent with IncomeStatementService.
+            var s = invoices.Where(x => x.Date >= from && x.Date <= to).Sum(x => x.Total);
             var t = tickets.Where(x => x.DeliveryDate >= from && x.DeliveryDate <= to).Sum(x => x.Cost);
             return s + t;
         }
@@ -117,17 +118,19 @@ public class DashboardService : IDashboardService
 
     private async Task<decimal> CalculateCashBalanceAsync()
     {
-        var allSales = await _uow.Sales.GetAllAsync();
+        var allInvoices = await _uow.SalesInvoices.GetAllAsync();
+        var allCustomerPayments = await _uow.CustomerPayments.GetAllAsync();
         var allRepairPayments = await _uow.RepairTicketPayments.GetAllAsync();
         var allPurchases = await _uow.Purchases.GetAllAsync();
         var allExpenses = await _uow.Expenses.GetAllAsync();
         var allPayments = await _uow.SupplierPayments.GetAllAsync();
 
-        // Repair cash on hand is the payments actually collected on tickets (deposits + partials + final),
-        // not delivered tickets' full Cost - a deposit on a ticket still in repair is real cash in the
-        // drawer, and a delivered ticket with an owner-approved balance never brought in its full Cost.
-        // Repair parts cost is not a separate cash inflow (paid for via the parts' Purchase).
-        var inflows = allSales.Sum(s => s.TotalPrice)
+        // Cash on hand is what was actually collected - invoice PaidAmount + later CustomerPayment
+        // (a credit sale's unpaid balance isn't cash), and repair payments actually collected
+        // (deposits + partials + final), not delivered tickets' full Cost. Parts/goods cost is not a
+        // separate cash outflow here (already paid for via their Purchase).
+        var inflows = allInvoices.Sum(i => i.PaidAmount)
+                    + allCustomerPayments.Sum(p => p.Amount)
                     + allRepairPayments.Sum(p => p.Amount);
 
         var outflows = allPurchases.Sum(p => p.PaidAmount)

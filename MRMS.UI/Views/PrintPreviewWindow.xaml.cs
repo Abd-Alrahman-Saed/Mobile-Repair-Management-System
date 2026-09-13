@@ -145,6 +145,99 @@ public partial class PrintPreviewWindow : Window
         return doc;
     }
 
+    public static FixedDocument BuildSalesInvoice(SalesInvoiceDto invoice)
+    {
+        var doc = new FixedDocument();
+        var pageSize = new Size(302, 1400);
+        doc.DocumentPaginator.PageSize = pageSize;
+
+        var pageContent = new PageContent();
+        var fixedPage = new FixedPage { Width = pageSize.Width, Height = pageSize.Height };
+
+        var root = new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(2),
+            Padding = new Thickness(14, 20, 14, 20),
+            Background = Brushes.White,
+            FlowDirection = FlowDirection.RightToLeft
+        };
+        TextElement.SetFontFamily(root, new FontFamily("Segoe UI"));
+
+        var stack = new StackPanel();
+
+        void AddInfoRow(StackPanel parent, string label, string value, bool isBoldValue = false)
+        {
+            var g = new Grid { Margin = new Thickness(0, 0, 0, 2) };
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            g.Children.Add(new TextBlock(new Run(label + ":"))
+            { FontWeight = FontWeights.SemiBold, FontSize = 10, VerticalAlignment = VerticalAlignment.Center });
+            var vt = new TextBlock(new Run(value))
+            { FontSize = 10, FontWeight = isBoldValue ? FontWeights.Bold : FontWeights.Normal, VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(vt, 1);
+            g.Children.Add(vt);
+            parent.Children.Add(g);
+        }
+
+        // Header
+        stack.Children.Add(new TextBlock(new Run("KMG"))
+        { FontSize = 20, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+        stack.Children.Add(new TextBlock(new Run("مركز صيانة الأجهزة المحمولة"))
+        { FontSize = 11, Foreground = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 6) });
+        stack.Children.Add(new Rectangle { Height = 1, Fill = Brushes.Black, Margin = new Thickness(0, 0, 0, 8) });
+
+        // Title
+        stack.Children.Add(new TextBlock(new Run("فاتورة مبيعات"))
+        { FontSize = 16, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 8) });
+
+        // Invoice info
+        var infoStack = new StackPanel();
+        AddInfoRow(infoStack, "رقم الفاتورة", invoice.InvoiceNumber, true);
+        AddInfoRow(infoStack, "التاريخ", invoice.Date.ToString("yyyy-MM-dd"));
+        AddInfoRow(infoStack, "العميل", string.IsNullOrWhiteSpace(invoice.CustomerName) ? "---" : invoice.CustomerName);
+        stack.Children.Add(new Border
+        { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Padding = new Thickness(8), Margin = new Thickness(0, 0, 0, 6), Child = infoStack });
+
+        // Line items
+        var itemsStack = new StackPanel();
+        itemsStack.Children.Add(new TextBlock(new Run("الأصناف"))
+        { FontWeight = FontWeights.Bold, FontSize = 11, Margin = new Thickness(0, 0, 0, 4) });
+        foreach (var line in invoice.Lines)
+            AddInfoRow(itemsStack, $"{line.ItemName} x{line.Quantity}", $"{line.LineTotal:N0}");
+        stack.Children.Add(new Border
+        { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Padding = new Thickness(8), Margin = new Thickness(0, 0, 0, 6), Child = itemsStack });
+
+        // Totals
+        var totalsStack = new StackPanel();
+        AddInfoRow(totalsStack, "الإجمالي الفرعي", $"{invoice.Subtotal:N0}");
+        if (invoice.DiscountAmount > 0)
+            AddInfoRow(totalsStack, "الخصم", $"{invoice.DiscountAmount:N0}");
+        AddInfoRow(totalsStack, "الإجمالي", $"{invoice.Total:N0} جنيه", true);
+        AddInfoRow(totalsStack, "المدفوع", $"{invoice.PaidAmount:N0} جنيه");
+        if (invoice.RemainingAmount > 0)
+            AddInfoRow(totalsStack, "المتبقي", $"{invoice.RemainingAmount:N0} جنيه", true);
+        stack.Children.Add(new Border
+        { BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Padding = new Thickness(8), Margin = new Thickness(0, 0, 0, 6), Child = totalsStack });
+
+        // Footer
+        stack.Children.Add(new Rectangle { Height = 1, Fill = Brushes.Black, Margin = new Thickness(0, 0, 0, 6) });
+        stack.Children.Add(new TextBlock(new Run("شكراً لتعاملكم معنا"))
+        { FontSize = 12, FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
+        stack.Children.Add(new TextBlock(new Run("نتمنى لكم يوماً سعيداً"))
+        { FontSize = 10, Foreground = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Center });
+
+        root.Child = stack;
+        FixedPage.SetLeft(root, 0);
+        FixedPage.SetTop(root, 0);
+        root.Width = pageSize.Width - 4;
+        root.Height = pageSize.Height - 4;
+        fixedPage.Children.Add(root);
+        pageContent.Child = fixedPage;
+        doc.Pages.Add(pageContent);
+        return doc;
+    }
+
     public static FixedDocument BuildReceptionReceipt(RepairTicketDto ticket)
     {
         var doc = new FixedDocument();

@@ -21,7 +21,9 @@ public class AppDbContext : DbContext
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
-    public DbSet<Sale> Sales => Set<Sale>();
+    public DbSet<SalesInvoice> SalesInvoices => Set<SalesInvoice>();
+    public DbSet<SalesInvoiceLine> SalesInvoiceLines => Set<SalesInvoiceLine>();
+    public DbSet<CustomerPayment> CustomerPayments => Set<CustomerPayment>();
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
@@ -180,19 +182,60 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<Sale>(e =>
+        modelBuilder.Entity<SalesInvoice>(e =>
         {
-            e.Property(s => s.UnitPrice).HasColumnType("decimal(18,2)");
-            e.Property(s => s.CostPrice).HasColumnType("decimal(18,2)");
+            e.Property(s => s.InvoiceNumber).HasMaxLength(20);
             e.Property(s => s.CustomerName).HasMaxLength(100);
+            e.Property(s => s.Subtotal).HasColumnType("decimal(18,2)");
+            e.Property(s => s.DiscountAmount).HasColumnType("decimal(18,2)");
+            e.Property(s => s.Total).HasColumnType("decimal(18,2)");
+            e.Property(s => s.PaidAmount).HasColumnType("decimal(18,2)");
+            e.Property(s => s.PaymentMethod).HasConversion<string>().HasMaxLength(20);
             e.Property(s => s.Notes).HasMaxLength(500);
             e.Property(s => s.VoidReason).HasMaxLength(300);
+            e.HasIndex(s => s.InvoiceNumber).IsUnique();
             // Voided rows are kept for audit but excluded from every normal query (reports, dashboards,
             // lists). Screens that show voided rows to the owner call IgnoreQueryFilters().
             e.HasQueryFilter(s => !s.IsVoided);
-            e.HasOne(s => s.Item)
-                .WithMany(i => i.Sales)
-                .HasForeignKey(s => s.ItemId)
+            e.HasOne(s => s.Customer)
+                .WithMany(c => c.SalesInvoices)
+                .HasForeignKey(s => s.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<CashSession>()
+                .WithMany()
+                .HasForeignKey(s => s.CashSessionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SalesInvoiceLine>(e =>
+        {
+            e.Property(l => l.UnitPrice).HasColumnType("decimal(18,2)");
+            e.Property(l => l.UnitCost).HasColumnType("decimal(18,2)");
+            e.HasQueryFilter(l => !l.SalesInvoice.IsVoided);
+            e.HasOne(l => l.SalesInvoice)
+                .WithMany(s => s.Lines)
+                .HasForeignKey(l => l.SalesInvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(l => l.Item)
+                .WithMany(i => i.SalesInvoiceLines)
+                .HasForeignKey(l => l.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CustomerPayment>(e =>
+        {
+            e.Property(cp => cp.Amount).HasColumnType("decimal(18,2)");
+            e.Property(cp => cp.Reference).HasMaxLength(100);
+            e.Property(cp => cp.Notes).HasMaxLength(500);
+            e.Property(cp => cp.VoidReason).HasMaxLength(300);
+            e.HasQueryFilter(cp => !cp.IsVoided);
+            e.HasOne(cp => cp.Customer)
+                .WithMany(c => c.CustomerPayments)
+                .HasForeignKey(cp => cp.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<CashSession>()
+                .WithMany()
+                .HasForeignKey(cp => cp.CashSessionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -257,12 +300,6 @@ public class AppDbContext : DbContext
                 .HasForeignKey(p => p.CashSessionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-
-        modelBuilder.Entity<Sale>()
-            .HasOne<CashSession>()
-            .WithMany()
-            .HasForeignKey(s => s.CashSessionId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Expense>()
             .HasOne<CashSession>()

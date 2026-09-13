@@ -55,6 +55,25 @@
                         <DataGridTextColumn Header="الاسم" Binding="{Binding FullName}" Width="*"/>
                         <DataGridTextColumn Header="رقم الهاتف" Binding="{Binding PhoneNumber}" Width="140"/>
                         <DataGridTextColumn Header="تاريخ التسجيل" Binding="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd}}" Width="130"/>
+                        <DataGridTemplateColumn Header="مديونية" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding OutstandingBalance, StringFormat={}{0:N0}}"
+                                               VerticalAlignment="Center" FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding OutstandingBalance, Converter={StaticResource GreaterThanZero}}" Value="True">
+                                                        <Setter Property="Foreground" Value="#B45309"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="الإجراءات" Width="170">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

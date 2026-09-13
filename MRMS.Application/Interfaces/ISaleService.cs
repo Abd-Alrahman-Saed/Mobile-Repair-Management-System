@@ -4,9 +4,9 @@ namespace MRMS.Application.Interfaces;
 
 public interface ISaleService
 {
-    Task<IEnumerable<SaleDto>> GetAllAsync();
-    Task<SaleDto?> GetByIdAsync(int id);
-    Task<SaleDto> CreateAsync(CreateSaleDto dto);
-    Task UpdateAsync(UpdateSaleDto dto);
+    Task<IEnumerable<SalesInvoiceDto>> GetAllAsync();
+    Task<SalesInvoiceDto?> GetByIdAsync(int id);
+    Task<IEnumerable<SalesInvoiceDto>> GetByCustomerIdAsync(int customerId);
+    Task<SalesInvoiceDto> CreateAsync(CreateSalesInvoiceDto dto);
     Task VoidAsync(int id, string reason);
 }

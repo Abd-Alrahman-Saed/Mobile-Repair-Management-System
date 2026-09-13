@@ -8,4 +8,6 @@ public class Customer
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Device> Devices { get; set; } = new List<Device>();
+    public ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
+    public ICollection<CustomerPayment> CustomerPayments { get; set; } = new List<CustomerPayment>();
 }

@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddTransient<ISaleService, SaleService>();
         services.AddTransient<IExpenseService, ExpenseService>();
         services.AddTransient<ISupplierPaymentService, SupplierPaymentService>();
+        services.AddTransient<ICustomerPaymentService, CustomerPaymentService>();
         services.AddTransient<IStockMovementService, StockMovementService>();
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IIncomeStatementService, IncomeStatementService>();

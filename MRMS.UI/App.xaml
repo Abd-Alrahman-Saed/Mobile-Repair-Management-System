@@ -16,6 +16,7 @@
             <converters:FirstLetterConverter x:Key="FirstLetter"/>
             <converters:InverseSignConverter x:Key="InverseSign"/>
             <converters:LessThanZeroConverter x:Key="LessThanZero"/>
+            <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
             <converters:FileSizeConverter x:Key="FileSize"/>
             <converters:BoolToResultTextConverter x:Key="BoolToResultText"/>
             <converters:ActiveStatusConverter x:Key="ActiveStatus"/>

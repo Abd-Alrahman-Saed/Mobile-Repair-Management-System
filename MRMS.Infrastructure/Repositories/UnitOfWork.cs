@@ -22,7 +22,9 @@ public class UnitOfWork : IUnitOfWork
     private Repository<StockMovement>? _stockMovements;
     private Repository<Purchase>? _purchases;
     private Repository<PurchaseItem>? _purchaseItems;
-    private Repository<Sale>? _sales;
+    private Repository<SalesInvoice>? _salesInvoices;
+    private Repository<SalesInvoiceLine>? _salesInvoiceLines;
+    private Repository<CustomerPayment>? _customerPayments;
     private Repository<Expense>? _expenses;
     private Repository<JournalEntry>? _journalEntries;
     private Repository<JournalEntryLine>? _journalEntryLines;
@@ -49,7 +51,9 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<StockMovement> StockMovements => _stockMovements ??= new Repository<StockMovement>(_context);
     public IRepository<Purchase> Purchases => _purchases ??= new Repository<Purchase>(_context);
     public IRepository<PurchaseItem> PurchaseItems => _purchaseItems ??= new Repository<PurchaseItem>(_context);
-    public IRepository<Sale> Sales => _sales ??= new Repository<Sale>(_context);
+    public IRepository<SalesInvoice> SalesInvoices => _salesInvoices ??= new Repository<SalesInvoice>(_context);
+    public IRepository<SalesInvoiceLine> SalesInvoiceLines => _salesInvoiceLines ??= new Repository<SalesInvoiceLine>(_context);
+    public IRepository<CustomerPayment> CustomerPayments => _customerPayments ??= new Repository<CustomerPayment>(_context);
     public IRepository<Expense> Expenses => _expenses ??= new Repository<Expense>(_context);
     public IRepository<JournalEntry> JournalEntries => _journalEntries ??= new Repository<JournalEntry>(_context);
     public IRepository<JournalEntryLine> JournalEntryLines => _journalEntryLines ??= new Repository<JournalEntryLine>(_context);

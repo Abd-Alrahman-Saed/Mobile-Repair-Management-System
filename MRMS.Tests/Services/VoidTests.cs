@@ -45,8 +45,10 @@ public sealed class VoidTests : IDisposable
 
     private async Task<int> CreateSaleAsync()
     {
-        var sale = await Sales(UserRole.Owner).CreateAsync(new CreateSaleDto(
-            DateTime.Today, _itemId, Quantity: 4, UnitPrice: 50, CostPrice: 30, CustomerName: "x", Notes: ""));
+        var sale = await Sales(UserRole.Owner).CreateAsync(new CreateSalesInvoiceDto(
+            DateTime.Today, CustomerId: null, CustomerName: "x", PaymentMethod.Cash,
+            Lines: [new CreateSalesInvoiceLineDto(_itemId, 4, 50)],
+            DiscountAmount: 0, PaidAmount: 200, Notes: ""));
         return sale.Id;
     }
 
@@ -58,7 +60,7 @@ public sealed class VoidTests : IDisposable
         await Sales(UserRole.Owner).VoidAsync(saleId, "إدخال خاطئ");
 
         await using var ctx = new AppDbContext(_options);
-        var sale = await ctx.Sales.IgnoreQueryFilters().SingleAsync(s => s.Id == saleId);
+        var sale = await ctx.SalesInvoices.IgnoreQueryFilters().SingleAsync(s => s.Id == saleId);
         sale.IsVoided.Should().BeTrue();
         sale.VoidReason.Should().Be("إدخال خاطئ");
 
@@ -66,8 +68,8 @@ public sealed class VoidTests : IDisposable
 
         var lines = await ctx.JournalEntryLines.ToListAsync();
         lines.Sum(l => l.DebitAmount).Should().Be(lines.Sum(l => l.CreditAmount), "original + reversal net out");
-        (await ctx.JournalEntries.AnyAsync(e => e.ReferenceType == "Sale.Reversal")).Should().BeTrue();
-        (await ctx.AuditLogs.AnyAsync(a => a.Action == "Sale.Void")).Should().BeTrue();
+        (await ctx.JournalEntries.AnyAsync(e => e.ReferenceType == "SalesInvoice.Reversal")).Should().BeTrue();
+        (await ctx.AuditLogs.AnyAsync(a => a.Action == "SalesInvoice.Void")).Should().BeTrue();
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public sealed class VoidTests : IDisposable
 
         // Global query filter: a plain query sees nothing.
         await using var ctx = new AppDbContext(_options);
-        (await ctx.Sales.AnyAsync()).Should().BeFalse();
+        (await ctx.SalesInvoices.AnyAsync()).Should().BeFalse();
 
         // Owner list ignores the filter and still shows it (struck through in the UI).
         (await Sales(UserRole.Owner).GetAllAsync()).Should().ContainSingle(s => s.IsVoided);

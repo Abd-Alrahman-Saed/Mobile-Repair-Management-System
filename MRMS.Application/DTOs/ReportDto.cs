@@ -33,3 +33,12 @@ public record PayableItemDto(
     decimal? TotalPurchases,
     decimal? TotalPayments,
     decimal? OutstandingBalance);
+
+// Unlike PayableItemDto, receivables are visible to everyone (no permission gate) - front-desk staff
+// need to see a customer's debt before deciding whether to extend more credit.
+public record ReceivableItemDto(
+    int CustomerId,
+    string CustomerName,
+    decimal TotalInvoiced,
+    decimal TotalCollected,
+    decimal OutstandingBalance);

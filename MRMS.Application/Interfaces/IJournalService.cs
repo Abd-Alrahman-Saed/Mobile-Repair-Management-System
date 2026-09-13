@@ -4,7 +4,12 @@ namespace MRMS.Application.Interfaces;
 
 public interface IJournalService
 {
-    Task PostSaleAsync(DateTime date, string description, decimal amount, int saleId);
+    /// <summary>Posts cash-basis revenue for the amount actually collected on a sales invoice at the
+    /// moment of sale (may be less than the invoice's Total for a credit sale).</summary>
+    Task PostSalesInvoicePaymentAsync(DateTime date, string invoiceNumber, decimal amount, int invoiceId);
+    /// <summary>Posts a later, invoice-independent collection from a customer (mirrors
+    /// <see cref="PostSupplierPaymentAsync"/> on the other side of the ledger).</summary>
+    Task PostCustomerPaymentAsync(DateTime date, string customerName, decimal amount, int paymentId);
     Task PostPurchaseAsync(DateTime date, string description, decimal amount, int purchaseId);
     Task PostExpenseAsync(DateTime date, string category, string description, decimal amount, int expenseId);
     /// <summary>Posts cash-basis revenue for a single payment (deposit or partial/final) actually

@@ -139,10 +139,18 @@ public class CashSessionService : ICashSessionService
 
     private async Task<SessionTotals> ComputeTotalsAsync(CashSession s)
     {
-        // Voided sales/expenses are already excluded by the global query filters.
-        var cashSales = await _uow.Sales.Query()
+        // "Cash sales" = what was actually collected on invoices at sale time, plus any later
+        // CustomerPayment collected during this same shift - not the invoices' full Total. Voided
+        // rows are already excluded by the global query filters.
+        var invoicePayments = await _uow.SalesInvoices.Query()
             .Where(x => x.CashSessionId == s.Id)
-            .SumAsync(x => (decimal?)(x.Quantity * x.UnitPrice)) ?? 0m;
+            .SumAsync(x => (decimal?)x.PaidAmount) ?? 0m;
+
+        var customerPayments = await _uow.CustomerPayments.Query()
+            .Where(x => x.CashSessionId == s.Id)
+            .SumAsync(x => (decimal?)x.Amount) ?? 0m;
+
+        var cashSales = invoicePayments + customerPayments;
 
         var repairCollections = await _uow.RepairTicketPayments.Query()
             .Where(p => p.CashSessionId == s.Id)

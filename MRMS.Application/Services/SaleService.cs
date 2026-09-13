@@ -31,82 +31,124 @@ public class SaleService : ISaleService
         _cashSessions = cashSessions;
     }
 
-    public async Task<IEnumerable<SaleDto>> GetAllAsync()
+    public async Task<IEnumerable<SalesInvoiceDto>> GetAllAsync()
     {
-        var query = _unitOfWork.Sales.Query();
-        // Only a user who can void transactions is shown the voided rows (struck through) - everyone
-        // else, and every report, sees the global filter's already-clean list.
+        var query = _unitOfWork.SalesInvoices.Query();
         if (_permissions.Can(Permission.VoidTransaction))
             query = query.IgnoreQueryFilters();
 
-        var sales = await query
-            .Include(s => s.Item)
-            .OrderByDescending(s => s.Date).ThenByDescending(s => s.CreatedAt)
+        var invoices = await query
+            .Include(i => i.Lines).ThenInclude(l => l.Item)
+            .Include(i => i.Customer)
+            .OrderByDescending(i => i.Date).ThenByDescending(i => i.CreatedAt)
             .ToListAsync();
 
-        return sales.Select(MapToDto);
+        return invoices.Select(MapToDto);
     }
 
-    public async Task<SaleDto?> GetByIdAsync(int id)
+    public async Task<SalesInvoiceDto?> GetByIdAsync(int id)
     {
-        var sale = await _unitOfWork.Sales
-            .Query()
-            .Include(s => s.Item)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var invoice = await _unitOfWork.SalesInvoices.Query()
+            .Include(i => i.Lines).ThenInclude(l => l.Item)
+            .Include(i => i.Customer)
+            .FirstOrDefaultAsync(i => i.Id == id);
 
-        return sale is null ? null : MapToDto(sale);
+        return invoice is null ? null : MapToDto(invoice);
     }
 
-    public async Task<SaleDto> CreateAsync(CreateSaleDto dto)
+    public async Task<IEnumerable<SalesInvoiceDto>> GetByCustomerIdAsync(int customerId)
     {
-        if (dto.Quantity <= 0)
-            throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
+        var invoices = await _unitOfWork.SalesInvoices.Query()
+            .Include(i => i.Lines).ThenInclude(l => l.Item)
+            .Include(i => i.Customer)
+            .Where(i => i.CustomerId == customerId)
+            .OrderByDescending(i => i.Date).ThenByDescending(i => i.CreatedAt)
+            .ToListAsync();
 
-        if (dto.UnitPrice <= 0)
-            throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
+        return invoices.Select(MapToDto);
+    }
+
+    public async Task<SalesInvoiceDto> CreateAsync(CreateSalesInvoiceDto dto)
+    {
+        if (dto.Lines is not { Count: > 0 })
+            throw new InvalidOperationException("يجب إضافة صنف واحد على الأقل للفاتورة");
+
+        if (dto.PaymentMethod == PaymentMethod.Credit && dto.CustomerId is null)
+            throw new InvalidOperationException("البيع الآجل يتطلب اختيار عميل مسجّل");
 
         await _cashSessions.EnsureNotLockedAsync(dto.Date);
 
-        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
-            ?? throw new InvalidOperationException("الصنف غير موجود");
-
         var approver = await ResolvePricingApproverAsync(dto.ApprovedByUserId);
-        await EnforcePricingRulesAsync(dto.UnitPrice, item, approver);
 
-        var sale = new Sale
+        var invoice = new SalesInvoice
         {
+            InvoiceNumber = await GenerateInvoiceNumberAsync(),
             Date = dto.Date,
-            ItemId = dto.ItemId,
-            Quantity = dto.Quantity,
-            UnitPrice = dto.UnitPrice,
-            // Cost basis is locked from the item at the moment of sale - never taken from the caller,
-            // so a receptionist's form (which can't see cost) can't zero out the profit calculation.
-            CostPrice = item.CostPrice,
-            CustomerName = dto.CustomerName,
-            Notes = dto.Notes,
-            CashSessionId = await _cashSessions.GetCurrentSessionIdAsync()
+            CustomerId = dto.CustomerId,
+            PaymentMethod = dto.PaymentMethod,
+            Notes = dto.Notes
         };
 
-        if (item.CurrentStock < dto.Quantity)
-            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
+        var subtotal = 0m;
+        foreach (var lineDto in dto.Lines)
+        {
+            if (lineDto.Quantity <= 0)
+                throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
+            if (lineDto.UnitPrice <= 0)
+                throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
+
+            var item = await _unitOfWork.Items.GetByIdAsync(lineDto.ItemId)
+                ?? throw new InvalidOperationException("الصنف غير موجود");
+            if (item.CurrentStock < lineDto.Quantity)
+                throw new InvalidOperationException($"الرصيد غير كافٍ للصنف {item.Name}. المتوفر: {item.CurrentStock}");
+
+            await EnforcePricingRulesAsync(lineDto.UnitPrice, item, approver);
+
+            invoice.Lines.Add(new SalesInvoiceLine
+            {
+                ItemId = lineDto.ItemId,
+                Quantity = lineDto.Quantity,
+                UnitPrice = lineDto.UnitPrice,
+                // Cost basis is locked from the item at the moment of sale - never taken from the
+                // caller, so a receptionist's form (which can't see cost) can't zero out profit.
+                UnitCost = item.CostPrice
+            });
+            subtotal += lineDto.Quantity * lineDto.UnitPrice;
+        }
+
+        invoice.Subtotal = subtotal;
+        invoice.DiscountAmount = dto.DiscountAmount;
+        invoice.Total = subtotal - dto.DiscountAmount;
+        invoice.PaidAmount = dto.PaidAmount;
+
+        var customer = dto.CustomerId is { } cid ? await _unitOfWork.Customers.GetByIdAsync(cid) : null;
+        invoice.CustomerName = customer?.FullName ?? dto.CustomerName;
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            item.CurrentStock -= dto.Quantity;
+            foreach (var line in invoice.Lines)
+            {
+                var item = await _unitOfWork.Items.GetByIdAsync(line.ItemId);
+                if (item is not null)
+                    item.CurrentStock -= line.Quantity;
+            }
 
-            await _unitOfWork.Sales.AddAsync(sale);
+            invoice.CashSessionId = await _cashSessions.GetCurrentSessionIdAsync();
+            await _unitOfWork.SalesInvoices.AddAsync(invoice);
             await _unitOfWork.CompleteAsync();
 
-            await _journalService.PostSaleAsync(sale.Date, $"بيع: {item.Name} x{sale.Quantity} - {sale.CustomerName}", sale.TotalPrice, sale.Id);
-            await _audit.LogAsync("Sale.Create", nameof(Sale), sale.Id,
-                $"{item.Name} x{sale.Quantity} = {sale.TotalPrice:N0}");
+            if (invoice.PaidAmount > 0)
+                await _journalService.PostSalesInvoicePaymentAsync(invoice.Date, invoice.InvoiceNumber, invoice.PaidAmount, invoice.Id);
+
+            await _audit.LogAsync("SalesInvoice.Create", nameof(SalesInvoice), invoice.Id,
+                $"{invoice.InvoiceNumber} - {invoice.Total:N0}");
             if (approver is not null)
-                await _audit.LogAsync("Sale.OverrideApproved", nameof(Sale), sale.Id,
-                    $"سعر {sale.UnitPrice:N0} بموافقة {approver.FullName}");
+                await _audit.LogAsync("SalesInvoice.OverrideApproved", nameof(SalesInvoice), invoice.Id,
+                    $"بموافقة {approver.FullName}");
             await _unitOfWork.CompleteAsync();
         });
 
-        return (await GetByIdAsync(sale.Id))!;
+        return (await GetByIdAsync(invoice.Id))!;
     }
 
     public async Task VoidAsync(int id, string reason)
@@ -115,26 +157,30 @@ public class SaleService : ISaleService
         if (string.IsNullOrWhiteSpace(reason))
             throw new InvalidOperationException("سبب الإلغاء مطلوب");
 
-        var sale = await _unitOfWork.Sales.Query()
+        var invoice = await _unitOfWork.SalesInvoices.Query()
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(s => s.Id == id)
-            ?? throw new InvalidOperationException("عملية البيع غير موجودة");
-        if (sale.IsVoided)
-            throw new InvalidOperationException("العملية ملغاة بالفعل");
+            .Include(i => i.Lines)
+            .FirstOrDefaultAsync(i => i.Id == id)
+            ?? throw new InvalidOperationException("الفاتورة غير موجودة");
+        if (invoice.IsVoided)
+            throw new InvalidOperationException("الفاتورة ملغاة بالفعل");
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            sale.IsVoided = true;
-            sale.VoidedByUserId = _currentUser.User?.Id;
-            sale.VoidReason = reason.Trim();
-            sale.VoidedAt = DateTime.UtcNow;
+            invoice.IsVoided = true;
+            invoice.VoidedByUserId = _currentUser.User?.Id;
+            invoice.VoidReason = reason.Trim();
+            invoice.VoidedAt = DateTime.UtcNow;
 
-            var item = await _unitOfWork.Items.GetByIdAsync(sale.ItemId);
-            if (item is not null)
-                item.CurrentStock += sale.Quantity;
+            foreach (var line in invoice.Lines)
+            {
+                var item = await _unitOfWork.Items.GetByIdAsync(line.ItemId);
+                if (item is not null)
+                    item.CurrentStock += line.Quantity;
+            }
 
-            await _journalService.PostReversalAsync(nameof(Sale), sale.Id, DateTime.UtcNow.Date, reason.Trim());
-            await _audit.LogAsync("Sale.Void", nameof(Sale), sale.Id, reason.Trim());
+            await _journalService.PostReversalAsync(nameof(SalesInvoice), invoice.Id, DateTime.UtcNow.Date, reason.Trim());
+            await _audit.LogAsync("SalesInvoice.Void", nameof(SalesInvoice), invoice.Id, reason.Trim());
             await _unitOfWork.CompleteAsync();
         });
     }
@@ -178,49 +224,27 @@ public class SaleService : ISaleService
         return decimal.TryParse(setting?.Value, out var pct) ? pct : 0m;
     }
 
-    public async Task UpdateAsync(UpdateSaleDto dto)
+    private async Task<string> GenerateInvoiceNumberAsync()
     {
-        var existing = await _unitOfWork.Sales.GetByIdAsync(dto.Id);
-        if (existing is null) return;
-
-        await _cashSessions.EnsureNotLockedAsync(existing.Date);
-        await _cashSessions.EnsureNotLockedAsync(dto.Date);
-
-        var oldQty = existing.Quantity;
-        var diff = dto.Quantity - oldQty;
-
-        if (dto.Quantity <= 0)
-            throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
-
-        if (dto.UnitPrice <= 0)
-            throw new InvalidOperationException("السعر يجب أن يكون أكبر من صفر");
-
-        existing.Date = dto.Date;
-        existing.ItemId = dto.ItemId;
-        existing.Quantity = dto.Quantity;
-        existing.UnitPrice = dto.UnitPrice;
-        existing.CustomerName = dto.CustomerName;
-        existing.Notes = dto.Notes;
-
-        var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId);
-        if (item is not null && diff > 0 && item.CurrentStock < diff)
-            throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}");
-
-        if (item is not null)
-            item.CurrentStock -= diff;
-
-        await _unitOfWork.CompleteAsync();
+        var count = (await _unitOfWork.SalesInvoices.Query().IgnoreQueryFilters().CountAsync()) + 1;
+        return $"INV-{count:D5}";
     }
 
-    private SaleDto MapToDto(Sale s)
+    private SalesInvoiceDto MapToDto(SalesInvoice i)
     {
         var canSeeProfit = _permissions.Can(Permission.ViewProfit);
-        return new(
-            s.Id, s.Date, s.ItemId, s.Item.Name,
-            s.Quantity, s.UnitPrice, s.TotalPrice,
-            canSeeProfit ? s.CostPrice : null,
-            canSeeProfit ? s.Profit : null,
-            s.CustomerName, s.Notes, s.CreatedAt,
-            s.IsVoided, s.VoidReason);
+        var lines = i.Lines.Select(l => new SalesInvoiceLineDto(
+            l.Id, l.ItemId, l.Item.Name, l.Quantity, l.UnitPrice,
+            canSeeProfit ? l.UnitCost : null, l.LineTotal)).ToList();
+
+        decimal? profit = canSeeProfit
+            ? i.Lines.Sum(l => l.LineTotal) - i.Lines.Sum(l => l.Quantity * l.UnitCost) - i.DiscountAmount
+            : null;
+
+        return new SalesInvoiceDto(
+            i.Id, i.InvoiceNumber, i.Date, i.CustomerId,
+            i.Customer?.FullName ?? i.CustomerName,
+            i.Subtotal, i.DiscountAmount, i.Total, i.PaymentMethod, i.PaidAmount,
+            i.Notes, i.CreatedAt, lines, profit, i.IsVoided, i.VoidReason);
     }
 }

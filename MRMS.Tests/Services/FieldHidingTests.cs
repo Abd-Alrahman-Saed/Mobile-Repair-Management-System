@@ -64,16 +64,18 @@ public sealed class FieldHidingTests : IDisposable
         await using (var ctx = new AppDbContext(_options))
             itemId = (await ctx.Items.SingleAsync()).Id;
 
-        // Receptionist creates a sale; their form can't see cost so it passes 0 - the service must ignore it.
-        await Sales(UserRole.Receptionist).CreateAsync(new CreateSaleDto(
-            DateTime.Today, itemId, Quantity: 2, UnitPrice: 50, CostPrice: 0, CustomerName: "x", Notes: ""));
+        // Receptionist creates a sale; their form can't see cost, so the item's cost is what gets locked in.
+        await Sales(UserRole.Receptionist).CreateAsync(new CreateSalesInvoiceDto(
+            DateTime.Today, CustomerId: null, CustomerName: "x", PaymentMethod.Cash,
+            Lines: [new CreateSalesInvoiceLineDto(itemId, 2, 50)],
+            DiscountAmount: 0, PaidAmount: 100, Notes: ""));
 
         await using (var ctx = new AppDbContext(_options))
-            (await ctx.Sales.SingleAsync()).CostPrice.Should().Be(30m, "cost is taken from the item, not the caller");
+            (await ctx.SalesInvoiceLines.SingleAsync()).UnitCost.Should().Be(30m, "cost is taken from the item, not the caller");
 
         var asReception = (await Sales(UserRole.Receptionist).GetAllAsync()).Single();
         asReception.Profit.Should().BeNull();
-        asReception.CostPrice.Should().BeNull();
+        asReception.Lines.Single().UnitCost.Should().BeNull();
 
         var asOwner = (await Sales(UserRole.Owner).GetAllAsync()).Single();
         asOwner.Profit.Should().Be(40m); // (50-30) * 2

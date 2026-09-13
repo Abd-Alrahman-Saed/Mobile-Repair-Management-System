@@ -23,8 +23,12 @@ public class MonthlyReportService : IMonthlyReportService
     public async Task<MonthlyReportDto> GetMonthlyReportAsync(int year, int month)
     {
         _permissions.Require(Permission.ViewReports);
-        var allSales = await _uow.Sales.Query()
-            .Where(s => s.Date.Year == year).ToListAsync();
+        var allInvoices = await _uow.SalesInvoices.Query()
+            .Include(i => i.Lines)
+            .Where(i => i.Date.Year == year).ToListAsync();
+
+        var allCustomerPayments = await _uow.CustomerPayments.Query()
+            .Where(p => p.Date.Year == year).ToListAsync();
 
         var allDeliveredTickets = await _uow.RepairTickets.Query()
             .Where(t => t.Status == TicketStatus.Delivered && t.DeliveryDate!.Value.Year == year)
@@ -34,6 +38,9 @@ public class MonthlyReportService : IMonthlyReportService
         var allParts = await _uow.RepairTicketItems.Query()
             .Where(rti => deliveredIds.Contains(rti.RepairTicketId))
             .ToListAsync();
+
+        var allRepairPayments = await _uow.RepairTicketPayments.Query()
+            .Where(p => p.BusinessDate.Year == year).ToListAsync();
 
         var allExpenses = await _uow.Expenses.Query()
             .Where(e => e.Date.Year == year).ToListAsync();
@@ -49,27 +56,33 @@ public class MonthlyReportService : IMonthlyReportService
 
         for (int m = 1; m <= 12; m++)
         {
-            var sales = allSales.Where(s => s.Date.Month == m).ToList();
+            var invoices = allInvoices.Where(i => i.Date.Month == m).ToList();
+            var customerPayments = allCustomerPayments.Where(p => p.Date.Month == m).ToList();
             var tickets = allDeliveredTickets.Where(t => t.DeliveryDate!.Value.Month == m).ToList();
             var ticketIds = tickets.Select(t => t.Id).ToHashSet();
             var parts = allParts.Where(p => ticketIds.Contains(p.RepairTicketId)).ToList();
+            var repairPayments = allRepairPayments.Where(p => p.BusinessDate.Month == m).ToList();
             var expenses = allExpenses.Where(e => e.Date.Month == m).ToList();
             var purchases = allPurchases.Where(p => p.Date.Month == m).ToList();
             var payments = allPayments.Where(sp => sp.Date.Month == m).ToList();
 
-            var salesRevenue = sales.Sum(s => s.TotalPrice);
+            // Revenue rows stay accrual-basis (recognized at invoice/delivery date), consistent with
+            // IncomeStatementService - only the cash-flow figures below are cash-basis.
+            var salesRevenue = invoices.Sum(i => i.Total);
             var partsCost = parts.Sum(p => p.TotalCost);
             // ticket.Cost already includes parts + labor (the full amount the customer pays) - don't add partsCost again.
             var repairRevenue = tickets.Sum(t => t.Cost);
             var totalRevenue = salesRevenue + repairRevenue;
-            var cogs = sales.Sum(s => s.Quantity * s.CostPrice);
+            var cogs = invoices.Sum(i => i.Lines.Sum(l => l.Quantity * l.UnitCost));
             var grossProfit = totalRevenue - cogs - partsCost;
             var expSum = expenses.Sum(e => e.Amount);
             var netProfit = grossProfit - expSum;
             var purchasesAmount = purchases.Sum(p => p.PaidAmount);
             var paymentsAmount = payments.Sum(p => p.Amount);
 
-            var cashIn = salesRevenue + repairRevenue;
+            // Cash flow is what was actually collected/paid this month, not accrual revenue/cost.
+            var cashIn = invoices.Sum(i => i.PaidAmount) + customerPayments.Sum(p => p.Amount)
+                       + repairPayments.Sum(p => p.Amount);
             var cashOut = expSum + purchasesAmount + paymentsAmount;
             var netCashFlow = cashIn - cashOut;
             runningCash += netCashFlow;
@@ -106,14 +119,15 @@ public class MonthlyReportService : IMonthlyReportService
 
     private async Task<List<TopSellingItemDto>> GetTopSellingItemsAsync(int year)
     {
-        var sales = await _uow.Sales.Query()
-            .Include(s => s.Item)
-            .Where(s => s.Date.Year == year)
+        var lines = await _uow.SalesInvoiceLines.Query()
+            .Include(l => l.Item)
+            .Include(l => l.SalesInvoice)
+            .Where(l => l.SalesInvoice.Date.Year == year)
             .ToListAsync();
 
-        return sales
-            .GroupBy(s => s.Item.Name)
-            .Select(g => new TopSellingItemDto(g.Key, g.Sum(s => s.Quantity), g.Sum(s => s.TotalPrice)))
+        return lines
+            .GroupBy(l => l.Item.Name)
+            .Select(g => new TopSellingItemDto(g.Key, g.Sum(l => l.Quantity), g.Sum(l => l.LineTotal)))
             .OrderByDescending(x => x.TotalRevenue)
             .Take(10)
             .ToList();

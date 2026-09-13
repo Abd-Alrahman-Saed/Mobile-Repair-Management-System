@@ -90,9 +90,11 @@ public sealed class AccountingIntegrationTests : IDisposable
             var uow = new UnitOfWork(ctx);
             var sales = Sale(uow);
 
-            await sales.CreateAsync(new CreateSaleDto(
-                DateTime.Today, itemId, Quantity: 3, UnitPrice: 50, CostPrice: 30,
-                CustomerName: "عميل", Notes: ""));
+            var dto = new CreateSalesInvoiceDto(
+                DateTime.Today, CustomerId: null, CustomerName: "عميل", PaymentMethod.Cash,
+                Lines: [new CreateSalesInvoiceLineDto(itemId, 3, 50m)],
+                DiscountAmount: 0, PaidAmount: 150m, Notes: "");
+            await sales.CreateAsync(dto);
         }
 
         await using (var assert = NewContext())
@@ -108,7 +110,7 @@ public sealed class AccountingIntegrationTests : IDisposable
             (await assert.Items.FindAsync(itemId))!.CurrentStock.Should().Be(7);
 
             var audit = await assert.AuditLogs.SingleAsync();
-            audit.Action.Should().Be("Sale.Create");
+            audit.Action.Should().Be("SalesInvoice.Create");
             audit.UserName.Should().Be("المالك");
         }
     }
@@ -129,18 +131,21 @@ public sealed class AccountingIntegrationTests : IDisposable
         {
             var uow = new UnitOfWork(ctx);
             // Journal service pointed at a poisoned context so the second SaveChanges throws AFTER the
-            // Sale row + stock change have already been written once inside the transaction.
+            // SalesInvoice row + stock change have already been written once inside the transaction.
             var sales = Sale(uow, new ThrowingJournalService());
 
-            var act = async () => await sales.CreateAsync(new CreateSaleDto(
-                DateTime.Today, itemId, Quantity: 2, UnitPrice: 40, CostPrice: 20, CustomerName: "x", Notes: ""));
+            var dto = new CreateSalesInvoiceDto(
+                DateTime.Today, CustomerId: null, CustomerName: "x", PaymentMethod.Cash,
+                Lines: [new CreateSalesInvoiceLineDto(itemId, 2, 40m)],
+                DiscountAmount: 0, PaidAmount: 80m, Notes: "");
+            var act = async () => await sales.CreateAsync(dto);
 
             await act.Should().ThrowAsync<Exception>();
         }
 
         await using (var assert = NewContext())
         {
-            (await assert.Sales.AnyAsync()).Should().BeFalse("the transaction rolled back");
+            (await assert.SalesInvoices.AnyAsync()).Should().BeFalse("the transaction rolled back");
             (await assert.JournalEntries.AnyAsync()).Should().BeFalse();
             (await assert.Items.FindAsync(itemId))!.CurrentStock.Should().Be(5, "stock decrement rolled back too");
         }
@@ -236,8 +241,9 @@ public sealed class AccountingIntegrationTests : IDisposable
 
     private sealed class ThrowingJournalService : MRMS.Application.Interfaces.IJournalService
     {
-        public Task PostSaleAsync(DateTime date, string description, decimal amount, int saleId)
+        public Task PostSalesInvoicePaymentAsync(DateTime date, string invoiceNumber, decimal amount, int invoiceId)
             => throw new InvalidOperationException("boom");
+        public Task PostCustomerPaymentAsync(DateTime date, string customerName, decimal amount, int paymentId) => Task.CompletedTask;
         public Task PostPurchaseAsync(DateTime date, string description, decimal amount, int purchaseId) => Task.CompletedTask;
         public Task PostExpenseAsync(DateTime date, string category, string description, decimal amount, int expenseId) => Task.CompletedTask;
         public Task PostRepairPaymentAsync(DateTime date, string ticketNumber, decimal amount, int ticketId) => Task.CompletedTask;

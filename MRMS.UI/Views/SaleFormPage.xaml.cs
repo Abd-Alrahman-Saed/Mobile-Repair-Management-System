@@ -18,6 +18,12 @@ public partial class SaleFormPage : Page
 
         _vm.ItemScanned += () => QuantityBox.Focus();
         _vm.RequestApproval = RequestOwnerApproval;
+        _vm.InvoiceCreated += invoice =>
+        {
+            var doc = PrintPreviewWindow.BuildSalesInvoice(invoice);
+            var preview = new PrintPreviewWindow(doc) { Owner = Window.GetWindow(this) };
+            preview.ShowDialog();
+        };
 
         Loaded += async (_, _) =>
         {

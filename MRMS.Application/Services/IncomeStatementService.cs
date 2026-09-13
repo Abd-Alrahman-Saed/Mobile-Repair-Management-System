@@ -22,8 +22,9 @@ public class IncomeStatementService : IIncomeStatementService
         _permissions.Require(Permission.ViewReports);
         var toEnd = to.Date.AddDays(1).AddTicks(-1);
 
-        var sales = await _uow.Sales.Query()
-            .Where(s => s.Date >= from && s.Date <= toEnd)
+        var invoices = await _uow.SalesInvoices.Query()
+            .Include(i => i.Lines)
+            .Where(i => i.Date >= from && i.Date <= toEnd)
             .ToListAsync();
 
         var deliveredTickets = await _uow.RepairTickets.Query()
@@ -43,14 +44,16 @@ public class IncomeStatementService : IIncomeStatementService
             .Where(sm => sm.Type == MovementType.Damaged && sm.Date >= from && sm.Date <= toEnd)
             .ToListAsync();
 
-        var salesRevenue = sales.Sum(s => s.TotalPrice);
+        // Revenue is recognized accrual-basis (at the invoice/delivery date), regardless of how much
+        // cash has actually been collected - the cashbook/dashboard track cash-basis separately.
+        var salesRevenue = invoices.Sum(i => i.Total);
         var repairPartsCost = repairParts.Sum(rp => rp.TotalCost);
         // ticket.Cost is the final amount the customer pays (parts + labor combined, entered by the technician) —
         // it must NOT have repairPartsCost added on top, or revenue gets inflated by the parts cost.
         var repairRevenue = deliveredTickets.Sum(t => t.Cost);
         var totalRevenue = salesRevenue + repairRevenue;
 
-        var cogs = sales.Sum(s => s.Quantity * s.CostPrice);
+        var cogs = invoices.Sum(i => i.Lines.Sum(l => l.Quantity * l.UnitCost));
 
         var grossProfit = totalRevenue - cogs - repairPartsCost;
 

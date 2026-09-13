@@ -98,7 +98,9 @@ public sealed class CashSessionTests : IDisposable
 
         var uow = Uow();
         var cash = Cash(uow);
-        await Sales(uow, cash).CreateAsync(new CreateSaleDto(DateTime.Today, _itemId, 2, 150m, 100m, "x", ""));   // +300
+        await Sales(uow, cash).CreateAsync(new CreateSalesInvoiceDto(
+            DateTime.Today, null, "x", PaymentMethod.Cash,
+            [new CreateSalesInvoiceLineDto(_itemId, 2, 150m)], 0, 300m, ""));   // +300
         await Expenses(uow, cash).CreateAsync(new CreateExpenseDto(DateTime.Today, "إيجار", "", 120m, PaymentMethod.Cash, ""));   // -120
         await Expenses(uow, cash).CreateAsync(new CreateExpenseDto(DateTime.Today, "آجل", "", 999m, PaymentMethod.Credit, ""));   // ignored
         await Repair(uow, cash).CollectPaymentAsync(new CollectPaymentDto(_ticketId, 250m));   // +250
@@ -117,7 +119,9 @@ public sealed class CashSessionTests : IDisposable
         await Cash(Uow()).OpenAsync(1000m);
 
         var uow = Uow();
-        await Sales(uow, Cash(uow)).CreateAsync(new CreateSaleDto(DateTime.Today, _itemId, 1, 150m, 100m, "x", ""));
+        await Sales(uow, Cash(uow)).CreateAsync(new CreateSalesInvoiceDto(
+            DateTime.Today, null, "x", PaymentMethod.Cash,
+            [new CreateSalesInvoiceLineDto(_itemId, 1, 150m)], 0, 150m, ""));
 
         // expected = 1150; count 1100 → shortage of 50
         var closed = await Cash(Uow()).CloseAsync(1100m, "عجز");
@@ -135,12 +139,16 @@ public sealed class CashSessionTests : IDisposable
 
         var recUow = Uow();
         await FluentActions.Awaiting(() => Sales(recUow, Cash(recUow, UserRole.Receptionist), UserRole.Receptionist)
-                .CreateAsync(new CreateSaleDto(DateTime.Today, _itemId, 1, 150m, 100m, "x", "")))
+                .CreateAsync(new CreateSalesInvoiceDto(
+                    DateTime.Today, null, "x", PaymentMethod.Cash,
+                    [new CreateSalesInvoiceLineDto(_itemId, 1, 150m)], 0, 150m, "")))
             .Should().ThrowAsync<InvalidOperationException>().WithMessage("*مقفلة*");
 
         var ownUow = Uow();
         var sale = await Sales(ownUow, Cash(ownUow)).CreateAsync(
-            new CreateSaleDto(DateTime.Today, _itemId, 1, 150m, 100m, "x", ""));
+            new CreateSalesInvoiceDto(
+                DateTime.Today, null, "x", PaymentMethod.Cash,
+                [new CreateSalesInvoiceLineDto(_itemId, 1, 150m)], 0, 150m, ""));
         sale.Should().NotBeNull();
     }
 

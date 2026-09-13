@@ -14,13 +14,13 @@ public partial class SalesViewModel : ObservableObject
     private readonly ISaleService _saleService;
     private readonly AppNavigationService _navigationService;
     private readonly NotificationService _notificationService;
-    private List<SaleDto> _allSales = [];
+    private List<SalesInvoiceDto> _allSales = [];
     private const int PageSize = 20;
 
     public bool CanViewProfit { get; }
 
     [ObservableProperty]
-    private ObservableCollection<SaleDto> _sales = [];
+    private ObservableCollection<SalesInvoiceDto> _sales = [];
 
     [ObservableProperty]
     private bool _isLoading;
@@ -68,7 +68,7 @@ public partial class SalesViewModel : ObservableObject
     private void ApplyPaging()
     {
         var paged = _allSales.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
-        Sales = new ObservableCollection<SaleDto>(paged);
+        Sales = new ObservableCollection<SalesInvoiceDto>(paged);
         OnPropertyChanged(nameof(TotalPages));
         OnPropertyChanged(nameof(HasPrevious));
         OnPropertyChanged(nameof(HasNext));
