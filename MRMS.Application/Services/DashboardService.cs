@@ -118,17 +118,17 @@ public class DashboardService : IDashboardService
     private async Task<decimal> CalculateCashBalanceAsync()
     {
         var allSales = await _uow.Sales.GetAllAsync();
-        var allTickets = await _uow.RepairTickets.Query()
-            .Where(t => t.Status == TicketStatus.Delivered).ToListAsync();
+        var allRepairPayments = await _uow.RepairTicketPayments.GetAllAsync();
         var allPurchases = await _uow.Purchases.GetAllAsync();
         var allExpenses = await _uow.Expenses.GetAllAsync();
         var allPayments = await _uow.SupplierPayments.GetAllAsync();
 
-        // ticket.Cost is the full amount the customer pays (parts + labor). Repair parts cost is not a
-        // separate cash inflow - it's a non-cash COGS reallocation (the parts were already paid for
-        // via their Purchase). Adding it here would double-count cash that was never actually received twice.
+        // Repair cash on hand is the payments actually collected on tickets (deposits + partials + final),
+        // not delivered tickets' full Cost - a deposit on a ticket still in repair is real cash in the
+        // drawer, and a delivered ticket with an owner-approved balance never brought in its full Cost.
+        // Repair parts cost is not a separate cash inflow (paid for via the parts' Purchase).
         var inflows = allSales.Sum(s => s.TotalPrice)
-                    + allTickets.Sum(t => t.Cost);
+                    + allRepairPayments.Sum(p => p.Amount);
 
         var outflows = allPurchases.Sum(p => p.PaidAmount)
                      + allExpenses.Sum(e => e.Amount)

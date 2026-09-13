@@ -592,6 +592,9 @@ namespace MRMS.Infrastructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("BusinessDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("CashSessionId")
                         .HasColumnType("int");
 

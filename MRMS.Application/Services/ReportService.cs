@@ -40,21 +40,19 @@ public class ReportService : IReportService
         foreach (var s in sales)
             entries.Add(new CashbookEntryDto(s.Date, $"بيع: {s.Item.Name} x{s.Quantity}", "وارد", s.TotalPrice, 0, s.CreatedAt));
 
-        var tickets = await _uow.RepairTickets.Query()
-            .Include(t => t.Device)
-            .Where(t => t.Status == TicketStatus.Delivered && t.DeliveryDate >= from && t.DeliveryDate <= to)
+        // Repair cash comes from the actual payments collected on tickets (deposits + partials + final),
+        // not the ticket's full Cost at delivery - so a deposit taken this week and the balance next week
+        // each land in their own period. Repair parts cost is not separate cash received; it was already
+        // paid for via the parts' Purchase.
+        var repairPayments = await _uow.RepairTicketPayments.Query()
+            .Include(p => p.RepairTicket).ThenInclude(t => t.Device)
+            .Where(p => p.BusinessDate >= from && p.BusinessDate <= to)
             .ToListAsync();
-
-        // t.Cost is the full amount the customer pays (parts + labor) - it's the only cash inflow here.
-        // Repair parts cost is not separate cash received; it was already paid for via the parts' Purchase.
-        foreach (var t in tickets)
+        foreach (var p in repairPayments)
         {
-            // Use the moment the ticket was actually marked "delivered" (when the cash was received),
-            // not the ticket's original creation time, so same-day ordering reflects reality.
-            var deliveredAt = t.DeliveryDate!.Value.Add(t.DeliveryTime ?? TimeSpan.Zero);
-            var deviceName = $"{t.Device?.Brand} {t.Device?.Model}".Trim();
+            var deviceName = $"{p.RepairTicket.Device?.Brand} {p.RepairTicket.Device?.Model}".Trim();
             entries.Add(new CashbookEntryDto(
-                t.DeliveryDate!.Value, $"صيانة: {deviceName}", "وارد", t.Cost, 0, deliveredAt));
+                p.BusinessDate, $"صيانة: {deviceName}", "وارد", p.Amount, 0, p.CollectedAt));
         }
 
         var purchases = await _uow.Purchases.Query()
@@ -127,15 +125,15 @@ public class ReportService : IReportService
     private async Task<decimal> CalculateOpeningCashBalanceAsync(DateTime from)
     {
         var allSales = await _uow.Sales.GetAllAsync();
-        var allTickets = await _uow.RepairTickets.GetAllAsync();
+        var allRepairPayments = await _uow.RepairTicketPayments.GetAllAsync();
         var allPurchases = await _uow.Purchases.GetAllAsync();
         var allExpenses = await _uow.Expenses.GetAllAsync();
         var allPayments = await _uow.SupplierPayments.GetAllAsync();
 
-        // t.Cost already covers parts + labor - repair parts cost is not an additional cash inflow
-        // (it was already paid for via the parts' Purchase), so it's intentionally excluded here.
+        // Repair cash is the sum of payments actually collected before the window, not delivered tickets'
+        // Cost. Repair parts cost is not an additional cash inflow (paid for via the parts' Purchase).
         var inflows = allSales.Where(s => s.Date < from).Sum(s => s.TotalPrice)
-                    + allTickets.Where(t => t.Status == TicketStatus.Delivered && t.DeliveryDate < from).Sum(t => t.Cost);
+                    + allRepairPayments.Where(p => p.BusinessDate < from).Sum(p => p.Amount);
 
         var outflows = allPurchases.Where(p => p.Date < from).Sum(p => p.PaidAmount)
                      + allExpenses.Where(e => e.Date < from).Sum(e => e.Amount)

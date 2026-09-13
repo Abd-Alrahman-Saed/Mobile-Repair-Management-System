@@ -335,6 +335,7 @@ public class RepairTicketService : IRepairTicketService
             {
                 RepairTicketId = ticket.Id,
                 Amount = dto.Amount,
+                BusinessDate = DateTime.Today,
                 CollectedAt = DateTime.UtcNow,
                 CollectedByUserId = user?.Id ?? 0,
                 CollectedByName = user?.FullName ?? user?.Username ?? "",
