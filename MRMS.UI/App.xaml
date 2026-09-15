@@ -17,6 +17,8 @@
             <converters:InverseSignConverter x:Key="InverseSign"/>
             <converters:LessThanZeroConverter x:Key="LessThanZero"/>
             <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
+            <converters:StockStatusConverter x:Key="StockStatus"/>
+            <converters:StockStatusBrushConverter x:Key="StockStatusBrush"/>
             <converters:FileSizeConverter x:Key="FileSize"/>
             <converters:BoolToResultTextConverter x:Key="BoolToResultText"/>
             <converters:ActiveStatusConverter x:Key="ActiveStatus"/>

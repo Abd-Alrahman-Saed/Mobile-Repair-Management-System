@@ -9,6 +9,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -17,7 +19,64 @@
             <TextBlock Text="عرض وإدارة جميع الأصناف والإكسسوارات وقطع الغيار" Style="{StaticResource PageSubtitle}"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
+        <!-- ===== Stat cards ===== -->
+        <UniformGrid Grid.Row="1" Rows="1" Margin="0,0,0,16">
+            <Border Style="{StaticResource CardBorder}" Padding="18" Margin="0,0,8,0" Effect="{StaticResource CardShadow}"
+                    Visibility="{Binding CanViewCost, Converter={StaticResource BoolToVis}}">
+                <StackPanel>
+                    <TextBlock Text="قيمة المخزون" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding TotalStockValue, StringFormat={}{0:N0}}"
+                               FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource PrimaryBrush}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Padding="18" Margin="0,0,8,0" Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="عدد الأصناف المنخفضة" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding LowStockCount}"
+                               FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="#B45309"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" Padding="18" Effect="{StaticResource CardShadow}">
+                <StackPanel>
+                    <TextBlock Text="عدد الأصناف النافدة" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                    <TextBlock Text="{Binding OutOfStockCount}"
+                               FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource DangerBrush}"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- ===== Reorder-needed section ===== -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16"
+                Background="#FEF3C7" BorderBrush="#B45309"
+                Visibility="{Binding HasReorderItems, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="أصناف تحتاج إعادة طلب" FontWeight="Bold" FontSize="14"
+                           Foreground="#B45309" Margin="0,0,0,8"/>
+                <ItemsControl ItemsSource="{Binding ReorderItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="13">
+                                    <Run Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <Run Text="—"/>
+                                    <Run Text="{Binding CurrentStock, StringFormat='المتوفر {0}'}"/>
+                                </TextBlock>
+                                <Button Grid.Column="2" Content="طلب من مورد" Style="{StaticResource ActionButton}"
+                                        Command="{Binding DataContext.RequestPurchaseCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding Id}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -37,11 +96,11 @@
             </Grid>
         </Border>
 
-        <TextBox Grid.Row="2" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+        <TextBox Grid.Row="4" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource SearchTextBox}"
                  Margin="0,0,0,16"/>
 
-        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+        <Border Grid.Row="5" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
             <Grid>
                 <DataGrid ItemsSource="{Binding Items}"
                           Style="{StaticResource ModernDataGrid}"
@@ -53,8 +112,28 @@
                         <DataGridTextColumn Header="الوحدة" Binding="{Binding Unit}" Width="80"/>
                         <DataGridTextColumn x:Name="CostColumn" Header="تكلفة الشراء" Binding="{Binding CostPrice, StringFormat={}{0:N0}}" Width="110"/>
                         <DataGridTextColumn Header="سعر البيع" Binding="{Binding SellingPrice, StringFormat={}{0:N0}}" Width="110"/>
-                        <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock}" Width="80"/>
+                        <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock, TargetNullValue=—}" Width="80"/>
                         <DataGridTextColumn Header="حد الطلب" Binding="{Binding ReorderLevel}" Width="80"/>
+                        <DataGridTemplateColumn Header="الحالة" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource StockStatus}">
+                                                <Binding Path="CurrentStock"/>
+                                                <Binding Path="ReorderLevel"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                        <TextBlock.Foreground>
+                                            <MultiBinding Converter="{StaticResource StockStatusBrush}">
+                                                <Binding Path="CurrentStock"/>
+                                                <Binding Path="ReorderLevel"/>
+                                            </MultiBinding>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="الإجراءات" Width="160">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

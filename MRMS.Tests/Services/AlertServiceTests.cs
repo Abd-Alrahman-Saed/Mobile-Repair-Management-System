@@ -57,6 +57,21 @@ public sealed class AlertServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task A_service_item_never_raises_a_stock_alert()
+    {
+        await using (var ctx = new AppDbContext(_options))
+        {
+            ctx.Items.Add(new Item { Code = "SVC-1", Name = "خدمة تركيب شاشة", Type = ItemType.Service,
+                CurrentStock = null, ReorderLevel = 999 });
+            await ctx.SaveChangesAsync();
+        }
+
+        var alerts = await NewService().GetAlertsAsync();
+
+        alerts.Should().NotContain(a => a.Kind == "OutOfStock" || a.Kind == "LowStock");
+    }
+
+    [Fact]
     public async Task Stale_waiting_for_parts_ticket_raises_an_alert()
     {
         await using (var ctx = new AppDbContext(_options))

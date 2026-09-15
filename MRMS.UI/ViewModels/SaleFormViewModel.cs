@@ -133,7 +133,7 @@ public partial class SaleFormViewModel : ObservableObject
         {
             UnitPrice = item.SellingPrice;
             CostPrice = item.CostPrice ?? 0m;
-            SelectedItemCurrentStock = item.CurrentStock;
+            SelectedItemCurrentStock = item.CurrentStock ?? 0;
         }
         else
         {

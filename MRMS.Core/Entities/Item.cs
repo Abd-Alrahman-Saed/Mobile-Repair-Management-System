@@ -12,7 +12,9 @@ public class Item
     public decimal CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
     public int ReorderLevel { get; set; }
-    public int CurrentStock { get; set; }
+    /// <summary>Null for <see cref="ItemType.Service"/> items - they carry no stock and are excluded
+    /// from stock-value/low-stock calculations and never block a sale for insufficient stock.</summary>
+    public int? CurrentStock { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<PurchaseItem> PurchaseItems { get; set; } = [];

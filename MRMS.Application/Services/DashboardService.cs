@@ -143,7 +143,7 @@ public class DashboardService : IDashboardService
     private async Task<decimal> CalculateStockValueAsync()
     {
         var items = await _uow.Items.GetAllAsync();
-        return items.Sum(i => i.CurrentStock * i.CostPrice);
+        return items.Sum(i => (i.CurrentStock ?? 0) * i.CostPrice);
     }
 
     private async Task<decimal> CalculatePayablesTotalAsync()

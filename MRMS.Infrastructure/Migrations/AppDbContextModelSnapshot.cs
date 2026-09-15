@@ -360,7 +360,7 @@ namespace MRMS.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CurrentStock")
+                    b.Property<int?>("CurrentStock")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")

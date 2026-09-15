@@ -6,7 +6,7 @@ namespace MRMS.UI.Converters;
 public class GreaterThanZeroConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is decimal d && d > 0;
+        => value switch { decimal d => d > 0, int i => i > 0, _ => false };
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();

@@ -22,6 +22,21 @@ public partial class ItemsViewModel : ObservableObject
     private ObservableCollection<ItemDto> _items = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasReorderItems))]
+    private ObservableCollection<ItemDto> _reorderItems = [];
+
+    public bool HasReorderItems => ReorderItems.Count > 0;
+
+    [ObservableProperty]
+    private decimal _totalStockValue;
+
+    [ObservableProperty]
+    private int _lowStockCount;
+
+    [ObservableProperty]
+    private int _outOfStockCount;
+
+    [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
@@ -54,7 +69,23 @@ public partial class ItemsViewModel : ObservableObject
         var items = await _itemService.GetAllAsync();
         _allItems = items.ToList();
         Items = new ObservableCollection<ItemDto>(_allItems);
+
+        // Trackable items (Service items carry no stock, so a null CurrentStock never counts here).
+        var trackable = _allItems.Where(i => i.CurrentStock.HasValue).ToList();
+        TotalStockValue = CanViewCost ? trackable.Sum(i => (i.CostPrice ?? 0m) * i.CurrentStock!.Value) : 0;
+        LowStockCount = trackable.Count(i => i.CurrentStock <= i.ReorderLevel);
+        OutOfStockCount = trackable.Count(i => i.CurrentStock <= 0);
+        ReorderItems = new ObservableCollection<ItemDto>(
+            trackable.Where(i => i.CurrentStock <= i.ReorderLevel).OrderBy(i => i.CurrentStock));
+
         IsLoading = false;
+    }
+
+    [RelayCommand]
+    private void RequestPurchase(int itemId)
+    {
+        var page = App.ServiceProvider!.GetRequiredService<Views.PurchaseFormPage>();
+        _navigationService.NavigateTo(page, "PresetItemId", itemId);
     }
 
     [RelayCommand]

@@ -28,12 +28,12 @@
 
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock Text="النوع" Style="{StaticResource FormLabel}"/>
-                        <ComboBox SelectedItem="{Binding SelectedType}"
+                        <ComboBox SelectedValuePath="Tag"
+                                  SelectedValue="{Binding SelectedType, UpdateSourceTrigger=PropertyChanged}"
                                   Style="{StaticResource FormTextBox}">
-                            <ComboBox.Items>
-                                <ComboBoxItem Content="إكسسوار" IsSelected="True"/>
-                                <ComboBoxItem Content="قطعة غيار"/>
-                            </ComboBox.Items>
+                            <ComboBoxItem Content="إكسسوار" Tag="Accessory"/>
+                            <ComboBoxItem Content="قطعة غيار" Tag="SparePart"/>
+                            <ComboBoxItem Content="خدمة" Tag="Service"/>
                         </ComboBox>
                     </StackPanel>
 

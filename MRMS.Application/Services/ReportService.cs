@@ -20,12 +20,16 @@ public class ReportService : IReportService
 
     public async Task<IEnumerable<StockBalanceItemDto>> GetStockBalanceAsync()
     {
-        // Inventory screen - available to everyone. (The cost column itself is hidden per-DTO in 2.4.)
+        // Inventory screen - available to everyone, but cost/value are for ViewCostPrice only
+        // (matches ItemService.MapToDto - this used to claim the same and not actually do it).
+        var showCost = _permissions.Can(Permission.ViewCostPrice);
         var items = await _uow.Items.GetAllAsync();
         return items.Select(i => new StockBalanceItemDto(
-            i.Id, i.Code, i.Name, i.CurrentStock, i.CostPrice,
-            i.CurrentStock * i.CostPrice, i.ReorderLevel,
-            i.CurrentStock <= i.ReorderLevel));
+            i.Id, i.Code, i.Name, i.CurrentStock,
+            showCost ? i.CostPrice : null,
+            showCost ? (i.CurrentStock ?? 0) * i.CostPrice : null,
+            i.ReorderLevel,
+            i.CurrentStock is { } cs && cs <= i.ReorderLevel));
     }
 
     public async Task<CashbookReportDto> GetCashbookAsync(DateTime from, DateTime to)

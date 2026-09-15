@@ -34,16 +34,27 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="80"/>
                         <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock}" Width="80"/>
-                        <DataGridTextColumn Header="تكلفة الوحدة" Binding="{Binding CostPrice, StringFormat={}{0:N0}}" Width="100"/>
-                        <DataGridTextColumn Header="قيمة الرصيد" Binding="{Binding StockValue, StringFormat={}{0:N0}}" Width="110"/>
+                        <DataGridTextColumn Header="الرصيد" Binding="{Binding CurrentStock, TargetNullValue=—}" Width="80"/>
+                        <DataGridTextColumn Header="تكلفة الوحدة" Binding="{Binding CostPrice, StringFormat={}{0:N0}, TargetNullValue=—}" Width="100"/>
+                        <DataGridTextColumn Header="قيمة الرصيد" Binding="{Binding StockValue, StringFormat={}{0:N0}, TargetNullValue=—}" Width="110"/>
                         <DataGridTextColumn Header="حد الطلب" Binding="{Binding ReorderLevel}" Width="80"/>
                         <DataGridTemplateColumn Header="حالة المخزون" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding IsLowStock, Converter={StaticResource Not}}"
-                                               Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold"
-                                               Visibility="{Binding IsLowStock, Converter={StaticResource InverseBoolToVis}}"/>
+                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource StockStatus}">
+                                                <Binding Path="CurrentStock"/>
+                                                <Binding Path="ReorderLevel"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                        <TextBlock.Foreground>
+                                            <MultiBinding Converter="{StaticResource StockStatusBrush}">
+                                                <Binding Path="CurrentStock"/>
+                                                <Binding Path="ReorderLevel"/>
+                                            </MultiBinding>
+                                        </TextBlock.Foreground>
+                                    </TextBlock>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

@@ -72,7 +72,7 @@ public partial class PurchaseFormViewModel : ObservableObject
         if (item is not null)
         {
             SelectedUnitCost = item.CostPrice ?? 0m;
-            SelectedItemCurrentStock = item.CurrentStock;
+            SelectedItemCurrentStock = item.CurrentStock ?? 0;
         }
         else
         {
@@ -103,6 +103,12 @@ public partial class PurchaseFormViewModel : ObservableObject
 
         var items = await _itemService.GetAllAsync();
         Items = new ObservableCollection<ItemDto>(items);
+
+        // Arriving from the "أصناف تحتاج إعادة طلب" section on ItemsPage pre-selects that item.
+        var presetItemId = _navigationService.GetParameter<int?>("PresetItemId");
+        if (presetItemId is { } id && Items.Any(i => i.Id == id))
+            SelectedItemId = id;
+
         IsLoading = false;
     }
 

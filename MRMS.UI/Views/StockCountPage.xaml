@@ -1,0 +1,70 @@
+<Page x:Class="MRMS.UI.Views.StockCountPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="جرد المخزون" FlowDirection="RightToLeft"
+      Style="{StaticResource PageBackground}">
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="جرد المخزون" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="سجّل العدد الفعلي لكل صنف - الفرق عن الرصيد الدفتري يتسجّل كحركة تسوية موثّقة"
+                       Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
+            <Button Content="حفظ الجرد" Style="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" Margin="0,0,12,0"/>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="{StaticResource DangerBrush}"
+                       VerticalAlignment="Center" FontSize="13"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NonEmptyStringToVis}}"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0" Effect="{StaticResource CardShadow}">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Rows}"
+                          Style="{StaticResource ModernDataGrid}"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الكود" Binding="{Binding Code}" Width="90" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="الاسم" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="الرصيد الدفتري" Binding="{Binding BookStock}" Width="110" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="الفعلي" Binding="{Binding ActualCount, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                        <DataGridTemplateColumn Header="الفرق" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Difference}" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Difference, Converter={StaticResource GreaterThanZero}}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Difference, Converter={StaticResource LessThanZero}}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <ProgressBar IsIndeterminate="True"
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                             Height="3" VerticalAlignment="Top"
+                             Style="{StaticResource ModernProgressBar}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

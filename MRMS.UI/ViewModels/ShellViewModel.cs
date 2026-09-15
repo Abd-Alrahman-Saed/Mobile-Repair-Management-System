@@ -41,6 +41,7 @@ public partial class ShellViewModel : ObservableObject
         new("المخزون", "الأصناف", typeof(ItemsPage), null),
         new("المخزون", "الحركات المخزنية", typeof(StockMovementsPage), Permission.StockCount),
         new("المخزون", "كشف الرصيد المخزني", typeof(StockBalancePage), null),
+        new("المخزون", "جرد المخزون", typeof(StockCountPage), Permission.StockCount),
 
         new("المبيعات والمشتريات", "المبيعات", typeof(SalesPage), null),
         new("المبيعات والمشتريات", "المشتريات", typeof(PurchasesPage), Permission.ManagePurchases),

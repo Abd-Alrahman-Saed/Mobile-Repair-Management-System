@@ -14,7 +14,8 @@ public class ItemDto
     public decimal? CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
     public int ReorderLevel { get; init; }
-    public int CurrentStock { get; set; }
+    /// <summary>Null for <see cref="ItemType.Service"/> items - see <c>Item.CurrentStock</c>.</summary>
+    public int? CurrentStock { get; set; }
     public DateTime CreatedAt { get; init; }
 }
 

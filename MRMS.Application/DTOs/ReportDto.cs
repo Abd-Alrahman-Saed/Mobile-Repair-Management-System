@@ -4,9 +4,11 @@ public record StockBalanceItemDto(
     int ItemId,
     string Code,
     string Name,
-    int CurrentStock,
-    decimal CostPrice,
-    decimal StockValue,
+    // Null for a Service item (no stock tracked). CostPrice/StockValue are null when the current
+    // user lacks Permission.ViewCostPrice.
+    int? CurrentStock,
+    decimal? CostPrice,
+    decimal? StockValue,
     int ReorderLevel,
     bool IsLowStock);
 

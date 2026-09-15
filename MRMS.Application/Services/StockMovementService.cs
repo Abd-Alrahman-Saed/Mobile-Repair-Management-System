@@ -12,12 +12,15 @@ public class StockMovementService : IStockMovementService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IJournalService _journalService;
     private readonly IAuditService _audit;
+    private readonly IPermissionService _permissions;
 
-    public StockMovementService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit)
+    public StockMovementService(IUnitOfWork unitOfWork, IJournalService journalService, IAuditService audit,
+        IPermissionService permissions)
     {
         _unitOfWork = unitOfWork;
         _journalService = journalService;
         _audit = audit;
+        _permissions = permissions;
     }
 
     public async Task<IEnumerable<StockMovementDto>> GetAllAsync()
@@ -45,13 +48,20 @@ public class StockMovementService : IStockMovementService
 
     public async Task<StockMovementDto> CreateAsync(CreateStockMovementDto dto)
     {
+        _permissions.Require(Permission.StockCount);
+
         if (dto.Quantity <= 0)
             throw new InvalidOperationException("الكمية يجب أن تكون أكبر من صفر");
 
         var item = await _unitOfWork.Items.GetByIdAsync(dto.ItemId)
             ?? throw new InvalidOperationException("الصنف غير موجود");
 
-        if (dto.Type != MovementType.CustomerReturn && item.CurrentStock < dto.Quantity)
+        if (item.Type == ItemType.Service)
+            throw new InvalidOperationException("لا يمكن تسجيل حركة مخزون لصنف من نوع خدمة");
+
+        var increases = dto.Type is MovementType.CustomerReturn or MovementType.AdjustmentIncrease;
+
+        if (!increases && item.CurrentStock < dto.Quantity)
             throw new InvalidOperationException($"الرصيد غير كافٍ. المتوفر: {item.CurrentStock}، المطلوب: {dto.Quantity}");
 
         var movement = new StockMovement
@@ -67,7 +77,7 @@ public class StockMovementService : IStockMovementService
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            if (dto.Type == MovementType.CustomerReturn)
+            if (increases)
                 item.CurrentStock += dto.Quantity;
             else
                 item.CurrentStock -= dto.Quantity;

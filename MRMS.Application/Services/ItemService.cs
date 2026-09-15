@@ -49,7 +49,8 @@ public class ItemService : IItemService
             CostPrice = dto.CostPrice,
             SellingPrice = dto.SellingPrice,
             ReorderLevel = dto.ReorderLevel,
-            CurrentStock = 0,
+            // A service item carries no stock at all - everything else starts at 0.
+            CurrentStock = dto.Type == ItemType.Service ? null : 0,
             CreatedAt = DateTime.UtcNow
         };
         await _uow.Items.AddAsync(item);
@@ -70,6 +71,14 @@ public class ItemService : IItemService
         item.CostPrice = dto.CostPrice;
         item.SellingPrice = dto.SellingPrice;
         item.ReorderLevel = dto.ReorderLevel;
+
+        // Switching a trackable item to Service drops its stock tracking entirely; switching away
+        // from Service (where CurrentStock was always null) starts fresh at 0.
+        if (dto.Type == ItemType.Service)
+            item.CurrentStock = null;
+        else if (item.CurrentStock is null)
+            item.CurrentStock = 0;
+
         _uow.Items.Update(item);
         await _uow.CompleteAsync();
         return MapToDto(item);

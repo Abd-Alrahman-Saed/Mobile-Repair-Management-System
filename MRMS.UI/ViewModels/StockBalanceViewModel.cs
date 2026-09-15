@@ -30,7 +30,7 @@ public partial class StockBalanceViewModel : ObservableObject
         IsLoading = true;
         var items = await _reportService.GetStockBalanceAsync();
         Items = new ObservableCollection<StockBalanceItemDto>(items);
-        TotalStockValue = items.Sum(i => i.StockValue);
+        TotalStockValue = items.Sum(i => i.StockValue ?? 0m);
         IsLoading = false;
     }
 }
