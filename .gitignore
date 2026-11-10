@@ -22,4 +22,8 @@ Thumbs.db
 .DS_Store
 Desktop.ini
 
+# Archives & Releases
+*.zip
+MRMS_Release/
+
 next sessions layout problem/
